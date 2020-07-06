@@ -24,6 +24,7 @@ void main()
 		Sleep(16);
 		if (i == 149)
 			i = 0;
+		//ya mum
 	}
 
 	
