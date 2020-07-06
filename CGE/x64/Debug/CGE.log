@@ -1,0 +1,59 @@
+﻿  Main.cpp
+C:\Users\Glizz\source\repos\CGE\CGE\Math.h(446,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(89,2): error C2904: 'Polygon': name already used for a template in the current scope
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\wingdi.h(5127,25): message : see declaration of 'Polygon'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(4,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(94,19): error C2338: Must have more than 2 points
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(5): message : see reference to class template instantiation 'RegPolygon<1>' being compiled
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(12,11): error C2039: 'colour': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(13,11): error C2039: 'colour': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(14,11): error C2039: 'colour': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(19,10): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(20,10): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Main.cpp(21,10): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+  CGE.cpp
+C:\Users\Glizz\source\repos\CGE\CGE\Math.h(446,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(89,2): error C2904: 'Polygon': name already used for a template in the current scope
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\wingdi.h(5127,25): message : see declaration of 'Polygon'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(103,37): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(108,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(139,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(235,8): error C2039: 'theta': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(237,42): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(237,58): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(237,77): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(239,46): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(239,62): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(239,81): error C2039: 'rect': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(240,52): error C2039: 'colour': is not a member of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(240,52): error C2660: 'CGE::SetPixel': function does not take 1 arguments
+C:\Users\Glizz\source\repos\CGE\CGE\CGE.cpp(164,11): message : see declaration of 'CGE::SetPixel'
+  Polygon.cpp
+C:\Users\Glizz\source\repos\CGE\CGE\Math.h(446,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(5,1): error C2600: 'Rectangle2D::Rectangle2D': cannot define a compiler-generated special member function (must be declared in the class first)
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(6,5): error C2065: 'rect': undeclared identifier
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(6,5): message : This diagnostic occurred in the compiler generated function 'Rectangle2D::Rectangle2D(void)'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(7,5): error C2065: 'theta': undeclared identifier
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(7,5): message : This diagnostic occurred in the compiler generated function 'Rectangle2D::Rectangle2D(void)'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(8,5): error C2065: 'colour': undeclared identifier
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(8,5): message : This diagnostic occurred in the compiler generated function 'Rectangle2D::Rectangle2D(void)'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(11,1): error C2511: 'Rectangle2D::Rectangle2D(const Rect &,float,const Colour &)': overloaded member function not found in 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.h(65): message : see declaration of 'Rectangle2D'
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(12,5): error C2671: 'Rectangle2D::{ctor}': static member functions do not have 'this' pointers
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(13,5): error C2671: 'Rectangle2D::{ctor}': static member functions do not have 'this' pointers
+C:\Users\Glizz\source\repos\CGE\CGE\Polygon.cpp(14,5): error C2671: 'Rectangle2D::{ctor}': static member functions do not have 'this' pointers
+  Generating Code...
