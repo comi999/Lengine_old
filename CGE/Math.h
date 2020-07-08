@@ -18,18 +18,42 @@ public:
 
 	tVector2 operator +(const tVector2<T>& v2) const;
 	tVector2 operator -(const tVector2<T>& v2) const;
-	tVector2 operator *(float f)              const;
-	float   operator *(const tVector2<T>& v3) const;
+	tVector2 operator *(float f)               const;
+	float    operator *(const tVector2<T>& v3) const;
 
-	operator tVector2<int>() const;
-	operator tVector2<float>() const;
-	operator tVector2<double>() const;
+	tVector2 operator +=(const tVector2<T>& v2);
+	tVector2 operator -=(const tVector2<T>& v2);
+	tVector2 operator *=(float f);
+	float    operator *=(const tVector2<T>& v2) const;
+
+	operator tVector2<int>()    const { return tVector2<int>   ((int)i,    (int)j);    }
+	operator tVector2<float>()  const { return tVector2<float> ((float)i,  (float)j);  }
+	operator tVector2<double>() const { return tVector2<double>((double)i, (double)j); }
 	
-
 	tVector2 Normalise();
 	float Magnitude();
 	float MagnitudeSqrd();
 };
+
+template <typename T>
+tVector2<T> tVector2<T>::operator +=(const tVector2<T>& v2)
+{
+	i += v2.i; j += v2.j;
+	return *this;
+}
+
+template <typename T>
+tVector2<T> tVector2<T>::operator -=(const tVector2<T>& v2)
+{
+	i -= v2.i; j -= v2.j;
+	return *this;
+}
+
+template <typename T>
+float tVector2<T>::operator *=(const tVector2<T>& v2) const
+{
+	return i * v2.i + j * v2.j;
+}
 
 template <typename T = float>
 class tVector3
@@ -194,14 +218,6 @@ float tVector2<T>::operator *(const tVector2& v3) const
 {
 	return i * v3.i + j * v3.j;
 }
-
-
-template <typename T>
-tVector2<T>::operator tVector2<int>() const
-{
-	return tVector2<int>((int)i, (int)j);
-}
-
 
 template <typename T>
 tVector2<T> tVector2<T>::Normalise()

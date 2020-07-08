@@ -78,7 +78,7 @@ public:
 
     void DrawSquare(const Square& square);
     void DrawRect(const Rect& rect, float rotation, const Colour& colour);
-    void DrawRect
+    //void DrawRect
 
     void DrawTriangle();
     void DrawRectangle(const Rectangle2D& rect);

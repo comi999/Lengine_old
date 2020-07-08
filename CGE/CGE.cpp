@@ -205,40 +205,40 @@ void CGE::SetBuffer(Colour colour)
     }
 }
 
-void CGE::DrawLine(tVector2<int> position1, tVector2<int> position2, const Colour& colour)
-{
-    short dx = abs(position2.i - position1.i);
-    short sx = position1.i < position2.i ? 1 : -1;
-    short dy = -abs(position2.j - position1.j);
-    short sy = position1.j < position2.j ? 1 : -1;
-    short err = dx + dy;
-    while (true)
-    {
-        SetPixel(position1, colour);
-        if (position1.i == position2.i && position1.j == position2.j) break;
-        short e2 = 2 * err;
-        if (e2 >= dy)
-        {
-            err += dy;
-            position1.i += sx;
-        }
-        if (e2 <= dx)
-        {
-            err += dx;
-            position1.j += sy;
-        }
-    }
-}
+//void CGE::DrawLine(tVector2<int> position1, tVector2<int> position2, const Colour& colour)
+//{
+//    short dx = abs(position2.i - position1.i);
+//    short sx = position1.i < position2.i ? 1 : -1;
+//    short dy = -abs(position2.j - position1.j);
+//    short sy = position1.j < position2.j ? 1 : -1;
+//    short err = dx + dy;
+//    while (true)
+//    {
+//        SetPixel(position1, colour);
+//        if (position1.i == position2.i && position1.j == position2.j) break;
+//        short e2 = 2 * err;
+//        if (e2 >= dy)
+//        {
+//            err += dy;
+//            position1.i += sx;
+//        }
+//        if (e2 <= dx)
+//        {
+//            err += dx;
+//            position1.j += sy;
+//        }
+//    }
+//}
 
-void CGE::DrawRectangle(const Rectangle2D& rectangle)
-{
-    if (rectangle.theta == 0)
-    {
-        for (int h = rectangle.rect.y; h < rectangle.rect.y + rectangle.rect.h; h++)
-        {
-            for (int w = rectangle.rect.x; w < rectangle.rect.x + rectangle.rect.w; w++)
-                SetPixel({ w, h }, rectangle.colour);
-        }
-    }
-
-}
+//void CGE::DrawRectangle(const Rectangle2D& rectangle)
+//{
+//    if (rectangle.theta == 0)
+//    {
+//        for (int h = rectangle.rect.y; h < rectangle.rect.y + rectangle.rect.h; h++)
+//        {
+//            for (int w = rectangle.rect.x; w < rectangle.rect.x + rectangle.rect.w; w++)
+//                SetPixel({ w, h }, rectangle.colour);
+//        }
+//    }
+//
+//}
