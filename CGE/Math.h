@@ -8,7 +8,7 @@ template <typename T> class tMatrix2;
 template <typename T> class tMatrix3;
 template <typename T> class tMatrix4;
 
-template <typename T = float>
+template <typename T>
 class tVector2
 {
 public:
@@ -16,46 +16,25 @@ public:
 	tVector2();
 	tVector2(T i, T j);
 
-	tVector2 operator +(const tVector2<T>& v2) const;
-	tVector2 operator -(const tVector2<T>& v2) const;
-	tVector2 operator *(float f)               const;
-	float    operator *(const tVector2<T>& v3) const;
+	tVector2 operator  +(const tVector2<T>& v2) const;
+	tVector2 operator  -(const tVector2<T>& v2) const;
+	tVector2 operator  *(float f)               const;
+	float    operator  *(const tVector2<T>& v3) const;
 
 	tVector2 operator +=(const tVector2<T>& v2);
 	tVector2 operator -=(const tVector2<T>& v2);
 	tVector2 operator *=(float f);
-	float    operator *=(const tVector2<T>& v2) const;
 
 	operator tVector2<int>()    const { return tVector2<int>   ((int)i,    (int)j);    }
 	operator tVector2<float>()  const { return tVector2<float> ((float)i,  (float)j);  }
 	operator tVector2<double>() const { return tVector2<double>((double)i, (double)j); }
 	
 	tVector2 Normalise();
-	float Magnitude();
-	float MagnitudeSqrd();
+	float    Magnitude();
+	float    MagnitudeSqrd();
 };
 
 template <typename T>
-tVector2<T> tVector2<T>::operator +=(const tVector2<T>& v2)
-{
-	i += v2.i; j += v2.j;
-	return *this;
-}
-
-template <typename T>
-tVector2<T> tVector2<T>::operator -=(const tVector2<T>& v2)
-{
-	i -= v2.i; j -= v2.j;
-	return *this;
-}
-
-template <typename T>
-float tVector2<T>::operator *=(const tVector2<T>& v2) const
-{
-	return i * v2.i + j * v2.j;
-}
-
-template <typename T = float>
 class tVector3
 {
 public:
@@ -65,19 +44,27 @@ public:
 	tVector3(const tVector2<T>& v2);
 	tVector3(const tVector4<T>& v4);
 
-	tVector3 operator +(const tVector3<T>& v3) const;
-	tVector3 operator -(const tVector3<T>& v3) const;
-	tVector3 operator *(float f)              const;
-	float   operator *(const tVector3<T>& v3) const;
-	tVector3 operator %(const tVector3<T>& v3) const;
+	tVector3 operator  +(const tVector3<T>& v3) const;
+	tVector3 operator  -(const tVector3<T>& v3) const;
+	tVector3 operator  *(float f)               const;
+	float    operator  *(const tVector3<T>& v3) const;
+	tVector3 operator  %(const tVector3<T>& v3) const;
+
+	tVector3 operator +=(const tVector3<T>& v3);
+	tVector3 operator -=(const tVector3<T>& v3);
+	tVector3 operator *=(float f);
+
+	operator tVector3<int>()    const { return tVector3<int>   ((int)i,    (int)j,    (int)k);    }
+	operator tVector3<float>()  const { return tVector3<float> ((float)i,  (float)j,  (float)k);  }
+	operator tVector3<double>() const { return tVector3<double>((double)i, (double)j, (double)k); }
 
 	tVector3 Normalise();
-	float Magnitude();
-	float MagnitudeSqrd();
-	void PerspectiveDiv();
+	float    Magnitude();
+	float    MagnitudeSqrd();
+	void     PerspectiveDiv();
 };
 
-template <typename T = float>
+template <typename T>
 class tVector4
 {
 public:
@@ -86,20 +73,28 @@ public:
 	tVector4(T i, T j, T k, T w);
 	tVector4(const tVector3<T>& v3);
 
-	tVector4 operator +(const tVector4<T>& v4) const;
-	tVector4 operator -(const tVector4<T>& v4) const;
-	tVector4 operator *(float f)              const;
-	tVector4 operator *(const tMatrix4<T>& m4) const;
-	float   operator *(const tVector4<T>& v4) const;
-	tVector4 operator %(const tVector4<T>& v4) const;
+	tVector4 operator  +(const tVector4<T>& v4) const;
+	tVector4 operator  -(const tVector4<T>& v4) const;
+	tVector4 operator  *(float f)               const;
+	tVector4 operator  *(const tMatrix4<T>& m4) const;
+	float    operator  *(const tVector4<T>& v4) const;
+	tVector4 operator  %(const tVector4<T>& v4) const;
+
+	tVector4 operator +=(const tVector4<T>& v4);
+	tVector4 operator -=(const tVector4<T>& v4);
+	tVector4 operator *=(float f);
+
+	operator tVector4<int>()    const { return tVector4<int>   ((int)i,    (int)j,    (int)k,    (int)w);    }
+	operator tVector4<float>()  const { return tVector4<float> ((float)i,  (float)j,  (float)k,  (float)w);  }
+	operator tVector4<double>() const { return tVector4<double>((double)i, (double)j, (double)k, (double)w); }
 
 	tVector4 Normalise();
-	float Magnitude();
-	float MagnitudeSqrd();
-	void PerspectiveDiv();
+	float    Magnitude();
+	float    MagnitudeSqrd();
+	void     PerspectiveDiv();
 };
 
-template <typename T = float>
+template <typename T>
 class tMatrix2
 {
 public:
@@ -107,18 +102,41 @@ public:
 	  i2, j2;
 	tMatrix2();
 	tMatrix2(T i1, T j1,
-		    T i2, T j2);
+		     T i2, T j2);
 
-	tMatrix2    operator +(const tMatrix2<T>& m2) const;
-	tMatrix2    operator -(const tMatrix2<T>& m2) const;
-	tMatrix2    operator *(float f)              const;
-	tVector2<T> operator *(const tVector2<T>& v2) const;
-	tMatrix2    operator *(const tMatrix2<T>& m2) const;
+	tMatrix2    operator  +(const tMatrix2<T>& m2) const;
+	tMatrix2    operator  -(const tMatrix2<T>& m2) const;
+	tMatrix2    operator  *(float f)               const;
+	tVector2<T> operator  *(const tVector2<T>& v2) const;
+	tMatrix2    operator  *(const tMatrix2<T>& m2) const;
+
+	tMatrix2    operator +=(const tMatrix2<T>& m2);
+	tMatrix2    operator -=(const tMatrix2<T>& m2);
+	tMatrix2    operator *=(float f);
+
+	operator tMatrix2<int>()    const 
+	{ 
+		return tMatrix2<int>
+       ((int)i1,    (int)j1,    
+		(int)i2,    (int)j2);       
+	}
+	operator tMatrix2<float>()  const 
+	{ 
+		return tMatrix2<float> 
+	   ((float)i1,  (float)j1,  
+	    (float)i2,  (float)j2);   
+	}
+	operator tMatrix2<double>() const 
+	{ 
+		return tMatrix2<double>
+       ((double)i1, (double)j1, 
+        (double)i2, (double)j2); 
+	}
 
 	static tMatrix2 CreateRotation(float radians);
 };
 
-template <typename T = float>
+template <typename T>
 class tMatrix3
 {
 public:
@@ -127,16 +145,42 @@ public:
 	  i3, j3, k3;
 	tMatrix3();
 	tMatrix3(T i1, T j1, T k1, 
-		    T i2, T j2, T k2, 
-		    T i3, T j3, T k3);
+		     T i2, T j2, T k2, 
+		     T i3, T j3, T k3);
 	tMatrix3(const tMatrix2<T>& m2);
 	tMatrix3(const tMatrix4<T>& m4);
 
-	tMatrix3    operator +(const tMatrix3<T>& m3) const;
-	tMatrix3    operator -(const tMatrix3<T>& m3) const;
-    tMatrix3    operator *(float f)              const;
-	tVector3<T> operator *(const tVector3<T>& v3) const;
-	tMatrix3    operator *(const tMatrix3<T>& m3) const;
+	tMatrix3    operator  +(const tMatrix3<T>& m3) const;
+	tMatrix3    operator  -(const tMatrix3<T>& m3) const;
+    tMatrix3    operator  *(float f)               const;
+	tVector3<T> operator  *(const tVector3<T>& v3) const;
+	tMatrix3    operator  *(const tMatrix3<T>& m3) const;
+
+	tMatrix3    operator +=(const tMatrix3<T>& m3);
+	tMatrix3    operator -=(const tMatrix3<T>& m3);
+	tMatrix3    operator *=(float f);
+
+	operator tMatrix3<int>()    const 
+	{ 
+		return tMatrix3<int>
+	   ((int)i1,    (int)j1,    (int)k1, 
+		(int)i2,    (int)j2,    (int)k2, 
+		(int)i3,    (int)j3,    (int)k3); 
+	}
+	operator tMatrix3<float>()  const 
+	{ 
+		return tMatrix3<float>
+	   ((float)i1,  (float)j1,  (float)k1, 
+		(float)i2,  (float)j2,  (float)k2, 
+		(float)i3,  (float)j3,  (float)k3); 
+	}
+	operator tMatrix3<double>() const 
+	{ 
+		return tMatrix3<double>
+	   ((double)i1, (double)j1, (double)k1, 
+		(double)i2, (double)j2, (double)k2, 
+		(double)i3, (double)j3, (double)k3); 
+	}
 
 	tMatrix3 CreateRotationX(float radians);
 	tMatrix3 CreateRotationY(float radians);
@@ -147,7 +191,7 @@ public:
 	tMatrix3 Inverse(const tMatrix3<T>& m3);
 };
 
-template <typename T = float>
+template <typename T>
 class tMatrix4
 {
 public:
@@ -157,35 +201,64 @@ public:
 	  i4, j4, k4, w4;
 	tMatrix4();
 	tMatrix4(T i1, T j1, T k1, T w1, 
-		    T i2, T j2, T k2, T w2, 
-		    T i3, T j3, T k3, T w3, 
-		    T i4, T j4, T k4, T w4);
+		     T i2, T j2, T k2, T w2, 
+		     T i3, T j3, T k3, T w3, 
+		     T i4, T j4, T k4, T w4);
 	tMatrix4(const tMatrix3<T>& m3);
 
-	tMatrix4    operator +(const tMatrix4<T>& m4) const;
-	tMatrix4    operator -(const tMatrix4<T>& m4) const;
-	tMatrix4    operator *(float f)     	     const;
-	tVector4<T> operator *(const tVector4<T>& v4) const;
-	tMatrix4    operator *(const tMatrix4<T>& m4) const;
+	tMatrix4    operator  +(const tMatrix4<T>& m4) const;
+	tMatrix4    operator  -(const tMatrix4<T>& m4) const;
+	tMatrix4    operator  *(float f)     	       const;
+	tVector4<T> operator  *(const tVector4<T>& v4) const;
+	tMatrix4    operator  *(const tMatrix4<T>& m4) const;
+
+	tMatrix4    operator +=(const tMatrix4<T>& m4);
+	tMatrix4    operator -=(const tMatrix4<T>& m4);
+	tMatrix4    operator *=(float f);
+
+	operator tMatrix4<int>()    const 
+	{ 
+		return tMatrix4<int>
+	   ((int)i1,    (int)j1,    (int)k1,    (int)w1, 
+	    (int)i2,    (int)j2,    (int)k2,    (int)w2, 
+	    (int)i3,    (int)j3,    (int)k3,    (int)w3, 
+	    (int)i4,    (int)j4,    (int)k4,    (int)w4); 
+	}
+	operator tMatrix4<float>()  const 
+	{ 
+		return tMatrix4<float>
+	   ((float)i1,  (float)j1,  (float)k1,  (float)w1, 
+		(float)i2,  (float)j2,  (float)k2,  (float)w2, 
+		(float)i3,  (float)j3,  (float)k3,  (float)w3, 
+		(float)i4,  (float)j4,  (float)k4,  (float)w4); 
+	}
+	operator tMatrix4<double>() const 
+	{ 
+		return tMatrix4<double>
+	   ((double)i1, (double)j1, (double)k1, (double)w1, 
+		(double)i2, (double)j2, (double)k2, (double)w2, 
+		(double)i3, (double)j3, (double)k3, (double)w3, 
+		(double)i4, (double)j4, (double)k4, (double)w4); 
+	}
 
 	tMatrix4 CreateRotationX(float radians);
 	tMatrix4 CreateRotationY(float radians);
 	tMatrix4 CreateRotationZ(float radians);
 	tMatrix4 CreateTranslate(const tVector3<T>& translation);
 	tMatrix4 CreateScale(const tVector3<T>& scale);
-	float   Determinant(const tMatrix4<T>& m4);
+	float    Determinant(const tMatrix4<T>& m4);
 	tMatrix4 Inverse(const tMatrix4<T>& m4);
 
 	tMatrix4 CreateProjMatrix(float aspectRatio, float fov, float nearZ, float farZ);
 	tMatrix4 CreateRescale(float screenWidth, float screenHeight);
 };
 
-typedef tVector2<> Vector2;
-typedef tVector3<> Vector3;
-typedef tVector4<> Vector4;
-typedef tMatrix2<> Matrix2;
-typedef tMatrix3<> Matrix3;
-typedef tMatrix4<> Matrix4;
+typedef tVector2<float> Vector2;
+typedef tVector3<float> Vector3;
+typedef tVector4<float> Vector4;
+typedef tMatrix2<float> Matrix2;
+typedef tMatrix3<float> Matrix3;
+typedef tMatrix4<float> Matrix4;
 
 #pragma region tVector2
 template <typename T>
@@ -218,7 +291,24 @@ float tVector2<T>::operator *(const tVector2& v3) const
 {
 	return i * v3.i + j * v3.j;
 }
-
+template <typename T>
+tVector2<T> tVector2<T>::operator +=(const tVector2<T>& v2)
+{
+	i += v2.i; j += v2.j;
+	return *this;
+}
+template <typename T>
+tVector2<T> tVector2<T>::operator -=(const tVector2<T>& v2)
+{
+	i -= v2.i; j -= v2.j;
+	return *this;
+}
+template <typename T>
+tVector2<T> tVector2<T>::operator *=(float f)
+{
+	i *= f;  j *= f;
+	return *this;
+}
 template <typename T>
 tVector2<T> tVector2<T>::Normalise()
 {
@@ -282,6 +372,24 @@ template <typename T>
 tVector3<T> tVector3<T>::operator %(const tVector3<T>& v3) const
 {
 	return tVector3(j * v3.k - k * v3.j, k * v3.i - i * v3.k, i * v3.j - j * v3.i);
+}
+template <typename T>
+tVector3<T> tVector3<T>::operator +=(const tVector3<T>& v3)
+{
+	i += v3.i; j += v3.j; k += v3.k;
+	return *this;
+}
+template <typename T>
+tVector3<T> tVector3<T>::operator -=(const tVector3<T>& v3)
+{
+	i -= v3.i; j -= v3.j; k -= v3.k;
+	return *this;
+}
+template <typename T>
+tVector3<T> tVector3<T>::operator *=(float f)
+{
+	i *= f;  j *= f; k *= f;
+	return *this;
 }
 template <typename T>
 tVector3<T> tVector3<T>::Normalise()
@@ -358,6 +466,24 @@ tVector4<T> tVector4<T>::operator %(const tVector4<T>& v4) const
 	return tVector4(j * v4.k - k * v4.j, k * v4.i - i * v4.k, i * v4.j - j * v4.i, 0);
 }
 template <typename T>
+tVector4<T> tVector4<T>::operator +=(const tVector4<T>& v4)
+{
+	i += v4.i; j += v4.j; k += v4.k; w += v4.w;
+	return *this;
+}
+template <typename T>
+tVector4<T> tVector4<T>::operator -=(const tVector4<T>& v4)
+{
+	i -= v4.i; j -= v4.j; k -= v4.k; w -= v4.w;
+	return *this;
+}
+template <typename T>
+tVector4<T> tVector4<T>::operator *=(float f)
+{
+	i *= f;  j *= f; k *= f; w *= f;
+	return *this;
+}
+template <typename T>
 tVector4<T> tVector4<T>::Normalise()
 {
 	float f = 1.0f / sqrt(i * i + j * j + k * k);
@@ -425,6 +551,24 @@ tMatrix2<T> tMatrix2<T>::operator *(const tMatrix2<T>& m2) const
 {
 	return tMatrix2(i1 * m2.i1 + j1 * m2.i2, i1 * m2.j1 + j1 * m2.j2,
 		i2 * m2.i1 + j2 * m2.i2, i2 * m2.j1 + j2 * m2.j2);
+}
+template <typename T>
+tMatrix2<T> tMatrix2<T>::operator +=(const tMatrix2<T>& m2)
+{
+	i1 += m2.i1; j1 += m2.j1; i2 += m2.i2; j2 += m2.j2;
+	return *this;
+}
+template <typename T>
+tMatrix2<T> tMatrix2<T>::operator -=(const tMatrix2<T>& m2)
+{
+	i1 -= m2.i1; j1 -= m2.j1; i2 -= m2.i2; j2 -= m2.j2;
+	return *this;
+}
+template <typename T>
+tMatrix2<T> tMatrix2<T>::operator *=(float f)
+{
+	i1 *= f;  j1 *= f; i2 *= f; j2 *= f;
+	return *this;
 }
 template <typename T>
 tMatrix2<T> tMatrix2<T>::CreateRotation(float radians)
@@ -507,6 +651,24 @@ tMatrix3<T> tMatrix3<T>::operator *(const tMatrix3<T>& m3) const
 		i3 * m3.i1 + j3 * m3.i2 + k3 * m3.i3,
 		i3 * m3.j1 + j3 * m3.j2 + k3 * m3.j3,
 		i3 * m3.k1 + j3 * m3.k2 + k3 * m3.k3);
+}
+template <typename T>
+tMatrix3<T> tMatrix3<T>::operator +=(const tMatrix3<T>& m3)
+{
+	i1 += m3.i1; j1 += m3.j1; k1 += m3.k1; i2 += m3.i2; j2 += m3.j2; k2 += m3.k2; i3 += m3.i3; j3 += m3.j3; k3 += m3.k3;
+	return *this;
+}
+template <typename T>
+tMatrix3<T> tMatrix3<T>::operator -=(const tMatrix3<T>& m3)
+{
+	i1 -= m3.i1; j1 -= m3.j1; k1 -= m3.k1; i2 -= m3.i2; j2 -= m3.j2; k2 -= m3.k2; i3 -= m3.i3; j3 -= m3.j3; k3 -= m3.k3;
+	return *this;
+}
+template <typename T>
+tMatrix3<T> tMatrix3<T>::operator *=(float f)
+{
+	i1 *= f;  j1 *= f; k1 *= f; i2 *= f; j2 *= f; k2 *= f; i3 *= f; j3 *= f; k3 *= f;
+	return *this;
 }
 template <typename T>
 tMatrix3<T> tMatrix3<T>::CreateRotationX(float radians)
@@ -644,6 +806,24 @@ tMatrix4<T> tMatrix4<T>::operator *(const tMatrix4<T>& m4) const
 		i4 * m4.j1 + j4 * m4.j2 + k4 * m4.j3 + w4 * m4.j4,
 		i4 * m4.k1 + j4 * m4.k2 + k4 * m4.k3 + w4 * m4.k4,
 		i4 * m4.w1 + j4 * m4.w2 + k4 * m4.w3 + w4 * m4.w4);
+}
+template <typename T>
+tMatrix4<T> tMatrix4<T>::operator +=(const tMatrix4<T>& m4)
+{
+	i1 += m4.i1; j1 += m4.j1; k1 += m4.k1; w1 += m4.w1; i2 += m4.i2; j2 += m4.j2; k2 += m4.k2; w2 += m4.w2; i3 += m4.i3; j3 += m4.j3; k3 += m4.k3; w3 += m4.w3; i4 += m4.i4; j4 += m4.j4; k4 += m4.k4; w4 += m4.w4;
+	return *this;
+}
+template <typename T>
+tMatrix4<T> tMatrix4<T>::operator -=(const tMatrix4<T>& m4)
+{
+	i1 -= m4.i1; j1 -= m4.j1; k1 -= m4.k1; w1 -= m4.w1; i2 -= m4.i2; j2 -= m4.j2; k2 -= m4.k2; w2 -= m4.w2; i3 -= m4.i3; j3 -= m4.j3; k3 -= m4.k3; w3 -= m4.w3; i4 -= m4.i4; j4 -= m4.j4; k4 -= m4.k4; w4 -= m4.w4;
+	return *this;
+}
+template <typename T>
+tMatrix4<T> tMatrix4<T>::operator *=(float f)
+{
+	i1 *= f;  j1 *= f; k1 *= f; w1 *= f; i2 *= f; j2 *= f; k2 *= f; w2 *= f; i3 *= f; j3 *= f; k3 *= f; w3 *= f; i4 *= f; j4 *= f; k4 *= f; w4 *= f;
+	return *this;
 }
 template <typename T>
 tMatrix4<T> tMatrix4<T>::CreateRotationX(float radians)

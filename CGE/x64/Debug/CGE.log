@@ -1,10 +1,25 @@
 ﻿  Main.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(446,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(552,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
 C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(4,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  CGE.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(446,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(103,37): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(108,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(139,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(771,1): warning C4244: '*=': conversion from 'float' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(770): message : while compiling class template member function 'tMatrix4<T> tMatrix4<T>::operator *=(float)'
+          with
+          [
+              T=int
+          ]
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(10): message : see reference to function template instantiation 'tMatrix4<T> tMatrix4<T>::operator *=(float)' being compiled
+          with
+          [
+              T=int
+          ]
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(200): message : see reference to class template instantiation 'tMatrix4<T>' being compiled
+          with
+          [
+              T=int
+          ]
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(200): message : see reference to class template instantiation 'tMatrix4<T>' being compiled
   CGE.vcxproj -> C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\x64\Debug\CGE.exe
