@@ -29,13 +29,22 @@ struct Vertex3D
 struct Line
 {
 	Vector2 point[2];
-	Colour colour;
 };
 
-struct Square
+struct Edge2D
+{
+	Point2D point[2];
+};
+
+struct Edge3D
+{
+	Point3D point[2];
+};
+
+struct Triangle
 {
 	Vector2 position;
-	float s;
+	Vector2 point[3];
 };
 
 struct Rect
@@ -50,53 +59,45 @@ struct Circle
 	float radius;
 };
 
-struct Ellipse
+struct Oval
 {
 	Vector2 position;
 	Vector2 size;
 };
 
-struct Edge2D
-{
-	Point2D point[2];
-};
-
-struct Edge3D
-{
-	Point3D point[2];
-};
-
 struct Triangle2D
 {
+	Vector2 position;
 	Point2D point[3];
 };
 
 struct vTriangle2D
 {
+	Vector2 position;
 	Vertex2D vertex[3];
 };
 
 struct Triangle3D
 {
+	Vector3 position;
 	Point3D point[3];
 };
 
 struct vTriangle3D
 {
+	Vector3 position;
 	Vertex3D vertex[3];
 };
 
 struct Rectangle2D
 {
-	Vector2 pos;
-	Vector2 size;
+	Rect rect;
 	Colour colour[4];
 };
 
 struct vRectangle2D
 {
-	Vector2 pos;
-	Vector2 size;
+	Rect rect;
 	Vector2 texel[4];
 };
 	
@@ -115,15 +116,60 @@ struct vRectangle3D
 };
 
 template <int s>
+class Poly
+{
+public:
+	int sides;
+	Vector2 position;
+	Vector2 point[s];
+
+	Poly(Vector2 position, float radians = 0)
+	{
+		sides = s;
+		this->position = position;
+		float angle = 6.283f / s;
+		float cos = cosf(angle);
+		float sin = sinf(angle);
+		Matrix2 m(cos, sin, -sin, cos);
+		point[0] = { cosf(radians), sinf(radians) };
+		for (int i = 1; i < sides; i++)
+			point[i] = m * point[i - 1];
+	}
+
+	void Rotate(float radians)
+	{
+		float cos = cosf(radians);
+		float sin = sinf(radians);
+		Matrix2 m(cos, sin, -sin, cos);
+
+		for (int i = 0; i < sides; i++)
+			point[i] = m * point[i];
+	}
+
+	void MakeReg(float radians = 0)
+	{
+		float angle = 6.283f / s;
+		float cos = cosf(angle);
+		float sin = sinf(angle);
+		Matrix2 m(cos, sin, -sin, cos);
+		point[0] = { cosf(radians), sinf(radians) };
+		for (int i = 1; i < sides; i++)
+			point[i] = m * point[i - 1];
+	}
+};
+
+template <int s>
 class Shape
 {
 public:
 	int sides;
+	Vector2 position;
 	Point2D point[s];
 
-	Shape(float radians = 0)
+	Shape(Vector2 position, float radians = 0)
 	{
 		sides = s;
+		this->position = position;
 		float angle = 6.283f / s;
 		float cos = cosf(angle);
 		float sin = sinf(angle);
@@ -160,11 +206,13 @@ class vShape
 {
 public:
 	int sides = s;
+	Vector2 position;
 	Vertex2D vertex[s];
 
-	vShape(float radians = 0)
+	vShape(Vector2 position, float radians = 0)
 	{
 		sides = s;
+		this->position = position;
 		float angle = 6.283f / sides;
 		float cos = cosf(angle);
 		float sin = sinf(angle);

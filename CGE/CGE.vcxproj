@@ -155,17 +155,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour_Map.cpp" />
+    <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGE.h" />
     <ClInclude Include="Colour.h" />
     <ClInclude Include="Colour_Map.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Sprite.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
