@@ -159,6 +159,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour_Map.cpp" />
+    <ClCompile Include="Screen_Buffer.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -170,9 +171,11 @@
     <ClInclude Include="Image.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Screen_Buffer.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Todo_List.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

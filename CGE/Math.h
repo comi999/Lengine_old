@@ -15,6 +15,7 @@ public:
 	T i, j;
 	tVector2();
 	tVector2(T i, T j);
+	tVector2(const tVector3<T>& v3);
 
 	tVector2 operator  +(const tVector2<T>& v2) const;
 	tVector2 operator  -(const tVector2<T>& v2) const;
@@ -182,12 +183,12 @@ public:
 		(double)i3, (double)j3, (double)k3); 
 	}
 
-	tMatrix3 CreateRotationX(float radians);
-	tMatrix3 CreateRotationY(float radians);
-	tMatrix3 CreateRotationZ(float radians);
-	tMatrix3 CreateTranslate(const tVector3<T>& translation);
-	tMatrix3 CreateScale(const tVector3<T>& scale);
-	float   Determinant(const tMatrix3<T>& m3);
+	static tMatrix3 CreateRotationX(float radians);
+	static tMatrix3 CreateRotationY(float radians);
+	static tMatrix3 CreateRotationZ(float radians);
+	static tMatrix3 CreateTranslate(const tVector3<T>& translation);
+	static tMatrix3 CreateScale(const tVector3<T>& scale);
+	float Determinant(const tMatrix3<T>& m3);
 	tMatrix3 Inverse(const tMatrix3<T>& m3);
 };
 
@@ -241,16 +242,16 @@ public:
 		(double)i4, (double)j4, (double)k4, (double)w4); 
 	}
 
-	tMatrix4 CreateRotationX(float radians);
-	tMatrix4 CreateRotationY(float radians);
-	tMatrix4 CreateRotationZ(float radians);
-	tMatrix4 CreateTranslate(const tVector3<T>& translation);
-	tMatrix4 CreateScale(const tVector3<T>& scale);
+	static tMatrix4 CreateRotationX(float radians);
+	static tMatrix4 CreateRotationY(float radians);
+	static tMatrix4 CreateRotationZ(float radians);
+	static tMatrix4 CreateTranslate(const tVector3<T>& translation);
+	static tMatrix4 CreateScale(const tVector3<T>& scale);
 	float    Determinant(const tMatrix4<T>& m4);
 	tMatrix4 Inverse(const tMatrix4<T>& m4);
 
-	tMatrix4 CreateProjMatrix(float aspectRatio, float fov, float nearZ, float farZ);
-	tMatrix4 CreateRescale(float screenWidth, float screenHeight);
+	static tMatrix4 CreateProjMatrix(float aspectRatio, float fov, float nearZ, float farZ);
+	static tMatrix4 CreateRescale(float screenWidth, float screenHeight);
 };
 
 typedef tVector2<float> Vector2;
@@ -270,6 +271,11 @@ template <typename T>
 tVector2<T>::tVector2(T i, T j)
 {
 	this->i = i; this->j = j;
+}
+template <typename T>
+tVector2<T>::tVector2(const tVector3<T>& v3)
+{
+	i = v3.i; j = v3.j;
 }
 template <typename T>
 tVector2<T> tVector2<T>::operator +(const tVector2& v2) const
@@ -312,7 +318,7 @@ tVector2<T> tVector2<T>::operator *=(float f)
 template <typename T>
 tVector2<T> tVector2<T>::Normalise()
 {
-	float f = 1.0f / sqrt(i * i + j * j);
+	float f = 1.0f / sqrtf(i * i + j * j);
 	return tVector2(this->i * f, this->j * f);
 }
 template <typename T>
@@ -574,7 +580,7 @@ template <typename T>
 tMatrix2<T> tMatrix2<T>::CreateRotation(float radians)
 {
 	float c = cos(radians), s = sin(radians);
-	return tMatrix2(c, -s, s, c);
+	return tMatrix2(c, s, -s, c);
 }
 #pragma endregion
 

@@ -9,6 +9,7 @@
 #include "Image.h"
 #include "Texture.h"
 #include "Sprite.h"
+#include "Screen_Buffer.h"
 
 class CGE
 {
@@ -17,8 +18,6 @@ public:
     HANDLE hSTDout;
     HANDLE hSTDin;
     CONSOLE_CURSOR_INFO cursorInfo;
-    CHAR_INFO* charArray;
-    Colour* pixelBuffer;
     SMALL_RECT windowArea;
     wchar_t windowTitle[64];
     char windowTitleLength = 0;
@@ -29,9 +28,11 @@ public:
     char currentFrame = 0;std::thread* titleManager;
     bool engineActive = true;
     tVector2<int> screenSize;
+    bool thirdDimension;
     Colour_Map colourMap;
+    Screen_Buffer screenBuffer;
 
-    CGE(LPCWSTR title, const tVector2<int>& pixelSize, const tVector2<int>& screenSize);
+    CGE(LPCWSTR title, const tVector2<int>& pixelSize, const tVector2<int>& screenSize, bool thirdDimension = false);
     ~CGE();
 
     void virtual Startup();
@@ -52,7 +53,7 @@ public:
     void SetPixel(const tVector2<int>& position, const Colour& colour = { });
     void SetPixel(const Point2D& point);
 
-    void DrawLine(Vector2 position1, Vector2 position2, const Colour& colour = { });
+    void DrawLine(tVector2<int> position1, tVector2<int> position2, const Colour& colour = { });
     void DrawLine(Line line, const Colour& colour = { });
     void DrawLineEx(Vector2 position1, Vector2 position2, const Colour& colour = { }, int thickness = 1);
     void DrawLineEx(Line line, const Colour& colour = { }, int thickness = 1);
@@ -65,15 +66,15 @@ public:
     void DrawCircleLine(const Vector2& position, float radius, const Colour& colour = { }, int thickness = 1);
     void DrawCircleLine(const Circle& circle, const Colour& colour = { }, int thickness = 1);
 
-    void DrawOval(const Vector2& position, const Vector2& size, const Colour& colour = { });
-    void DrawOval(const Oval& oval, const Colour& colour = { });
-    void DrawOvalLine(const Vector2& position, const Vector2& size, const Colour& colour = { }, int thickness = 1);
-    void DrawOvalLine(const Oval& oval, const Colour& colour = { }, int thickness = 1);
+    void DrawOval(const Vector2& position, const Vector2& size, float rotation = 0, const Colour& colour = { });
+    void DrawOval(const Oval& oval, float rotation = 0, const Colour& colour = { });
+    void DrawOvalLine(const Vector2& position, const Vector2& size, float rotation = 0, const Colour& colour = { }, int thickness = 1);
+    void DrawOvalLine(const Oval& oval, float rotation = 0, const Colour& colour = { }, int thickness = 1);
 
     void DrawRect(const Vector2& position, const Vector2& size, float rotation = 0, const Colour& colour = { });
     void DrawRect(const Rect& rect, float rotation = 0, const Colour& colour = { });
     void DrawRectLine(const Vector2& position, const Vector2& size, float rotation = 0, const Colour& colour = { }, int thickness = 1);
-    void DrawRectLine(const Rect& rect, float rotation = 0, int thickness = 1, const Colour& colour = { });
+    void DrawRectLine(const Rect& rect, float rotation = 0, const Colour& colour = { }, int thickness = 1);
 
     //Textured shape drawing
     void DrawRectangle(const Rectangle2D& rectangle, float rotation = 0);
@@ -81,6 +82,7 @@ public:
     void DrawRectangleTexture(const Triangle& source, const Triangle& dest, const Texture& texture, float sourceRot = 0, float destRot = 0);
     void DrawRectangleTexture(const vTriangle2D& triangle, const Texture& texture, float rotation = 0);
 
+    void DrawTriangle(const Vector2& p0, const Vector2& p1, const Vector2& p2, const Colour& colour = { });
     void DrawTriangle(const Triangle& triangle, float rotation = 0, const Colour& colour = { });
     void DrawTriangle(const Triangle2D& triangle, float rotation = 0);
     void DrawTriangleLine(const Triangle& triangle, float rotation = 0, const Colour& colour = { }, int thickness = 1);
@@ -90,7 +92,7 @@ public:
     template <int s>
     void DrawPoly(const Poly<s>& poly, float rotation = 0, const Colour& colour = { });
     template <int s>
-    void DrawPolyLine(const Poly<s>& poly, float rotation = 0, const Colour & = { }, int thickness = 1);
+    void DrawPolyLine(const Poly<s>& poly, float rotation = 0, const Colour& colour = { }, int thickness = 1);
     template <int s>
     void DrawShape(const Shape<s>& shape, float rotation = 0);
     template <int s>
@@ -98,6 +100,29 @@ public:
     template <int s>
     void DrawShapeTexture(const vShape<s>& shape, const Texture& texture, float rotation = 0);
 };
-    
 
-
+template <int s>
+void CGE::DrawPoly(const Poly<s>& poly, float rotation, const Colour& colour)
+{
+    //NEEDS WORK
+}
+template <int s>
+void CGE::DrawPolyLine(const Poly<s>& poly, float rotation, const Colour& colour, int thickness)
+{
+    //NEEDS WORK
+}
+template <int s>
+void CGE::DrawShape(const Shape<s>& shape, float rotation)
+{
+    //NEEDS WORK
+}
+template <int s>
+void CGE::DrawShapeTexture(const Poly<s>& source, const Poly<s>& dest, const Texture& texture, float sourceRot, float destRot)
+{
+    //NEEDS WORK
+}
+template <int s>
+void CGE::DrawShapeTexture(const vShape<s>& shape, const Texture& texture, float rotation)
+{
+    //NEEDS WORK
+}

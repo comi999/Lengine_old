@@ -1,4 +1,9 @@
 #pragma once
+#include <string>
+
+class Sprite;
+class Colour;
+class Image;
 
 class Texture
 {

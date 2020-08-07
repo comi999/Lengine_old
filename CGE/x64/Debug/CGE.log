@@ -1,25 +1,4 @@
-﻿  CGE.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(606,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,35): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,35): error C2143: syntax error: missing ',' before '&'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,69): error C2143: syntax error: missing ')' before '{'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,72): error C2059: syntax error: ')'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,39): error C2143: syntax error: missing ',' before '&'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,111): error C2143: syntax error: missing ')' before '{'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,114): error C2059: syntax error: ')'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(103,37): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(108,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.cpp(139,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-  Main.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(606,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,35): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,35): error C2143: syntax error: missing ',' before '&'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,69): error C2143: syntax error: missing ')' before '{'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(88,72): error C2059: syntax error: ')'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,39): error C2143: syntax error: missing ',' before '&'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,111): error C2143: syntax error: missing ')' before '{'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\CGE.h(89,114): error C2059: syntax error: ')'
+﻿  Main.cpp
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(612,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
 C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(4,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  Generating Code...
+  CGE.vcxproj -> C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\x64\Debug\CGE.exe

@@ -1,4 +1,9 @@
 #pragma once
+
+class Texture;
+class Colour;
+struct Rect;
+
 class Sprite
 {
 public:
