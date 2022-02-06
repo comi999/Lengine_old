@@ -1,4 +1,44 @@
 ﻿  Main.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.h(612,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(4,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  CGE.vcxproj -> C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\x64\Debug\CGE.exe
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(612,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(98,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(375,29): warning C4244: 'return': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(374): message : while compiling class template member function 'float tVector3<int>::operator *(const tVector3<int> &) const'
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(98): message : see reference to function template instantiation 'float tVector3<int>::operator *(const tVector3<int> &) const' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(88): message : see reference to class template instantiation 'tVector3<int>' being compiled
+  PixelColourMap.cpp
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(612,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(98,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(375,29): warning C4244: 'return': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(374): message : while compiling class template member function 'float tVector3<int>::operator *(const tVector3<int> &) const'
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(98): message : see reference to function template instantiation 'float tVector3<int>::operator *(const tVector3<int> &) const' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\PixelColourMap.hpp(88): message : see reference to class template instantiation 'tVector3<int>' being compiled
+  Rect.hpp
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.h(612,1): warning C4812: obsolete declaration style: please use 'tMatrix3<T>::tMatrix3' instead
+  Generating Code...
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ScreenBuffer.hpp(210): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
+  CGE.vcxproj -> C:\Users\l_farag\source\repos\Console-Game-Engine\x64\Debug\CGE.exe

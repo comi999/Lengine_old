@@ -906,3 +906,25 @@ tMatrix4<T> tMatrix4<T>::CreateRescale(float screenWidth, float screenHeight)
 	return tMatrix4(w, 0, 0, 0, 0, h, 0, 0, 0, 0, 1, 0, w, h, 0, 1);
 }
 #pragma endregion
+
+template < typename T >
+T Clamp( T a_Value, T a_Min, T a_Max )
+{
+	if ( a_Value < a_Min )
+	{
+		a_Value = a_Min;
+	}
+
+	if ( a_Value > a_Max )
+	{
+		a_Value = a_Max;
+	}
+
+	return a_Value;
+}
+
+template < typename T >
+T Lerp( T a_Start, T a_End, float a_Parameter )
+{
+	return ( a_End - a_Start ) * a_Parameter + a_Start;
+}

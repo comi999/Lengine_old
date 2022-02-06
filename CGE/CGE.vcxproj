@@ -107,8 +107,9 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/ENTRY:"mainCRTStartup" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,11 +156,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="CGE.cpp" />
-    <ClCompile Include="Colour_Map.cpp" />
-    <ClCompile Include="Screen_Buffer.cpp" />
+    <ClCompile Include="PixelColourMap.cpp" />
+    <ClCompile Include="Rect.hpp" />
+    <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -167,15 +169,22 @@
   <ItemGroup>
     <ClInclude Include="CGE.h" />
     <ClInclude Include="Colour.h" />
-    <ClInclude Include="Colour_Map.h" />
+    <ClInclude Include="ConsoleColour.hpp" />
+    <ClInclude Include="ConsoleWindow.hpp" />
+    <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Polygon.h" />
-    <ClInclude Include="Screen_Buffer.h" />
+    <ClInclude Include="Primitive.hpp" />
+    <ClInclude Include="ScreenBuffer.hpp" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Todo_List.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="oldcode.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

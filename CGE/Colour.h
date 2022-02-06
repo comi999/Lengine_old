@@ -1,48 +1,140 @@
 #pragma once
 
-class Colour
+struct Colour
 {
-public:
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
-	unsigned char a;
+	typedef unsigned char Channel;
 
-	Colour();
-	Colour(int R, int G, int B, int A = 255);
-	Colour(float R, float G, float B, float A = 255);
+	Colour()
+		: R( 255 )
+		, G( 255 )
+		, B( 255 )
+		, A( 255 )
+	{ }
 
-	void Premultiply();
+	Colour( Colour a_Colour, Channel a_Alpha )
+		: R( a_Colour.R )
+		, G( a_Colour.G )
+		, B( a_Colour.B )
+		, A( a_Alpha )
+	{ }
 
-	Colour operator +(const Colour& rhs) const;
-	void operator +=(const Colour& rhs);
-	bool operator ==(const Colour& rhs) const;
+	Colour( Channel a_Red, Channel a_Green, Channel a_Blue, Channel a_Alpha = 255 )
+		: R( a_Red )
+		, G( a_Green )
+		, B( a_Blue )
+		, A( a_Alpha )
+	{ }
+
+	Colour operator +( Colour a_RHS ) const
+	{
+		static const float Denom = 1.0f / 255.0f;
+
+		if ( a_RHS.A == 255 )
+		{
+			return a_RHS;
+		}
+
+		if ( a_RHS.A == 0 )
+		{
+			return *this;
+		}
+
+		Channel NewA = 255 - ( 255 - a_RHS.A ) * ( 1.0f - A * Denom );
+
+		if ( A < 1.0e-6f )
+		{
+			return Colour( 255, 255, 255, 0 );
+		}
+
+		float PremultiplyLeft = float( a_RHS.A ) / NewA;
+		float PremultiplyRight = A * ( 1.0f - a_RHS.A * Denom ) / NewA;
+
+		a_RHS.R = a_RHS.R * PremultiplyLeft + R * PremultiplyRight;
+		a_RHS.G = a_RHS.G * PremultiplyLeft + G * PremultiplyRight;
+		a_RHS.B = a_RHS.B * PremultiplyLeft + B * PremultiplyRight;
+		a_RHS.A = NewA;
+
+		return a_RHS;
+	}
+
+	Colour& operator +=( Colour a_RHS )
+	{
+		static const float Denom = 1.0f / 255.0f;
+
+		if ( a_RHS.A == 255 )
+		{
+			*this = a_RHS;
+			return *this;
+		}
+
+		if ( a_RHS.A == 0 )
+		{
+			return *this;
+		}
+
+		Channel NewA = 255 - ( 255 - a_RHS.A ) * ( 1.0f - A * Denom );
+
+		if ( A < 1.0e-6f )
+		{
+			*this = Colour( 255, 255, 255, 0 );
+			return *this;
+		}
+
+		float PremultiplyLeft = static_cast< float >( a_RHS.A ) / NewA;
+		float PremultiplyRight = A * ( 1.0f - a_RHS.A * Denom ) / NewA;
+
+		a_RHS.R = a_RHS.R * PremultiplyLeft + R * PremultiplyRight;
+		a_RHS.G = a_RHS.G * PremultiplyLeft + G * PremultiplyRight;
+		a_RHS.B = a_RHS.B * PremultiplyLeft + B * PremultiplyRight;
+		*this = a_RHS;
+		return *this;
+	}
+
+	bool operator ==( Colour a_RHS ) const
+	{
+		return
+			R == a_RHS.R &&
+			G == a_RHS.G && 
+			B == a_RHS.B &&
+			A == a_RHS.A;
+	}
+
+	bool operator !=( Colour a_RHS ) const
+	{
+		return !operator==( a_RHS );
+	}
+
+	Channel R;
+	Channel G;
+	Channel B;
+	Channel A;
+
+	static const Colour WHITE;
+	static const Colour BLACK;
+	static const Colour GREY;
+	static const Colour LIGHT_GREY;
+	static const Colour DARK_GREY;
+	static const Colour BROWN;
+	static const Colour RED;
+	static const Colour LIGHT_RED;
+	static const Colour DARK_RED;
+	static const Colour ORANGE;
+	static const Colour LIGHT_ORANGE;
+	static const Colour DARK_ORANGE;
+	static const Colour YELLOW;
+	static const Colour LIGHT_YELLOW;
+	static const Colour DARK_YELLOW;
+	static const Colour GREEN;
+	static const Colour LIGHT_GREEN;
+	static const Colour DARK_GREEN;
+	static const Colour BLUE;
+	static const Colour DARK_BLUE;
+	static const Colour LIGHT_BLUE;
+	static const Colour PURPLE;
+	static const Colour DARK_PURPLE;
+	static const Colour LIGHT_PURPLE;
+	static const Colour PINK;
+	static const Colour LIGHT_PINK;
+	static const Colour DARK_PINK;
 };
 
-const Colour WHITE        (255, 255, 255);
-const Colour BLACK        (0, 0, 0);
-const Colour GREY         (128, 128, 128);
-const Colour LIGHT_GREY   (196, 196, 196);
-const Colour DARK_GREY    (64, 64, 64);
-const Colour BROWN        (100, 50, 20);
-const Colour RED          (255, 0, 0);
-const Colour LIGHT_RED    (255, 64, 64);
-const Colour DARK_RED     (128, 0, 0);
-const Colour ORANGE       (255, 64, 0);
-const Colour LIGHT_ORANGE (255, 128, 0);
-const Colour DARK_ORANGE  (196, 32, 0);
-const Colour YELLOW       (196, 196, 0);
-const Colour LIGHT_YELLOW (255, 255, 32);
-const Colour DARK_YELLOW  (153, 153, 0);
-const Colour GREEN        (0, 255, 0);
-const Colour LIGHT_GREEN  (64, 255, 64);
-const Colour DARK_GREEN   (0, 128, 0);
-const Colour BLUE         (0, 0, 255);
-const Colour DARK_BLUE    (0, 0, 96);
-const Colour LIGHT_BLUE   (51, 153, 255);
-const Colour PURPLE       (64, 0, 255);
-const Colour DARK_PURPLE  (28, 0, 91);
-const Colour LIGHT_PURPLE (153, 153, 255);
-const Colour PINK         (255, 0, 255);
-const Colour LIGHT_PINK   (255, 96, 229);
-const Colour DARK_PINK    (140, 0, 140);

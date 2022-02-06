@@ -1,26 +1,43 @@
 #include "CGE.h"
+#include "Primitive.hpp"
 
-void main()
+using namespace std;
+
+int main()
 {
-	CGE game(L"test", { 4, 4 }, { 200, 200 });
-	game.StartTimer();
-	float f = 0;
-	Rect rect;
-	rect.position = { 100, 100 };
-	rect.size = { 40, 25 };
-	while (true)
+	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
+	
+	/*for ( int x = 0; x < 256; x += 1 )
 	{
-		f += 0.1f;
-		game.ResetBuffer();
-		
-		game.DrawTriangle({ 30, 150 }, { 50, 100 }, { 180, 20 }, GREEN);
-		game.DrawRect({ 100, 80 }, { 40, 50 }, f, { 128, 255, 0, 128 });
-		game.DrawRect({ 100, 100 }, { 40, 50 }, f, { 255, 100, 0, 128 });
-		game.DrawRect({ 100, 120 }, { 40, 50 }, f, { 128, 0, 255, 128 });
+		Sleep( 25 );
+		for ( int y = 0; y < 128; ++y )
+		{
+			for ( int z = 0; z < 128; ++z )
+			{
+				ScreenBuffer::SetPixel( { short(y), short(z) }, ScreenBuffer::GetPixelColourMap().ConvertColour( Colour( x, y * 2, z * 2 ) ) );
+			}
+		}
+		ConsoleWindow::WriteBuffer();
 
-		
+		if ( x == 252 )
+		{
+			x = 0;
+		}
+	}*/
 
-		game.DrawBuffer();
-		game.UpdateTimer();
+	Rect rect1 = { { 1, 1 }, { 45, 20 } };
+	Rect rect2 = { { 5, 15 }, { 45, 100 } };
+	ScreenBuffer::BlendingEnabled = true;
+	float f = 0.0f;
+	while ( true )
+	{
+		f += 0.01f;
+		ScreenBuffer::SetBuffer( Colour::WHITE );
+		ScreenBuffer::SetRect( rect1, Colour::YELLOW );
+		ScreenBuffer::SetRect( rect2, Colour( Colour::DARK_BLUE, 32 ) );
+		Primitive::DrawLine( { 64, 64 }, { sin( f ) * 90 + 64, cos( f ) * 90 + 64 }, Colour( Colour::DARK_RED, 128 ) );
+		ConsoleWindow::WriteBuffer();
 	}
+	
+	return 0;
 }
