@@ -59,12 +59,6 @@ struct Circle
 	float radius;
 };
 
-struct Oval
-{
-	Vector2 position;
-	Vector2 size;
-};
-
 struct Triangle2D
 {
 	Vector2 position;

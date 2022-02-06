@@ -20,7 +20,7 @@ public:
 	tVector2 operator  +(const tVector2<T>& v2) const;
 	tVector2 operator  -(const tVector2<T>& v2) const;
 	tVector2 operator  *(float f)               const;
-	float    operator  *(const tVector2<T>& v3) const;
+	float    operator  *(const tVector2<T>& v2) const;
 
 	tVector2 operator +=(const tVector2<T>& v2);
 	tVector2 operator -=(const tVector2<T>& v2);
