@@ -137,4 +137,3 @@ struct Colour
 	static const Colour LIGHT_PINK;
 	static const Colour DARK_PINK;
 };
-

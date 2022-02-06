@@ -97,7 +97,7 @@ private:
         CONSOLE_SCREEN_BUFFER_INFOEX ScreenBufferInfo;
         ScreenBufferInfo.cbSize = sizeof( ScreenBufferInfo );
         GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-
+        
         for ( int i = 0; i < 16; ++i )
         {
             COLORREF& ColourRef = ScreenBufferInfo.ColorTable[ i ];
@@ -214,7 +214,7 @@ private:
         SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
         SetTitle( a_Title );
     }
-    public:
+
     static void WriteBuffer()
     {
         WriteConsoleOutput(
@@ -224,7 +224,7 @@ private:
             { 0, 0 },
             &s_WindowRegion );
     }
-    private:
+
     friend class CGE;
 
     static ConsoleHandle     s_ConsoleHandle;

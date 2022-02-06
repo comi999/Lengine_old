@@ -22,8 +22,31 @@ public:
     }
 
     // Begin ticking.
-    static bool Begin()
+    static bool Run()
     {
+        s_Running = true;
 
+        while ( s_Running )
+        {
+
+        }
     }
+
+    static bool Quit()
+    {
+        if ( !s_Running )
+        {
+            return false;
+        }
+
+        s_Running = false;
+        return true;
+    }
+
+    static bool IsRunning()
+    {
+        return s_Running;
+    }
+
+    static bool s_Running;
 };
