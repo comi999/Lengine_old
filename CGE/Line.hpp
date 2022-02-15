@@ -116,12 +116,12 @@ struct Line
 			}
 		};
 
-		float X0 = Start.i;
-		float X1 = End.i;
-		float Y0 = Start.j;
-		float Y1 = End.j;
+		float X0 = Start.x;
+		float X1 = End.x;
+		float Y0 = Start.y;
+		float Y1 = End.y;
 
-		CohenSutherlandLineClipAndDraw( Start.i, Start.j, End.i, End.j );
+		CohenSutherlandLineClipAndDraw( Start.x, Start.y, End.x, End.y );
 		return true;
 	}
 };

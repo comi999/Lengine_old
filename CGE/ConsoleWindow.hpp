@@ -21,7 +21,7 @@ public:
         SetConsoleTitle( s_Title );
     }
 
-    static inline tVector2< int > GetWindowSize()
+    static inline Vector2Int GetWindowSize()
     {
         return ScreenBuffer::GetBufferSize();
     }
@@ -41,19 +41,19 @@ public:
         return ScreenBuffer::GetBufferHeight();
     }
 
-    static inline tVector2< short > GetPixelSize()
+    static inline Vector< short, 2 > GetPixelSize()
     {
         return s_PixelSize;
     }
 
     static inline short GetPixelWidth()
     {
-        return s_PixelSize.i;
+        return s_PixelSize.x;
     }
 
     static inline short GetPixelHeight()
     {
-        return s_PixelSize.j;
+        return s_PixelSize.y;
     }
 
     static inline ConsoleHandle GetConsoleHandle()
@@ -68,7 +68,7 @@ public:
 
 private:
 
-    static bool Initialize( const char* a_Title, tVector2< short > a_WindowSize, tVector2< short > a_PixelSize )
+    static bool Initialize( const char* a_Title, Vector< short, 2 > a_WindowSize, Vector< short, 2 > a_PixelSize )
     {
         // If cannot create console window, return false.
         if ( !AllocConsole() )
@@ -81,12 +81,12 @@ private:
         s_WindowHandle = GetConsoleWindow();
 
         // Set console font.
-        a_PixelSize.i = a_PixelSize.i > 8 ? a_PixelSize.i : 8;
-        a_PixelSize.j = a_PixelSize.j > 8 ? a_PixelSize.j : 8;
+        a_PixelSize.x = a_PixelSize.x > 8 ? a_PixelSize.x : 8;
+        a_PixelSize.y = a_PixelSize.y > 8 ? a_PixelSize.y : 8;
         CONSOLE_FONT_INFOEX FontInfo;
         FontInfo.cbSize = sizeof( FontInfo );
         FontInfo.nFont = 0;
-        FontInfo.dwFontSize = { a_PixelSize.i, a_PixelSize.j };
+        FontInfo.dwFontSize = { a_PixelSize.x, a_PixelSize.y };
         FontInfo.FontFamily = FF_DONTCARE;
         FontInfo.FontWeight = FW_NORMAL;
         wcscpy_s( FontInfo.FaceName, L"Terminal" );
@@ -114,8 +114,8 @@ private:
         COORD LargestWindow = GetLargestConsoleWindowSize( s_ConsoleHandle );
 
         // If smaller than requested size, exit.
-        if ( LargestWindow.X < a_WindowSize.i ||
-            LargestWindow.Y < a_WindowSize.j )
+        if ( LargestWindow.X < a_WindowSize.x ||
+            LargestWindow.Y < a_WindowSize.y )
         {
             return false;
         }
@@ -131,10 +131,10 @@ private:
         s_WindowRegion.Bottom = WindowSize.Y - 1;
 
         // Set console attributes.
-        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.i, a_WindowSize.j } );
+        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.x, a_WindowSize.y } );
         SetConsoleWindowInfo( s_ConsoleHandle, true, &s_WindowRegion );
         GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.i, a_WindowSize.j } );
+        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.x, a_WindowSize.y } );
 
         // Set cursor attributes.
         CONSOLE_CURSOR_INFO CursorInfo;
@@ -148,7 +148,7 @@ private:
         SetTitle( a_Title );
     }
 
-    static bool Initialize( const char* a_Title, tVector2< short > a_PixelSize )
+    static bool Initialize( const char* a_Title, Vector< short, 2 > a_PixelSize )
     {
         // If cannot create console window, return false.
         if ( !AllocConsole() )
@@ -161,12 +161,12 @@ private:
         s_WindowHandle = GetConsoleWindow();
 
         // Set console font.
-        a_PixelSize.i = a_PixelSize.i > 8 ? a_PixelSize.i : 8;
-        a_PixelSize.j = a_PixelSize.j > 8 ? a_PixelSize.j : 8;
+        a_PixelSize.x = a_PixelSize.x > 8 ? a_PixelSize.x : 8;
+        a_PixelSize.y = a_PixelSize.y > 8 ? a_PixelSize.y : 8;
         CONSOLE_FONT_INFOEX FontInfo;
         FontInfo.cbSize = sizeof( FontInfo );
         FontInfo.nFont = 0;
-        FontInfo.dwFontSize = { a_PixelSize.i, a_PixelSize.j };
+        FontInfo.dwFontSize = { a_PixelSize.x, a_PixelSize.y };
         FontInfo.FontFamily = FF_DONTCARE;
         FontInfo.FontWeight = FW_NORMAL;
         wcscpy_s( FontInfo.FaceName, L"Terminal" );
@@ -230,6 +230,6 @@ private:
     static ConsoleHandle     s_ConsoleHandle;
     static WindowHandle      s_WindowHandle;
     static WindowRegion      s_WindowRegion;
-    static tVector2< short > s_PixelSize;
+    static Vector< short, 2 > s_PixelSize;
     static wchar_t           s_Title[ 64 ];
 };

@@ -175,8 +175,8 @@
     <ClInclude Include="entt\entt.hpp" />
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="Line.hpp" />
+    <ClInclude Include="Math.hpp" />
     <ClInclude Include="PixelColourMap.hpp" />
-    <ClInclude Include="Math.h" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />

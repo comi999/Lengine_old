@@ -18,29 +18,29 @@ public:
         return s_ColourBuffer;
     }
 
-    static inline tVector2< short > GetBufferSize()
+    static inline Vector< short, 2 > GetBufferSize()
     {
         return s_Size;
     }
 
     static inline short GetBufferArea()
     {
-        return s_Size.i * s_Size.j;
+        return s_Size.x * s_Size.y;
     }
 
     static inline short GetBufferWidth()
     {
-        return s_Size.i;
+        return s_Size.x;
     }
 
     static inline short GetBufferHeight()
     {
-        return s_Size.j;
+        return s_Size.y;
     }
 
     static inline Rect GetBufferRect()
     {
-        return { { 0, 0 }, { s_Size.i, s_Size.j } };
+        return { { 0, 0 }, { s_Size.x, s_Size.y } };
     }
 
     static PixelColourMap& GetPixelColourMap()
@@ -48,9 +48,9 @@ public:
         return s_PixelColourMap;
     }
 
-    static void SetPixel( tVector2< short > a_Coord, Pixel a_Pixel )
+    static void SetPixel( Vector< short, 2 > a_Coord, Pixel a_Pixel )
     {
-        s_PixelBuffer[ a_Coord.j * s_Size.i + a_Coord.i ] = a_Pixel;
+        s_PixelBuffer[ a_Coord.y * s_Size.x + a_Coord.x ] = a_Pixel;
     }
 
     static void SetPixels( int a_Index, Pixel a_Pixel, short a_Count )
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    static void SetPixels( tVector2< short > a_Coord, Pixel a_Pixel, short a_Count )
+    static void SetPixels( Vector< short, 2 > a_Coord, Pixel a_Pixel, short a_Count )
     {
         Pixel* PixelBegin = s_PixelBuffer + GetIndex( a_Coord );
         for ( ; a_Count > 0; --a_Count )
@@ -73,7 +73,7 @@ public:
         }
     }
 
-    static void SetColour( tVector2< short > a_Coord, Colour a_Colour )
+    static void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
     {
         int Index = GetIndex( a_Coord );
 
@@ -90,7 +90,7 @@ public:
         }
     }
 
-    static void SetColours( tVector2< short > a_Coord, Colour a_Colour, short a_Count )
+    static void SetColours( Vector< short, 2 > a_Coord, Colour a_Colour, short a_Count )
     {
         int Index = GetIndex( a_Coord );
         Pixel PixelToSet = s_PixelColourMap.ConvertColour( a_Colour );
@@ -160,52 +160,52 @@ public:
     static void SetRect( const Rect& a_Rect, Pixel a_Pixel )
     {
         int Index = GetIndex( {
-            static_cast< short >( a_Rect.Origin.i ),
-            static_cast< short >( a_Rect.Origin.j ) } );
+            static_cast< short >( a_Rect.Origin.x ),
+            static_cast< short >( a_Rect.Origin.y ) } );
 
-        for ( int y = 0; y < a_Rect.Size.j; ++y )
+        for ( int y = 0; y < a_Rect.Size.y; ++y )
         {
-            SetPixels( Index, a_Pixel, a_Rect.Size.i );
-            Index += s_Size.i;
+            SetPixels( Index, a_Pixel, a_Rect.Size.x );
+            Index += s_Size.x;
         }
     }
 
     static void SetRect( const Rect& a_Rect, Colour a_Colour )
     {
         int Index = GetIndex( {
-            static_cast< short >( a_Rect.Origin.i ),
-            static_cast< short >( a_Rect.Origin.j ) } );
+            static_cast< short >( a_Rect.Origin.x ),
+            static_cast< short >( a_Rect.Origin.y ) } );
 
-        for ( int y = 0; y < a_Rect.Size.j; ++y )
+        for ( int y = 0; y < a_Rect.Size.y; ++y )
         {
-            SetColours( Index, a_Colour, a_Rect.Size.i );
-            Index += s_Size.i;
+            SetColours( Index, a_Colour, a_Rect.Size.x );
+            Index += s_Size.x;
         }
     }
 
-    static inline tVector2< short > GetCoordinate( int a_Index )
+    static inline Vector< short, 2 > GetCoordinate( int a_Index )
     {
-        tVector2< short > Coordinate = { 0, static_cast< short >( a_Index ) / s_Size.i };
-        Coordinate.i = a_Index - Coordinate.j * s_Size.i;
+        Vector< short, 2 > Coordinate = { 0, static_cast< short >( a_Index ) / s_Size.x };
+        Coordinate.x = a_Index - Coordinate.y * s_Size.y;
         return Coordinate;
     }
 
-    static inline int GetIndex( tVector2< short > a_Coord )
+    static inline int GetIndex( Vector< short, 2 > a_Coord )
     {
-        return a_Coord.j * s_Size.i + a_Coord.i;
+        return a_Coord.y * s_Size.x + a_Coord.x;
     }
 
 private:
 
-    static bool Initialize( tVector2< short > a_BufferSize )
+    static bool Initialize( Vector< short, 2 > a_BufferSize )
     {
         if ( !s_PixelColourMap.Initialize() )
         {
             return false;
         }
 
-        s_PixelBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.i ) * a_BufferSize.j ];
-        s_ColourBuffer = new Colour[ static_cast< size_t >( a_BufferSize.i ) * a_BufferSize.j ];
+        s_PixelBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
+        s_ColourBuffer = new Colour[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
         s_Size = a_BufferSize;
     }
 
@@ -213,7 +213,7 @@ private:
 
     static Pixel*            s_PixelBuffer;
     static Colour*           s_ColourBuffer;
-    static tVector2< short > s_Size;
+    static Vector< short, 2 > s_Size;
     static PixelColourMap    s_PixelColourMap;
 
 public:

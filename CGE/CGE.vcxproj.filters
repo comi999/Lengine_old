@@ -49,14 +49,14 @@
     <ClInclude Include="Colour.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="entt\entt.hpp">
       <Filter>Entt</Filter>
     </ClInclude>
     <ClInclude Include="entt\fwd.hpp">
       <Filter>Entt</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,11 +2,20 @@
 #include "Primitive.hpp"
 #include "entt/entt.hpp"
 
-using namespace std;
+//using namespace std;
+
+
 
 int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
+
+	
+
+	while ( true )
+	{
+
+	}
 	
 	/*for ( int x = 0; x < 256; x += 1 )
 	{

@@ -1,28 +1,28 @@
 #pragma once
-#include "Math.h"
+#include "Math.hpp"
 
 struct Rect
 {
-	tVector2< int > Origin;
-	tVector2< int > Size;
+	Vector2Int Origin;
+	Vector2Int Size;
 
 	inline int GetLeft() const
 	{
-		return Origin.i;
+		return Origin.x;
 	}
 
 	inline int GetRight() const
 	{
-		return Origin.i + Size.i - 1;
+		return Origin.x + Size.x - 1;
 	}
 
 	inline int GetBottom() const
 	{
-		return Origin.j + Size.j - 1;
+		return Origin.y + Size.y - 1;
 	}
 
 	inline int GetTop() const
 	{
-		return Origin.j;
+		return Origin.y;
 	}
 };

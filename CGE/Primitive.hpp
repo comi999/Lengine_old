@@ -16,30 +16,30 @@ public:
 
 	static inline void DrawPoint( Vector2 a_Position, Colour a_Colour )
 	{
-		ScreenBuffer::SetColour( { ScreenBuffer::GetBufferHeight() - static_cast< short >( a_Position.j ) - 1, static_cast< short >( a_Position.i ) }, a_Colour );
+		ScreenBuffer::SetColour( Vector< short, 2 >( static_cast< short >( ScreenBuffer::GetBufferHeight() - a_Position.y - 1 ), static_cast< short >( a_Position.x ) ), a_Colour );
 	}
 
 	static inline void DrawPoint( const Point& a_Point )
 	{
-		ScreenBuffer::SetColour( { ScreenBuffer::GetBufferHeight() - static_cast< short >( a_Point.Position.j ) - 1, static_cast< short >( a_Point.Position.i ) }, a_Point.Colour );
+		ScreenBuffer::SetColour( Vector< short, 2 >( static_cast< short >( ScreenBuffer::GetBufferHeight() - a_Point.Position.y - 1 ), static_cast< short >( a_Point.Position.x ) ), a_Point.Colour );
 	}
 
 	static void DrawLine( Vector2 a_Start, Vector2 a_End, Colour a_Colour )
 	{
 		Line Segment = { a_Start, a_End };
 		Segment.RectClamp( ScreenBuffer::GetBufferRect() );
-		tVector2< short > Start = { static_cast< short >( Segment.Start.i ), static_cast< short >( Segment.Start.j ) };
-		tVector2< short > End = { static_cast< short >( Segment.End.i ), static_cast< short >( Segment.End.j ) };
+		Vector< short, 2 > Start = { static_cast< short >( Segment.Start.x ), static_cast< short >( Segment.Start.y ) };
+		Vector< short, 2 > End = { static_cast< short >( Segment.End.x ), static_cast< short >( Segment.End.y ) };
 
 		// Invert Y.
 		short MaxY = ScreenBuffer::GetBufferHeight() - 1;
-		Start.j = MaxY - Start.j;
-		End.j = MaxY - End.j;
+		Start.y = MaxY - Start.y;
+		End.y = MaxY - End.y;
 
-		short DX = abs( End.i - Start.i );
-		short DY = -abs( End.j - Start.j );
-		short SX = Start.i < End.i ? 1 : -1;
-		short SY = Start.j < End.j ? 1 : -1;
+		short DX = abs( End.x - Start.x );
+		short DY = -abs( End.y - Start.y );
+		short SX = Start.x < End.x ? 1 : -1;
+		short SY = Start.y < End.y ? 1 : -1;
 		short ER = DX + DY;
 
 		if ( ScreenBuffer::BlendingEnabled )
@@ -48,7 +48,7 @@ public:
 			{
 				ScreenBuffer::SetColour( Start, a_Colour );
 
-				if ( Start.i == End.i && Start.j == End.j )
+				if ( Start.x == End.x && Start.y == End.y )
 				{
 					break;
 				}
@@ -57,24 +57,24 @@ public:
 
 				if ( ER2 >= DY )
 				{
-					if ( Start.i == End.i )
+					if ( Start.x == End.x )
 					{
 						break;
 					}
 
 					ER += DY;
-					Start.i += SX;
+					Start.x += SX;
 				}
 
 				if ( ER2 <= DX )
 				{
-					if ( Start.j == End.j )
+					if ( Start.y == End.y )
 					{
 						break;
 					}
 
 					ER += DX;
-					Start.j += SY;
+					Start.y += SY;
 				}
 			}
 		}
@@ -86,7 +86,7 @@ public:
 			{
 				ScreenBuffer::SetPixel( Start, PixelToSet );
 
-				if ( Start.i == End.i && Start.j == End.j )
+				if ( Start.x == End.x && Start.y == End.y )
 				{
 					break;
 				}
@@ -95,24 +95,24 @@ public:
 
 				if ( ER2 >= DY )
 				{
-					if ( Start.i == End.i )
+					if ( Start.x == End.x )
 					{
 						break;
 					}
 
 					ER += DY;
-					Start.i += SX;
+					Start.x += SX;
 				}
 
 				if ( ER2 <= DX )
 				{
-					if ( Start.j == End.j )
+					if ( Start.y == End.y )
 					{
 						break;
 					}
 
 					ER += DX;
-					Start.j += SY;
+					Start.y += SY;
 				}
 			}
 		}
@@ -121,18 +121,18 @@ public:
 	static void DrawLine( Line a_Line, Colour a_Colour )
 	{
 		a_Line.RectClamp( ScreenBuffer::GetBufferRect() );
-		tVector2< short > Start = { static_cast< short >( a_Line.Start.i ), static_cast< short >( a_Line.Start.j ) };
-		tVector2< short > End = { static_cast< short >( a_Line.End.i ), static_cast< short >( a_Line.End.j ) };
+		Vector< short, 2 > Start( static_cast< short >( a_Line.Start.x ), static_cast< short >( a_Line.Start.y ) );
+		Vector< short, 2 > End( static_cast< short >( a_Line.End.x ), static_cast< short >( a_Line.End.y ) );
 
 		// Invert Y.
 		short MaxY = ScreenBuffer::GetBufferHeight() - 1;
-		Start.j = MaxY - Start.j;
-		End.j   = MaxY - End.j;
+		Start.y = MaxY - Start.y;
+		End.y   = MaxY - End.y;
 
-		short DX =  abs( End.i - Start.i );
-		short DY = -abs( End.j - Start.j );
-		short SX = Start.i < End.i ? 1 : -1;
-		short SY = Start.j < End.j ? 1 : -1;
+		short DX =  abs( End.x - Start.x );
+		short DY = -abs( End.y - Start.y );
+		short SX = Start.x < End.x ? 1 : -1;
+		short SY = Start.y < End.y ? 1 : -1;
 		short ER = DX + DY;
 
 		if ( ScreenBuffer::BlendingEnabled )
@@ -141,7 +141,7 @@ public:
 			{
 				ScreenBuffer::SetColour( Start, a_Colour );
 
-				if ( Start.i == End.i && Start.j == End.j )
+				if ( Start.x == End.x && Start.y == End.y )
 				{
 					break;
 				}
@@ -150,24 +150,24 @@ public:
 
 				if ( ER2 >= DY )
 				{
-					if ( Start.i == End.i )
+					if ( Start.x == End.x )
 					{
 						break;
 					}
 
 					ER += DY;
-					Start.i += SX;
+					Start.x += SX;
 				}
 
 				if ( ER2 <= DX )
 				{
-					if ( Start.j == End.j )
+					if ( Start.y == End.y )
 					{
 						break;
 					}
 
 					ER += DX;
-					Start.j += SY;
+					Start.y += SY;
 				}
 			}
 		}
@@ -179,7 +179,7 @@ public:
 			{
 				ScreenBuffer::SetPixel( Start, PixelToSet );
 
-				if ( Start.i == End.i && Start.j == End.j )
+				if ( Start.x == End.x && Start.y == End.y )
 				{
 					break;
 				}
@@ -188,24 +188,24 @@ public:
 
 				if ( ER2 >= DY )
 				{
-					if ( Start.i == End.i )
+					if ( Start.x == End.x )
 					{
 						break;
 					}
 
 					ER += DY;
-					Start.i += SX;
+					Start.x += SX;
 				}
 
 				if ( ER2 <= DX )
 				{
-					if ( Start.j == End.j )
+					if ( Start.y == End.y )
 					{
 						break;
 					}
 
 					ER += DX;
-					Start.j += SY;
+					Start.y += SY;
 				}
 			}
 		}

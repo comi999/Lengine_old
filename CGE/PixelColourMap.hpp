@@ -2,9 +2,7 @@
 #include <fstream>
 #include "Colour.h"
 #include "Pixel.hpp"
-#include "Math.h"
-
-using namespace std;
+#include "Math.hpp"
 
 class PixelColourMap
 {
@@ -85,17 +83,17 @@ public:
 			{
 				for ( int R = 0; R < 256; ++R )
 				{
-					tVector3< int > DiffVector;
+					Vector3Int DiffVector;
 					int MinDistSqrd = 16777216;
 					Pixel& Current = m_PixelMap[ Convert( Colour( R, G, B ) ) ];
 					Pixel Closest;
 
 					for ( Colour Seed : SeedColours )
 					{
-						DiffVector.i = R - Seed.R;
-						DiffVector.j = G - Seed.G;
-						DiffVector.k = B - Seed.B;
-						int DistSqrd = DiffVector * DiffVector;
+						DiffVector.x = R - Seed.R;
+						DiffVector.y = G - Seed.G;
+						DiffVector.z = B - Seed.B;
+						int DistSqrd = Math::LengthSqrd( DiffVector );
 
 						if ( DistSqrd == 0 )
 						{
@@ -124,8 +122,8 @@ public:
 
 	bool Load()
 	{
-		fstream File;
-		File.open( "colours.map", ios::binary | ios::in );
+		std::fstream File;
+		File.open( "colours.map", std::ios::binary | std::ios::in );
 
 		if ( !File.is_open() )
 		{
@@ -139,8 +137,8 @@ public:
 
 	bool Save()
 	{
-		fstream File;
-		File.open( "colours.map", ios::binary | ios::out );
+		std::fstream File;
+		File.open( "colours.map", std::ios::binary | std::ios::out );
 
 		if ( !File.is_open() )
 		{
