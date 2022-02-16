@@ -23,17 +23,20 @@ int main()
 	Cube cube;
 	Vector3 CubePosition = Vector3::Zero;
 	Vector3 CubeRotation = Vector3::Zero;
+	Vector3 CubeScale = Vector3::One * 1.f;
 	
+	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
+	Vector3 CameraRotation = Vector3( Math::Radians( -45.0f ), 0.0f, 0.0f );
+
 	
-	Vector3 CameraPosition  = Vector3( 0.0f, 0.0f, -10.0f );
-	Vector3 CameraRotation  = Vector3::Zero;
-	auto ViewMatrix = Math::Inverse( Matrix4::CreateTransform( CameraPosition, CameraRotation, Vector3::One ) );
-	auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( 75.0f, 1.0f ) );
+	auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f ) );
 
 	auto drawCube = [&]()
 	{
-		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, Vector3::One * 1.f );
-		auto PVMMatrix = Math::Multiply( Math::Multiply( ProjectionMatrix, ViewMatrix ), CubeMatrix );
+		//auto ViewMatrix = Math::Inverse( Matrix4::CreateTransform( CameraPosition, CameraRotation, Vector3::One ) );
+		auto ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
+		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
+		auto PVMMatrix = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
 
 		Vector4 Verts[ 8 ];
 
@@ -41,10 +44,10 @@ int main()
 
 		for ( int i = 0; i < 8; ++i )
 		{
-			Verts[ i ] = Math::Multiply( PVMMatrix, cube.Corners[ i ] );
-			//Verts[ i ] /= Verts[ i ].w;
-			//Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-			//Verts[ i ] += Vector4( 64, 64, 0, 0 );
+			Verts[ i ] = Math::Multiply( cube.Corners[ i ], PVMMatrix );
+			Verts[ i ] /= Verts[ i ].w;
+			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
+			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
 
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::WHITE );
@@ -54,7 +57,7 @@ int main()
 		Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::WHITE );
 		Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::WHITE );
 		Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::WHITE );
+		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::WHITE );
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::WHITE );
 		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::WHITE );
 		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::WHITE );
@@ -63,11 +66,15 @@ int main()
 		ConsoleWindow::WriteBuffer();
 	};
 
-	
+	float X = 0.0f;
 
 	while ( true )
 	{
 		drawCube();
+		//CameraPosition.y = Math::Sin( X += 0.005f );
+		//CameraPosition.y = 1.0f;
+		//CameraPosition.x = Math::Sin( X += 0.005f );
+		//CameraPosition.z = Math::Cos( X );
 		CubeRotation.y += 0.01f;
 		CubeRotation.x += 0.01f;
 	}

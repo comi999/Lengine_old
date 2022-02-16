@@ -50,6 +50,16 @@ public:
 
     static void SetPixel( Vector< short, 2 > a_Coord, Pixel a_Pixel )
     {
+        if ( a_Coord.x < 0 || a_Coord.x >= GetBufferWidth() )
+        {
+            return;
+        }
+
+        if ( a_Coord.y < 0 || a_Coord.y >= GetBufferHeight() )
+        {
+            return;
+        }
+
         s_PixelBuffer[ a_Coord.y * s_Size.x + a_Coord.x ] = a_Pixel;
     }
 

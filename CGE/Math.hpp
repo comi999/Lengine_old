@@ -575,6 +575,19 @@ public:
 		return Result;
 	}
 
+	template < typename T1, typename T2, size_t M, size_t N >
+	static Vector< T1, N > Multiply( const Vector< T1, M >& a_Vector, const Matrix< T2, M, N >& a_Matrix )
+	{
+		Vector< T1, N > Result;
+
+		for ( size_t n = 0; n < N; ++n )
+		{
+			Result[ n ] = Manhatten( a_Matrix.GetCol( n ) * a_Vector );
+		}
+
+		return Result;
+	}
+
 	template < typename T1, typename T2, size_t M, size_t N0, size_t N1 >
 	static Matrix< T1, N0, N1 > Multiply( const Matrix< T1, M, N0 >& a_MatrixA, const Matrix< T2, N0, N1 >& a_MatrixB )
 	{
@@ -910,6 +923,12 @@ Vector< T, S > operator+( const IVector< T, S, I0 >& a_VectorA, const IVector< U
 	return Result;
 }
 
+template < typename T, size_t S, size_t I >
+Vector< T, S > operator+( const IVector< T, S, I >& a_Vector )
+{
+	return reinterpret_cast< const Vector< T, S >& >( a_Vector );
+}
+
 template < typename T, typename U, size_t S, size_t I0, size_t I1 >
 Vector< T, S >& operator+=( IVector< T, S, I0 >& a_VectorA, const IVector< U, S, I1 >& a_VectorB )
 {
@@ -929,6 +948,19 @@ Vector< T, S > operator-( const IVector< T, S, I0 >& a_VectorA, const IVector< U
 	for ( size_t i = 0; i < S; ++i )
 	{
 		Result[ i ] = a_VectorA[ i ] - static_cast< T >( a_VectorB[ i ] );
+	}
+
+	return Result;
+}
+
+template < typename T, size_t S, size_t I >
+Vector< T, S > operator-( const IVector< T, S, I >& a_Vector )
+{
+	Vector< T, S > Result;
+	
+	for ( size_t i = 0; i < S; ++i )
+	{
+		Result[ i ] = -a_Vector[ i ];
 	}
 
 	return Result;
@@ -1862,6 +1894,12 @@ Matrix< T, M, N > operator+( const IMatrix< T, M, N >& a_MatrixA, const IMatrix<
 	return Result;
 }
 
+template < typename T, size_t M, size_t N >
+Matrix< T, M, N > operator+( const IMatrix< T, M, N >& a_Matrix )
+{
+	return reinterpret_cast< const Matrix< T, M, N >& >( a_Matrix );
+}
+
 template < typename T, typename U, size_t M, size_t N >
 Matrix< T, M, N >& operator+=( IMatrix< T, M, N >& a_MatrixA, const IMatrix< U, M, N >& a_MatrixB )
 {
@@ -1881,6 +1919,19 @@ Matrix< T, M, N > operator-( const IMatrix< T, M, N >& a_MatrixA, const IMatrix<
 	for ( int i = 0; i < M * N; ++i )
 	{
 		Result[ i ] = a_MatrixA[ i ] - static_cast< T >( a_MatrixB[ i ] );
+	}
+
+	return Result;
+}
+
+template < typename T, size_t M, size_t N >
+Matrix< T, M, N > operator-( const IMatrix< T, M, N >& a_Matrix )
+{
+	Matrix< T, M, N > Result;
+
+	for ( size_t i = 0; i < M * N; ++i )
+	{
+		Result[ i ] = -a_Matrix[ i ];
 	}
 
 	return Result;
@@ -2668,6 +2719,14 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ) );
 	}
 
+	template < typename U, typename V >
+	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Vector< V, 3 >& a_Rotation )
+	{
+		Matrix< T, 4 > Result = CreateTranslation( -a_Position );
+		Rotate( Result, -a_Rotation, RotationOrder::YXZ );
+		return Result;
+	}
+	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )
 	{
 		float HalfCot = 1.0f / Math::Tan( a_FOV * 0.5f );
