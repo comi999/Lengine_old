@@ -1,78 +1,70 @@
-﻿  CGE.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,28): error C2027: use of undefined type 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,1): error C3861: 'LengthSqrd': identifier not found
-  ConsoleWindow.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,28): error C2027: use of undefined type 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,1): error C3861: 'LengthSqrd': identifier not found
-  Main.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,28): error C2027: use of undefined type 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,1): error C3861: 'LengthSqrd': identifier not found
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  PixelColourMap.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,28): error C2027: use of undefined type 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,1): error C3861: 'LengthSqrd': identifier not found
-  Rect.hpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-  ScreenBuffer.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(1736,1): error C2011: 'Math': 'class' type redefinition
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,28): error C2027: use of undefined type 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(6): message : see declaration of 'Math'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\PixelColourMap.hpp(98,1): error C3861: 'LengthSqrd': identifier not found
-  Generating Code...
+﻿  Main.cpp
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(650,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2673): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
+          with
+          [
+              T=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2672): message : while compiling class template member function 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)'
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Main.cpp(31): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Main.cpp(30): message : see reference to class template instantiation 'Matrix<float,4,4>' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2552): message : see reference to function template instantiation 'T Math::Cos<U>(T)' being compiled
+          with
+          [
+              T=float,
+              U=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2454): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationZ<T>(U)' being compiled
+          with
+          [
+              T=float,
+              U=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2454): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationZ<T>(U)' being compiled
+          with
+          [
+              T=float,
+              U=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2577): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2577): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2632): message : see reference to function template instantiation 'void Matrix<float,4,4>::Rotate<float,float>(Matrix<float,4,4> &,const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2632): message : see reference to function template instantiation 'void Matrix<float,4,4>::Rotate<float,float>(Matrix<float,4,4> &,const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Main.cpp(30): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateTransform<float,float,float>(const Vector<float,3> &,const Vector<float,3> &,const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Main.cpp(35): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateTransform<float,float,float>(const Vector<float,3> &,const Vector<float,3> &,const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(605,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2553): message : see reference to function template instantiation 'T Math::Sin<U>(T)' being compiled
+          with
+          [
+              T=float,
+              U=float
+          ]
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ScreenBuffer.hpp(210): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
+C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2497): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
+  CGE.vcxproj -> C:\Users\l_farag\source\repos\Console-Game-Engine\x64\Debug\CGE.exe

@@ -214,7 +214,7 @@ private:
         SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
         SetTitle( a_Title );
     }
-
+    public:
     static void WriteBuffer()
     {
         WriteConsoleOutput(
@@ -224,7 +224,7 @@ private:
             { 0, 0 },
             &s_WindowRegion );
     }
-
+    private:
     friend class CGE;
 
     static ConsoleHandle     s_ConsoleHandle;

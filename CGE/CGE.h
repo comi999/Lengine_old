@@ -3,8 +3,6 @@
 #include <string>
 #include "ConsoleWindow.hpp"
 
-//using namespace std;
-
 class CGE
 {
 public:
