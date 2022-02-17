@@ -162,6 +162,7 @@
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />

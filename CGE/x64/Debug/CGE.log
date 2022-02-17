@@ -11,8 +11,6 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(83,11): warning C
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Input.hpp(2,1): warning C4005: '_WIN32_WINNT': macro redefinition
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\sdkddkver.h(218): message : see previous definition of '_WIN32_WINNT'
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
