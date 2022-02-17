@@ -6,7 +6,7 @@
 int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
-	Input::Initialize();
+	//Input::Initialize();
 
 	struct Cube
 	{
@@ -22,23 +22,33 @@ int main()
 		};
 	};
 
+	struct Plane
+	{
+
+	};
+
 	Cube cube;
 	Vector3 CubePosition = Vector3::Zero;
 	Vector3 CubeRotation = Vector3::Zero;
 	Vector3 CubeScale = Vector3::One * 1.f;
+
+
 	
 	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
 	Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
-	
-	auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f ) );
+	//auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f ) );
+	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f );
 
 	auto drawCube = [&]()
 	{
-		Input::Tick();
+		//Input::Tick();
 		auto ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
+		//auto ViewMatrix = Matrix4::CreateLookAt( CameraPosition, CubePosition, Vector3::Up );
+
 		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
 		auto PVMMatrix = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
+		//auto PVMMatrix = Math::Multiply( Math::Multiply( ViewMatrix, ProjectionMatrix ), CubeMatrix );
 
 		Vector4 Verts[ 8 ];
 
@@ -70,8 +80,6 @@ int main()
 
 	float X = 0.0f;
 
-	
-
 	while ( true )
 	{
 		drawCube();
@@ -80,44 +88,44 @@ int main()
 		//CameraPosition.x = Math::Sin( X += 0.005f );
 		//CameraPosition.z = Math::Cos( X );
 
-		// A
-		//if ( IsKeyDown( 0x41 ) )
-		//{
-		//	CameraPosition.x += 0.1f;
-		//}
+		// Left
+		if ( Input::IsKeyDown( KeyCode::A ) )
+		{
+			CameraPosition.x -= 0.1f;
+		}
 
-		//// D
-		//if ( IsKeyDown( 0x44 ) )
-		//{
-		//	CameraPosition.x -= 0.1f;
-		//}
+		// Right
+		if ( Input::IsKeyDown( KeyCode::D ) )
+		{
+			CameraPosition.x += 0.1f;
+		}
 
-		//// W
-		//if ( IsKeyDown( 0x57 ) )
-		//{
-		//	CameraPosition.z += 0.1f;
-		//}
+		// Forward
+		if ( Input::IsKeyDown( KeyCode::W ) )
+		{
+			CameraPosition.z += 0.1f;
+		}
 
-		//// S
-		//if ( IsKeyDown( 0x53 ) )
-		//{
-		//	CameraPosition.z -= 0.1f;
-		//}
+		// Back
+		if ( Input::IsKeyDown( KeyCode::S ) )
+		{
+			CameraPosition.z -= 0.1f;
+		}
 
-		//// E
-		//if ( IsKeyDown( 0x45 ) )
-		//{
-		//	CameraPosition.y += 0.1f;
-		//}
+		// Up
+		if ( Input::IsKeyDown( KeyCode::Plus ) )
+		{
+			CameraPosition.y += 0.1f;
+		}
 
-		//// Q
-		//if ( IsKeyDown( 0x51 ) )
-		//{
-		//	CameraPosition.y -= 0.1f;
-		//}
+		// Down
+		if ( Input::IsKeyDown( KeyCode::Minus ) )
+		{
+			CameraPosition.y -= 0.1f;
+		}
 
-		CubeRotation.y += 0.01f;
-		CubeRotation.x += 0.01f;
+		//CubeRotation.y += 0.01f;
+		//CubeRotation.x += 0.01f;
 	}
 	
 	/*for ( int x = 0; x < 256; x += 1 )

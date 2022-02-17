@@ -243,8 +243,8 @@ public:
 		return LengthSqrd( a_VectorB - a_VectorA );
 	}
 
-	template < typename T, size_t S >
-	static T Dot( const Vector< T, S >& a_VectorA, const Vector< T, S >& a_VectorB )
+	template < typename T, typename U, size_t S >
+	static T Dot( const Vector< T, S >& a_VectorA, const Vector< U, S >& a_VectorB )
 	{
 		Vector< T, S > Multiplied = a_VectorA * a_VectorB;
 		return Manhatten( Multiplied );
@@ -1025,7 +1025,7 @@ Vector< T, S >& operator*=( IVector< T, S, I >& a_Vector, U a_Scalar )
 	return reinterpret_cast< Vector< T, S >& >( a_Vector );
 }
 
-template < typename T, typename U, size_t S, size_t I >
+template < typename T, typename U, size_t S, size_t I, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 Vector< T, S > operator*( T a_Scalar, const IVector< U, S, I >& a_Vector )
 {
 	Vector< T, S > Result;
@@ -1038,7 +1038,7 @@ Vector< T, S > operator*( T a_Scalar, const IVector< U, S, I >& a_Vector )
 	return Result;
 }
 
-template < typename T, typename U, size_t S, size_t I, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t S, size_t I, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Vector< T, S > operator/( const IVector< T, S, I >& a_Vector, U a_Scalar )
 {
 	Vector< T, S > Result;
@@ -1052,7 +1052,7 @@ Vector< T, S > operator/( const IVector< T, S, I >& a_Vector, U a_Scalar )
 	return Result;
 }
 
-template < typename T, typename U, size_t S, size_t I, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t S, size_t I, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Vector< T, S >& operator/=( IVector< T, S, I >& a_Vector, U a_Scalar )
 {
 	float Scalar = 1.0f / a_Scalar;
@@ -1072,7 +1072,7 @@ struct Vector : public IVector< T, S >
 
 	Vector() = default;
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < S; ++i )
@@ -1081,7 +1081,7 @@ struct Vector : public IVector< T, S >
 		}
 	}
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Vector( std::initializer_list< U >&& a_InitializerList )
 	{
 		size_t Size = S < a_InitializerList.size() ? S : a_InitializerList.size();
@@ -1191,7 +1191,7 @@ struct Vector< T, 2 > : public IVector< T, 2 >
 
 	Vector() = default;
 
-	template < typename U, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 2; ++i )
@@ -1206,11 +1206,22 @@ struct Vector< T, 2 > : public IVector< T, 2 >
 		, y( static_cast< T >( a_Y ) )
 	{ }
 
-	template < typename U, size_t S >
-	Vector( const Vector< U, S >& a_Vector )
-		: x( static_cast< T >( a_Vector.x ) )
-		, y( static_cast< T >( a_Vector.y ) )
-	{ }
+	template < typename U, size_t S, size_t I >
+	Vector( const IVector< U, S, I >& a_Vector )
+	{
+		size_t Size = S < 2 ? S : 2;
+		size_t i = 0;
+
+		for ( ; i < Size; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		for ( ; i < 2; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( 0 );
+		}
+	}
 
 	static const Vector< T, 2 > Zero;
 	static const Vector< T, 2 > One;
@@ -1278,7 +1289,7 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 
 	Vector() = default;
 
-	template < typename U, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 3; ++i )
@@ -1294,12 +1305,22 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 		, z( static_cast< T >( a_Z ) )
 	{ }
 
-	template < typename U, size_t S >
-	Vector( const Vector< U, S >& a_Vector )
-		: x( static_cast< T >( a_Vector.x ) )
-		, y( static_cast< T >( a_Vector.y ) )
-		, z( static_cast< T >( a_Vector.z ) )
-	{ }
+	template < typename U, size_t S, size_t I >
+	Vector( const IVector< U, S, I >& a_Vector )
+	{
+		size_t Size = S < 3 ? S : 3;
+		size_t i = 0;
+
+		for ( ; i < Size; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		for ( ; i < 3; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( 0 );
+		}
+	}
 
 	static const Vector< T, 3 > Zero;
 	static const Vector< T, 3 > One;
@@ -1672,7 +1693,7 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 
 	Vector() = default;
 
-	template < typename U, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 4; ++i )
@@ -1689,13 +1710,22 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 		, w( static_cast< T >( a_W ) )
 	{ }
 
-	template < typename U, size_t S >
-	Vector( const Vector< U, S >& a_Vector )
-		: x( static_cast< T >( a_Vector.x ) )
-		, y( static_cast< T >( a_Vector.y ) )
-		, z( static_cast< T >( a_Vector.z ) )
-		, w( static_cast< T >( a_Vector.w ) )
-	{ }
+	template < typename U, size_t S, size_t I >
+	Vector( const IVector< U, S, I >& a_Vector )
+	{
+		size_t Size = S < 4 ? S : 4;
+		size_t i = 0;
+
+		for ( ; i < Size; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		for ( ; i < 4; ++i )
+		{
+			this->operator[]( i ) = static_cast< T >( 0 );
+		}
+	}
 
 	inline Vector< T, 2 > ToVector2() const
 	{
@@ -1972,7 +2002,7 @@ Matrix< T, M, N >& operator*=( IMatrix< T, M, N >& a_MatrixA, const IMatrix< U, 
 	return reinterpret_cast< Matrix< T, M, N >& >( a_MatrixA );
 }
 
-template < typename T, typename U, size_t M, size_t N, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t M, size_t N, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Matrix< T, M, N > operator*( const IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 {
 	Matrix< T, M, N > Result;
@@ -1985,7 +2015,7 @@ Matrix< T, M, N > operator*( const IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 	return Result;
 }
 
-template < typename T, typename U, size_t M, size_t N, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t M, size_t N, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Matrix< T, M, N > operator*( T a_Scalar, const IMatrix< U, M, N >& a_Matrix )
 {
 	Matrix< T, M, N > Result;
@@ -1998,7 +2028,7 @@ Matrix< T, M, N > operator*( T a_Scalar, const IMatrix< U, M, N >& a_Matrix )
 	return Result;
 }
 
-template < typename T, typename U, size_t M, size_t N, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t M, size_t N, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Matrix< T, M, N >& operator*=( IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 {
 	for ( size_t i = 0; i < M * N; ++i )
@@ -2009,7 +2039,7 @@ Matrix< T, M, N >& operator*=( IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 	return reinterpret_cast< Matrix< T, M, N >& >( a_Matrix );
 }
 
-template < typename T, typename U, size_t M, size_t N,typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t M, size_t N,typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Matrix< T, M, N > operator/( const IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 {
 	Matrix< T, M, N > Result;
@@ -2023,7 +2053,7 @@ Matrix< T, M, N > operator/( const IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 	return Result;
 }
 
-template < typename T, typename U, size_t M, size_t N, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+template < typename T, typename U, size_t M, size_t N, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 Matrix< T, M, N >& operator/=( IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 {
 	float Scalar = 1.0f / a_Scalar;
@@ -2047,7 +2077,7 @@ struct Matrix : public IMatrix< T, M, N >
 	
 	Matrix() = default;
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( U a_Scalar )
 	{
 		for ( size_t i = 0; i < M * N; ++i )
@@ -2056,7 +2086,7 @@ struct Matrix : public IMatrix< T, M, N >
 		}
 	}
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
 	{
 		size_t Size = M * N < a_InitializerList.size() ? M * N : a_InitializerList.size();
@@ -2123,7 +2153,7 @@ struct Matrix< T, 2 > : IMatrix< T, 2 >
 
 	Matrix() = default;
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 4; ++i )
@@ -2140,7 +2170,7 @@ struct Matrix< T, 2 > : IMatrix< T, 2 >
 		, y1( static_cast< T >( a_Y1 ) )
 	{ }
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U > && a_InitializerList )
 	{
 		size_t Size = 4 < a_InitializerList.size() ? 4 : a_InitializerList.size();
@@ -2221,7 +2251,7 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 
 	Matrix() = default;
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 9; ++i )
@@ -2243,7 +2273,7 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 		, z2( static_cast< T >( a_Z2 ) )
 	{ }
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
 	{
 		size_t Size = 9 < a_InitializerList.size() ? 9 : a_InitializerList.size();
@@ -2424,7 +2454,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 
 	Matrix() = default;
 
-	template < typename U, typename = typename std::enable_if_t< std::is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 16; ++i )
@@ -2453,7 +2483,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		, w3( static_cast< T >( a_W3 ) )
 	{ }
 
-	template < typename U, typename = typename enable_if_t< is_arithmetic_v< U > > >
+	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
 	{
 		size_t Size = 16 < a_InitializerList.size() ? 16 : a_InitializerList.size();
@@ -2700,22 +2730,22 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		auto Right = Math::Cross( a_Up, Forward );
 		auto Up = Math::Cross( Forward, Right );
 
-		return Matrix< T, 4 >( 
-			static_cast< T >( Right.x ), 
-			static_cast< T >( Right.y ),
-			static_cast< T >( Right.z ), 
-			static_cast< T >( 0 ),
+		return Matrix< T, 4 >(
+			static_cast< T >( Right.x ),
 			static_cast< T >( Up.x ),
-			static_cast< T >( Up.y ),
-			static_cast< T >( Up.z ),
-			static_cast< T >( 0 ),
 			static_cast< T >( Forward.x ),
+			static_cast< T >( 0 ),
+			static_cast< T >( Right.y ),
+			static_cast< T >( Up.y ),
 			static_cast< T >( Forward.y ),
+			static_cast< T >( 0 ),
+			static_cast< T >( Right.z ),
+			static_cast< T >( Up.z ),
 			static_cast< T >( Forward.z ),
 			static_cast< T >( 0 ),
-			static_cast< T >( a_Centre.x ),
-			static_cast< T >( a_Centre.y ),
-			static_cast< T >( a_Centre.z ),
+			static_cast< T >( Math::Dot( Right, a_Eye ) ),
+			static_cast< T >( Math::Dot( Up, a_Eye ) ),
+			static_cast< T >( Math::Dot( Forward, a_Eye ) ),
 			static_cast< T >( 1 ) );
 	}
 
