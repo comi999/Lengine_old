@@ -1,6 +1,8 @@
 #include "CGE.h"
 #include "Primitive.hpp"
 #include "entt/entt.hpp"
+#include "Input.hpp"
+
 
 int main()
 {
@@ -26,14 +28,14 @@ int main()
 	Vector3 CubeScale = Vector3::One * 1.f;
 	
 	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
-	Vector3 CameraRotation = Vector3( Math::Radians( -45.0f ), 0.0f, 0.0f );
+	Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
 	
 	auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f ) );
 
 	auto drawCube = [&]()
 	{
-		//auto ViewMatrix = Math::Inverse( Matrix4::CreateTransform( CameraPosition, CameraRotation, Vector3::One ) );
+		//auto ViewMatrix = Matrix4::CreateTransform( CameraPosition, CameraRotation, Vector3::One );// Math::Inverse( Matrix4::CreateTransform( CameraPosition, CameraRotation, Vector3::One ) );
 		auto ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
 		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
 		auto PVMMatrix = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
@@ -75,6 +77,43 @@ int main()
 		//CameraPosition.y = 1.0f;
 		//CameraPosition.x = Math::Sin( X += 0.005f );
 		//CameraPosition.z = Math::Cos( X );
+
+		// A
+		if ( IsKeyDown( 0x41 ) )
+		{
+			CameraPosition.x += 0.1f;
+		}
+
+		// D
+		if ( IsKeyDown( 0x44 ) )
+		{
+			CameraPosition.x -= 0.1f;
+		}
+
+		// W
+		if ( IsKeyDown( 0x57 ) )
+		{
+			CameraPosition.z += 0.1f;
+		}
+
+		// S
+		if ( IsKeyDown( 0x53 ) )
+		{
+			CameraPosition.z -= 0.1f;
+		}
+
+		// E
+		if ( IsKeyDown( 0x45 ) )
+		{
+			CameraPosition.y += 0.1f;
+		}
+
+		// Q
+		if ( IsKeyDown( 0x51 ) )
+		{
+			CameraPosition.y -= 0.1f;
+		}
+
 		CubeRotation.y += 0.01f;
 		CubeRotation.x += 0.01f;
 	}

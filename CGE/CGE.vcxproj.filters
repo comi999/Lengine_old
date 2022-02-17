@@ -58,6 +58,9 @@
     <ClInclude Include="Math.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Input.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
