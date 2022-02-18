@@ -6,7 +6,6 @@
 int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
-	//Input::Initialize();
 
 	struct Cube
 	{
@@ -39,9 +38,8 @@ int main()
 
 	auto drawCube = [&]()
 	{
-		auto ViewMatrix = Math::Inverse( Matrix4::CreateView( CameraPosition, CameraRotation ) );
+		auto ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
 		//auto ViewMatrix = Matrix4::CreateLookAt( CameraPosition, CubePosition, Vector3::Up );
-
 		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
 		auto MVPTransform = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
 
@@ -73,7 +71,6 @@ int main()
 		ConsoleWindow::WriteBuffer();
 	};
 
-	float X = 0.0f;
 	bool CursorShowing = true;
 	bool Running = true;
 	while ( Running )

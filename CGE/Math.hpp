@@ -1065,6 +1065,26 @@ Vector< T, S >& operator/=( IVector< T, S, I >& a_Vector, U a_Scalar )
 	return reinterpret_cast< Vector< T, S >& >( a_Vector );
 }
 
+template < typename T, typename U, size_t S, size_t I0, size_t I1 >
+bool operator==( const IVector< T, S, I0 >& a_VectorA, const IVector< U, S, I1 >& a_VectorB )
+{
+	for ( size_t i = 0; i < S; ++i )
+	{
+		if ( a_VectorA[ i ] != static_cast< T >( a_VectorB[ i ] ) )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+template < typename T, typename U, size_t S, size_t I0, size_t I1 >
+inline bool operator!=( const IVector< T, S, I0 >& a_VectorA, const IVector< U, S, I1 >& a_VectorB )
+{
+	return !( a_VectorA == a_VectorB );
+}
+
 template < typename T, size_t S >
 struct Vector : public IVector< T, S >
 {
@@ -2066,6 +2086,26 @@ Matrix< T, M, N >& operator/=( IMatrix< T, M, N >& a_Matrix, U a_Scalar )
 	return reinterpret_cast< Matrix< T, M, N >& >( a_Matrix );
 }
 
+template < typename T, typename U, size_t M, size_t N >
+bool operator==( const Matrix< T, M, N >& a_MatrixA, const Matrix< U, M, N >& a_MatrixB )
+{
+	for ( size_t i = 0; i < M * N; ++i )
+	{
+		if ( a_MatrixA[ i ] != static_cast< T >( a_MatrixB[ i ] ) )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+template < typename T, typename U, size_t M, size_t N >
+inline bool operator!=( const Matrix< T, M, N >& a_MatrixA, const Matrix< U, M, N >& a_MatrixB )
+{
+	return !( a_MatrixA == a_MatrixB );
+}
+
 template < typename T, size_t M, size_t N >
 struct Matrix : public IMatrix< T, M, N >
 {
@@ -2502,18 +2542,18 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ),
 			static_cast< T >( 0 ),
 			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.x ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.y ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
 			static_cast< T >( a_Vector.z ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 
@@ -2753,8 +2793,12 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Vector< V, 3 >& a_Rotation )
 	{
 		Matrix< T, 4 > Result = CreateTranslation( -a_Position );
-		Rotate( Result, -a_Rotation, RotationOrder::YXZ );
+		Rotate( Result, -a_Rotation, RotationOrder::ZXY );
 		return Result;
+
+		/*auto Result = CreateRotation( -a_Rotation, RotationOrder::YXZ );
+		Translate( Result, -a_Position );
+		return Result;*/
 	}
 	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )
