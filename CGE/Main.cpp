@@ -28,27 +28,22 @@ int main()
 	};
 
 	Cube cube;
-	Vector3 CubePosition = Vector3::Zero;
+	Vector3 CubePosition = Vector3( 0, 0, 0 );
 	Vector3 CubeRotation = Vector3::Zero;
 	Vector3 CubeScale = Vector3::One * 1.f;
 
-
-	
 	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
 	Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
-	//auto ProjectionMatrix = Math::Transpose( Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f ) );
 	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 1.0f, 100.0f );
 
 	auto drawCube = [&]()
 	{
-		//Input::Tick();
-		auto ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
+		auto ViewMatrix = Math::Inverse( Matrix4::CreateView( CameraPosition, CameraRotation ) );
 		//auto ViewMatrix = Matrix4::CreateLookAt( CameraPosition, CubePosition, Vector3::Up );
 
 		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
-		auto PVMMatrix = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
-		//auto PVMMatrix = Math::Multiply( Math::Multiply( ViewMatrix, ProjectionMatrix ), CubeMatrix );
+		auto MVPTransform = Math::Multiply( CubeMatrix, Math::Multiply( ViewMatrix, ProjectionMatrix ) );
 
 		Vector4 Verts[ 8 ];
 
@@ -56,7 +51,7 @@ int main()
 
 		for ( int i = 0; i < 8; ++i )
 		{
-			Verts[ i ] = Math::Multiply( cube.Corners[ i ], PVMMatrix );
+			Verts[ i ] = Math::Multiply( cube.Corners[ i ], MVPTransform );
 			Verts[ i ] /= Verts[ i ].w;
 			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
@@ -79,9 +74,12 @@ int main()
 	};
 
 	float X = 0.0f;
-
-	while ( true )
+	bool CursorShowing = true;
+	bool Running = true;
+	while ( Running )
 	{
+		ShowCursor( false );
+		Input::Tick();
 		drawCube();
 		//CameraPosition.y = Math::Sin( X += 0.005f );
 		//CameraPosition.y = 1.0f;
@@ -92,6 +90,9 @@ int main()
 		if ( Input::IsKeyDown( KeyCode::A ) )
 		{
 			CameraPosition.x -= 0.1f;
+			//auto camrot = Matrix4::CreateRotation( CameraRotation, RotationOrder::ZXY );
+
+			//CameraPosition += camrot.r2.ToVector3();
 		}
 
 		// Right
@@ -113,19 +114,31 @@ int main()
 		}
 
 		// Up
-		if ( Input::IsKeyDown( KeyCode::Plus ) )
+		if ( Input::IsKeyDown( KeyCode::E ) )
 		{
 			CameraPosition.y += 0.1f;
 		}
 
 		// Down
-		if ( Input::IsKeyDown( KeyCode::Minus ) )
+		if ( Input::IsKeyDown( KeyCode::Q ) )
 		{
 			CameraPosition.y -= 0.1f;
 		}
 
+		if ( Input::IsKeyDown( KeyCode::M ) )
+		{
+			Running = false;
+		}
+
 		//CubeRotation.y += 0.01f;
 		//CubeRotation.x += 0.01f;
+
+		//CameraRotation.y += 0.001f;
+		Vector2 MouseDelta = Input::GetMouseDelta();
+		CameraRotation.y += Math::Radians( MouseDelta.x * 1.0f );
+		CameraRotation.x += Math::Radians( MouseDelta.y * 1.0f );
+
+		ShowCursor( true );
 	}
 	
 	/*for ( int x = 0; x < 256; x += 1 )
