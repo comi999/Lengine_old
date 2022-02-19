@@ -2167,8 +2167,8 @@ struct Matrix< T, 2 > : IMatrix< T, 2 >
 
 		struct
 		{
-			T x0; T y0;
-			T x1; T y1;
+			T x0; T x1;
+			T y0; T y1;
 		};
 
 		IVector< T, 2, 3 > diagonal;
@@ -2178,7 +2178,7 @@ struct Matrix< T, 2 > : IMatrix< T, 2 >
 		
 		struct
 		{
-			T x0; T y0;
+			T x0; T x1;
 			IVector< T, 2, 1 > r1;
 		};
 
@@ -2251,9 +2251,9 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 
 		struct
 		{
-			T x0; T y0; T z0;
-			T x1; T y1; T z1;
-			T x2; T y2; T z2;
+			T x0; T x1; T x2;
+			T y0; T y1; T y2;
+			T z0; T z1; T z2;
 		};
 
 		IVector< T, 3, 4 > diagonal;
@@ -2263,14 +2263,14 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 
 		struct
 		{
-			T x0; T y0; T z0;
+			T x0; T x1; T x2;
 			IVector< T, 3, 1 > r1;
 		};
 
 		struct
 		{
-			T x0; T y0; T z0;
-			T x1; T y1; T z1;
+			T x0; T x1; T x2;
+			T y0; T y1; T y2;
 			IVector< T, 3, 1 > r2;
 		};
 
@@ -2284,7 +2284,7 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 
 		struct
 		{
-			T x0; T y0;
+			T x0; T x1;
 			IVector< T, 3, 3 > c2;
 		};
 	};
@@ -2439,10 +2439,10 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 
 		struct
 		{
-			T x0; T y0; T z0; T w0;
-			T x1; T y1; T z1; T w1;
-			T x2; T y2; T z2; T w2;
-			T x3; T y3; T z3; T w3;
+			T x0; T x1; T x2; T x3;
+			T y0; T y1; T y2; T y3;
+			T z0; T z1; T z2; T z3;
+			T w0; T w1; T w2; T w3;
 		};
 
 		IVector< T, 4, 5 > diagonal;
@@ -2452,22 +2452,22 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 
 		struct
 		{
-			T x0; T y0; T z0; T w0;
+			T x0; T x1; T x2; T x3;
 			IVector< T, 4, 1 > r1;
 		};
 
 		struct
 		{
-			T x0; T y0; T z0; T w0;
-			T x1; T y1; T z1; T w1;
+			T x0; T x1; T x2; T x3;
+			T y0; T y1; T y2; T y3;
 			IVector< T, 4, 1 > r2;
 		};
 
 		struct
 		{
-			T x0; T y0; T z0; T w0;
-			T x1; T y1; T z1; T w1;
-			T x2; T y2; T z2; T w2;
+			T x0; T x1; T x2; T x3;
+			T y0; T y1; T y2; T y3;
+			T z0; T z1; T z2; T z3;
 			IVector< T, 4, 1 > r3;
 		};
 
@@ -2481,13 +2481,13 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 
 		struct
 		{
-			T x0; T y0;
+			T x0; T x1;
 			IVector< T, 4, 4 > c2;
 		};
 
 		struct
 		{
-			T x0; T y0; T z0;
+			T x0; T x1; T x2;
 			IVector< T, 4, 4 > c3;
 		};
 	};
@@ -2506,22 +2506,25 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U >
 	Matrix( U a_X0, U a_Y0, U a_Z0, U a_W0, U a_X1, U a_Y1, U a_Z1, U a_W1, U a_X2, U a_Y2, U a_Z2, U a_W2, U a_X3, U a_Y3, U a_Z3, U a_W3 )
 		: x0( static_cast< T >( a_X0 ) )
-		, y0( static_cast< T >( a_Y0 ) )
-		, z0( static_cast< T >( a_Z0 ) )
-		, w0( static_cast< T >( a_W0 ) )
 		, x1( static_cast< T >( a_X1 ) )
-		, y1( static_cast< T >( a_Y1 ) )
-		, z1( static_cast< T >( a_Z1 ) )
-		, w1( static_cast< T >( a_W1 ) )
 		, x2( static_cast< T >( a_X2 ) )
-		, y2( static_cast< T >( a_Y2 ) )
-		, z2( static_cast< T >( a_Z2 ) )
-		, w2( static_cast< T >( a_W2 ) )
 		, x3( static_cast< T >( a_X3 ) )
+		, y0( static_cast< T >( a_Y0 ) )
+		, y1( static_cast< T >( a_Y1 ) )
+		, y2( static_cast< T >( a_Y2 ) )
 		, y3( static_cast< T >( a_Y3 ) )
+		, z0( static_cast< T >( a_Z0 ) )
+		, z1( static_cast< T >( a_Z1 ) )
+		, z2( static_cast< T >( a_Z2 ) )
 		, z3( static_cast< T >( a_Z3 ) )
+		, w0( static_cast< T >( a_W0 ) )
+		, w1( static_cast< T >( a_W1 ) )
+		, w2( static_cast< T >( a_W2 ) )
 		, w3( static_cast< T >( a_W3 ) )
 	{ }
+
+	template < typename U, typename V, typename W, typename X, size_t S0, size_t S1, size_t S2, size_t S3, size_t I0, size_t I1, size_t I2, size_t I3 >
+	Matrix( const IVector< U, S0, I0 >& a_VectorX, const IVector< V, S1, I1 >& a_VectorY,  )
 
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
@@ -2542,27 +2545,27 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ),
 			static_cast< T >( 0 ),
 			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.x ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.y ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
 			static_cast< T >( a_Vector.z ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 
 	template < typename U, typename V >
 	inline static void Translate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector )
 	{
-		a_Matrix.x3 += static_cast< U >( a_Vector.x );
-		a_Matrix.y3 += static_cast< U >( a_Vector.y );
-		a_Matrix.z3 += static_cast< U >( a_Vector.z );
+		a_Matrix.w0 += static_cast< U >( a_Vector.x );
+		a_Matrix.w1 += static_cast< U >( a_Vector.y );
+		a_Matrix.w2 += static_cast< U >( a_Vector.z );
 	}
 
 	template < typename U >
@@ -2621,7 +2624,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationX( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
+		U S = -Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >( 
 			static_cast< T >( 1 ), 
@@ -2646,7 +2649,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationY( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
+		U S = -Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >(
 			static_cast< T >( C ),
@@ -2671,7 +2674,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationZ( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
+		U S = -Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >(
 			static_cast< T >( C ),
@@ -2693,27 +2696,31 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	}
 
 	template < typename U, typename V >
-	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::YXZ )
 	{
-		a_Matrix = Math::Multiply( CreateRotation( a_Vector, a_RotationOrder ), a_Matrix );
+		//a_Matrix = Math::Multiply( CreateRotation( a_Vector, a_RotationOrder ), a_Matrix );
+		a_Matrix = Math::Multiply( a_Matrix, CreateRotation( a_Vector, a_RotationOrder ) );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateX( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		a_Matrix = Math::Multiply( CreateRotationX( a_Radians ), a_Matrix );
+		//a_Matrix = Math::Multiply( CreateRotationX( a_Radians ), a_Matrix );
+		a_Matrix = Math::Multiply( a_Matrix, CreateRotationX( a_Radians ) );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateY( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		a_Matrix = Math::Multiply( CreateRotationY( a_Radians ), a_Matrix );
+		//a_Matrix = Math::Multiply( CreateRotationY( a_Radians ), a_Matrix );
+		a_Matrix = Math::Multiply( a_Matrix, CreateRotationY( a_Radians ) );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateZ( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		a_Matrix = Math::Multiply( CreateRotationZ( a_Radians ), a_Matrix );
+		//a_Matrix = Math::Multiply( CreateRotationZ( a_Radians ), a_Matrix );
+		a_Matrix = Math::Multiply( a_Matrix, CreateRotationZ( a_Radians ) );
 	}
 
 	template < typename U >
@@ -2749,43 +2756,70 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U, typename V, typename W >
 	inline static Matrix< T, 4 > CreateTransform( const Vector< U, 3 >& a_Translation, const Vector< V, 3 >& a_Rotation, const Vector< W, 3 >& a_Scale, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
-		Matrix< T, 4 > Result = CreateScale( a_Scale );
+		/*Matrix< T, 4 > Result = CreateScale( a_Scale );
 		Rotate( Result, a_Rotation, a_RotationOrder );
 		Translate( Result, a_Translation );
+		return Result;*/
+
+		auto Result = CreateTranslation( a_Translation );
+		Rotate( Result, a_Rotation, a_RotationOrder );
+		Scale( Result, a_Scale );
 		return Result;
 	}
 
 	template < typename U, typename V, typename W, typename X >
-	inline static void Transform( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Translation, const Vector< W, 3 >& a_Rotation, const Vector< X, 3 >& a_Scale, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	inline static void Transform( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Translation, const Vector< W, 3 >& a_Rotation, const Vector< X, 3 >& a_Scale, RotationOrder a_RotationOrder )
 	{
-		Scale( a_Matrix, a_Scale );
+		/*Scale( a_Matrix, a_Scale );
 		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
+		Translate( a_Matrix, a_Translation );*/
+
 		Translate( a_Matrix, a_Translation );
+		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
+		Scale( a_Matrix, a_Scale );
 	}
 
 	template < typename U, typename V, typename W >
 	inline static Matrix< T, 4 > CreateLookAt( const Vector< U, 3 >& a_Eye, const Vector< V, 3 >& a_Centre, const Vector< W, 3 >& a_Up )
 	{
-		auto Forward = Math::Normalize( a_Centre - a_Eye );
+		auto Forward = Math::Normalize( a_Eye - a_Centre );
 		auto Right = Math::Cross( a_Up, Forward );
 		auto Up = Math::Cross( Forward, Right );
+
+		/*return Matrix< T, 4 >(
+			static_cast< T >( Right.x ),
+			static_cast< T >( Right.y ),
+			static_cast< T >( Right.z ),
+			static_cast< T >( -Math::Dot( Right, a_Eye ) ),
+			static_cast< T >( Up.x ),
+			static_cast< T >( Up.y ),
+			static_cast< T >( Up.z ),
+			static_cast< T >( -Math::Dot( Up, a_Eye ) ),
+			static_cast< T >( Forward.x ),
+			static_cast< T >( Forward.y ),
+			static_cast< T >( Forward.z ),
+			static_cast< T >( -Math::Dot( Forward, a_Eye ) ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ) );*/
 
 		return Matrix< T, 4 >(
 			static_cast< T >( Right.x ),
 			static_cast< T >( Up.x ),
 			static_cast< T >( Forward.x ),
-			static_cast< T >( 0 ),
+			static_cast< T >( -Math::Dot( Right, a_Eye ) ),
 			static_cast< T >( Right.y ),
 			static_cast< T >( Up.y ),
 			static_cast< T >( Forward.y ),
-			static_cast< T >( 0 ),
+			static_cast< T >( -Math::Dot( Up, a_Eye ) ),
 			static_cast< T >( Right.z ),
 			static_cast< T >( Up.z ),
 			static_cast< T >( Forward.z ),
+			static_cast< T >( -Math::Dot( Forward, a_Eye ) ),
 			static_cast< T >( 0 ),
-			static_cast< T >( Math::Dot( Right, a_Eye ) ),
-			static_cast< T >( Math::Dot( Up, a_Eye ) ),
-			static_cast< T >( Math::Dot( Forward, a_Eye ) ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 
@@ -2795,10 +2829,6 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		Matrix< T, 4 > Result = CreateTranslation( -a_Position );
 		Rotate( Result, -a_Rotation, RotationOrder::ZXY );
 		return Result;
-
-		/*auto Result = CreateRotation( -a_Rotation, RotationOrder::YXZ );
-		Translate( Result, -a_Position );
-		return Result;*/
 	}
 	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )

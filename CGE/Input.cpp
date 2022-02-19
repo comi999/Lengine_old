@@ -112,3 +112,4 @@ unsigned char Input::MouseCodes[ 3 ] =
 std::bitset< 98 > Input::KeyStates;
 std::bitset< 3  > Input::MouseStates;
 Vector2           Input::MousePosition;
+std::thread*      Input::InputProcessor;

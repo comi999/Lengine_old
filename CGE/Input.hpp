@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <bitset>
+#include <thread>
 #include "Math.hpp"
 #include "ConsoleWindow.hpp"
 
@@ -117,6 +118,20 @@ class Input
 {
 public:
 
+	static void Initialize()
+	{
+		/*InputProcessor = new std::thread( [&]()
+			{
+				Sleep( 100 );
+				Tick();
+			});*/
+	}
+
+	static void Deinitialize()
+	{
+		delete InputProcessor;
+	}
+
 	inline static bool IsKeyDown( KeyCode a_KeyCode )
 	{
 		return GetKeyState( KeyCodes[ static_cast< unsigned char >( a_KeyCode ) ] ) & 0x8000;
@@ -201,4 +216,6 @@ public:
 	static std::bitset< 98 > KeyStates;
 	static std::bitset< 3  > MouseStates;
 	static Vector2           MousePosition;
+
+	static std::thread* InputProcessor;
 };
