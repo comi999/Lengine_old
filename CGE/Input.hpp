@@ -120,16 +120,12 @@ public:
 
 	static void Initialize()
 	{
-		/*InputProcessor = new std::thread( [&]()
-			{
-				Sleep( 100 );
-				Tick();
-			});*/
+		MousePosition = GetMousePosition();
 	}
 
 	static void Deinitialize()
 	{
-		delete InputProcessor;
+		
 	}
 
 	inline static bool IsKeyDown( KeyCode a_KeyCode )

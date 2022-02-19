@@ -2696,7 +2696,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		}
 		case RotationOrder::ZYX:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
+			auto Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
 			RotateY( Rotation, a_Vector.y );
 			RotateX( Rotation, a_Vector.x );
 			return Rotation; 
@@ -2733,7 +2733,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationY( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = -Math::Sin( a_Radians );
+		U S = Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >(
 			static_cast< T >( C ),
@@ -2758,7 +2758,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationZ( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = -Math::Sin( a_Radians );
+		U S = Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >(
 			static_cast< T >( C ),
@@ -2780,31 +2780,27 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	}
 
 	template < typename U, typename V >
-	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::YXZ )
+	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
-		//a_Matrix = Math::Multiply( CreateRotation( a_Vector, a_RotationOrder ), a_Matrix );
-		a_Matrix = Math::Multiply( a_Matrix, CreateRotation( a_Vector, a_RotationOrder ) );
+		a_Matrix = Math::Multiply( CreateRotation( a_Vector, a_RotationOrder ), a_Matrix );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateX( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		//a_Matrix = Math::Multiply( CreateRotationX( a_Radians ), a_Matrix );
-		a_Matrix = Math::Multiply( a_Matrix, CreateRotationX( a_Radians ) );
+		a_Matrix = Math::Multiply( CreateRotationX( a_Radians ), a_Matrix );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateY( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		//a_Matrix = Math::Multiply( CreateRotationY( a_Radians ), a_Matrix );
-		a_Matrix = Math::Multiply( a_Matrix, CreateRotationY( a_Radians ) );
+		a_Matrix = Math::Multiply( CreateRotationY( a_Radians ), a_Matrix );
 	}
 
 	template < typename U, typename V >
 	inline static void RotateZ( Matrix< U, 4 >& a_Matrix, V a_Radians )
 	{
-		//a_Matrix = Math::Multiply( CreateRotationZ( a_Radians ), a_Matrix );
-		a_Matrix = Math::Multiply( a_Matrix, CreateRotationZ( a_Radians ) );
+		a_Matrix = Math::Multiply( CreateRotationZ( a_Radians ), a_Matrix );
 	}
 
 	template < typename U >
@@ -2840,27 +2836,18 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U, typename V, typename W >
 	inline static Matrix< T, 4 > CreateTransform( const Vector< U, 3 >& a_Translation, const Vector< V, 3 >& a_Rotation, const Vector< W, 3 >& a_Scale, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
-		/*Matrix< T, 4 > Result = CreateScale( a_Scale );
+		auto Result = CreateScale( a_Scale );
 		Rotate( Result, a_Rotation, a_RotationOrder );
 		Translate( Result, a_Translation );
-		return Result;*/
-
-		auto Result = CreateTranslation( a_Translation );
-		Rotate( Result, a_Rotation, a_RotationOrder );
-		Scale( Result, a_Scale );
 		return Result;
 	}
 
 	template < typename U, typename V, typename W, typename X >
 	inline static void Transform( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Translation, const Vector< W, 3 >& a_Rotation, const Vector< X, 3 >& a_Scale, RotationOrder a_RotationOrder )
 	{
-		/*Scale( a_Matrix, a_Scale );
-		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
-		Translate( a_Matrix, a_Translation );*/
-
-		Translate( a_Matrix, a_Translation );
-		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
 		Scale( a_Matrix, a_Scale );
+		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
+		Translate( a_Matrix, a_Translation );
 	}
 
 	template < typename U, typename V, typename W >
@@ -2869,24 +2856,6 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		auto Forward = Math::Normalize( a_Eye - a_Centre );
 		auto Right = Math::Cross( a_Up, Forward );
 		auto Up = Math::Cross( Forward, Right );
-
-		/*return Matrix< T, 4 >(
-			static_cast< T >( Right.x ),
-			static_cast< T >( Right.y ),
-			static_cast< T >( Right.z ),
-			static_cast< T >( -Math::Dot( Right, a_Eye ) ),
-			static_cast< T >( Up.x ),
-			static_cast< T >( Up.y ),
-			static_cast< T >( Up.z ),
-			static_cast< T >( -Math::Dot( Up, a_Eye ) ),
-			static_cast< T >( Forward.x ),
-			static_cast< T >( Forward.y ),
-			static_cast< T >( Forward.z ),
-			static_cast< T >( -Math::Dot( Forward, a_Eye ) ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ) );*/
 
 		return Matrix< T, 4 >(
 			static_cast< T >( Right.x ),
@@ -2910,9 +2879,37 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U, typename V >
 	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Vector< V, 3 >& a_Rotation )
 	{
-		Matrix< T, 4 > Result = CreateTranslation( -a_Position );
-		Rotate( Result, -a_Rotation, RotationOrder::ZXY );
-		return Result;
+		/*float cosPitch = Math::Cos( a_Rotation.x );
+		float sinPitch = Math::Sin( a_Rotation.x );
+		float cosYaw   = Math::Cos( a_Rotation.y );
+		float sinYaw   = Math::Sin( a_Rotation.y );
+
+		Vector3 AxisX( cosYaw, 0.0f, -sinYaw );
+		Vector3 AxisY( sinYaw * sinPitch, cosPitch, cosYaw * sinPitch );
+		Vector3 AxisZ( sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw );
+	
+		return Matrix< T, 4 >(
+			static_cast< T >( AxisX.x ),
+			static_cast< T >( AxisY.x ),
+			static_cast< T >( AxisZ.x ),
+			static_cast< T >( 0 ),
+			static_cast< T >( AxisX.y ),
+			static_cast< T >( AxisY.y ),
+			static_cast< T >( AxisZ.y ),
+			static_cast< T >( 0 ),
+			static_cast< T >( AxisX.z ),
+			static_cast< T >( AxisY.z ),
+			static_cast< T >( AxisZ.z ),
+			static_cast< T >( 0 ),
+			static_cast< T >( -Math::Dot( AxisX, a_Position ) ),
+			static_cast< T >( -Math::Dot( AxisY, a_Position ) ),
+			static_cast< T >( -Math::Dot( AxisZ, a_Position ) ),
+			static_cast< T >( 1 ) );*/
+
+		auto Result = CreateRotation( a_Rotation );
+		Translate( Result, a_Position );
+		return Math::Inverse( Result );
+
 	}
 	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )
@@ -2926,16 +2923,16 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
-			static_cast< T >( HalfCot ), 
+			static_cast< T >( HalfCot ),
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
-			static_cast< T >( FarRatio ), 
-			static_cast< T >( 1 ), 
+			static_cast< T >( FarRatio ),
+			static_cast< T >( 1 ),
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
-			static_cast< T >( -FarRatio * a_NearZ ), 
+			static_cast< T >( FarRatio * a_NearZ ), 
 			static_cast< T >( 0 ) );
 	}
 

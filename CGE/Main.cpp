@@ -5,7 +5,8 @@
 
 struct Cube
 {
-	Vector4 Corners[ 8 ]{
+	Vector4 Corners[ 8 ]
+	{
 		Vector4( 0.5f,  0.5f, -0.5f, 1.0f ),
 		Vector4( -0.5f,  0.5f, -0.5f, 1.0f ),
 		Vector4( -0.5f, -0.5f, -0.5f, 1.0f ),
@@ -19,7 +20,8 @@ struct Cube
 
 struct Plane
 {
-	Vector4 Corners[ 36 ]{
+	Vector4 Corners[ 36 ]
+	{
 		Vector4( -0.500f, 0.000f, -0.500f, 1.000f ), Vector4( -0.500f, 0.000f,  0.500f, 1.000f ),
 		Vector4( -0.375f, 0.000f, -0.500f, 1.000f ), Vector4( -0.375f, 0.000f,  0.500f, 1.000f ),
 		Vector4( -0.250f, 0.000f, -0.500f, 1.000f ), Vector4( -0.250f, 0.000f,  0.500f, 1.000f ),
@@ -41,12 +43,24 @@ struct Plane
 	};
 };
 
+struct Axes
+{
+	Vector4 Corners[ 4 ]
+	{
+		Vector4( Vector3::Zero, 1.0f ),
+		Vector4( Vector3::Right, 1.0f ),
+		Vector4( Vector3::Up, 1.0f ),
+		Vector4( Vector3::Forward, 1.0f )
+	};
+};
+
 int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	Cube cube;
 	Plane plane;
+	Axes axes;
 
 	Vector3 CubePosition = Vector3( 0.0f, 0.5f, 0.0f );
 	Vector3 CubeRotation = Vector3::Zero;
@@ -56,27 +70,34 @@ int main()
 	Vector3 PlaneRotation = Vector3::Zero;
 	Vector3 PlaneScale = Vector3::One * 5.0f;
 
+	Vector3 AxesPosition = Vector3::Left * 5.0f;
+	Vector3 AxesRotation = Vector3::Zero;
+	Vector3 AxesScale = Vector3::One * 3.0f;
+
 	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
 	Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
-	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 90.0f ), 1.0f, 1.0f, 100.0f );
+	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 90.0f ), 1.0f );
 	auto ViewMatrix = Matrix4();
-	auto VPMatrix = Matrix4();
-	Vector3 forward;
-	Vector3 right;
-	Vector3 up;
+	auto PVMatrix = Matrix4();
+	Vector3 forward = Vector3::Forward;
+	Vector3 right = Vector3::Right;
+	Vector3 up = Vector3::Up;
 
 	auto drawCube = [&]()
 	{
 		Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
-		auto MVP = Math::Multiply( CubeMatrix, VPMatrix );
+		auto PVM = Math::Multiply( PVMatrix, CubeMatrix );
+		//auto PVM = Math::Multiply( CubeMatrix, PVMatrix );
 		Vector4 Verts[ 8 ];
 
 		for ( int i = 0; i < 8; ++i )
 		{
-			Verts[ i ] = Math::Multiply( cube.Corners[ i ], MVP );
+			Verts[ i ] = Math::Multiply( PVM, cube.Corners[ i ] );
+			//Verts[ i ] = Math::Multiply( cube.Corners[ i ], PVM );
+
 			Verts[ i ] /= Verts[ i ].w;
-			Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
+			//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
 			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
@@ -98,14 +119,17 @@ int main()
 	auto drawPlane = [&]()
 	{
 		Matrix4 PlaneMatrix = Matrix4::CreateTransform( PlanePosition, PlaneRotation, PlaneScale );
-		auto MVP = Math::Multiply( PlaneMatrix, VPMatrix );
+		auto PVM = Math::Multiply( PVMatrix, PlaneMatrix );
+		//auto PVM = Math::Multiply( PlaneMatrix, PVMatrix );
 		Vector4 Verts[ 36 ];
 
 		for ( int i = 0; i < 36; ++i )
 		{
-			Verts[ i ] = Math::Multiply( plane.Corners[ i ], MVP );
+			Verts[ i ] = Math::Multiply( PVM, plane.Corners[ i ] );
+			//Verts[ i ] = Math::Multiply( plane.Corners[ i ], PVM );
+
 			Verts[ i ] /= Verts[ i ].w;
-			Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
+			//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
 			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
@@ -114,11 +138,29 @@ int main()
 		{
 			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
 		}
+	};
 
-		/*for ( int i = 19; i < 27; ++i )
+	auto drawAxes = [&]()
+	{
+		Matrix4 AxesMatrix = Matrix4::CreateTransform( AxesPosition, AxesRotation, AxesScale );
+		auto PVM = Math::Multiply( PVMatrix, AxesMatrix );
+		//auto PVM = Math::Multiply( PlaneMatrix, PVMatrix );
+		Vector4 Verts[ 4 ];
+
+		for ( int i = 0; i < 4; ++i )
 		{
-			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 9 ].ToVector2(), Colour::RED );
-		}*/
+			Verts[ i ] = Math::Multiply( PVM, axes.Corners[ i ] );
+			//Verts[ i ] = Math::Multiply( plane.Corners[ i ], PVM );
+
+			Verts[ i ] /= Verts[ i ].w;
+			//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
+			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
+			Verts[ i ] += Vector4( 64, 64, 0, 0 );
+		}
+
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::RED );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
 	};
 
 	bool Running = true;
@@ -128,55 +170,50 @@ int main()
 	while ( Running )
 	{
 		ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
-		VPMatrix = Math::Multiply( ViewMatrix, ProjectionMatrix );
-		forward = ViewMatrix.c2.ToVector3();
-		right = ViewMatrix.c0.ToVector3();
-		up = ViewMatrix.c1.ToVector3();
+		PVMatrix = Math::Multiply( ProjectionMatrix, ViewMatrix );
+		//PVMatrix = Math::Multiply( ViewMatrix, ProjectionMatrix );
+		//forward = ViewMatrix.c2.ToVector3();
+		//right = ViewMatrix.c0.ToVector3();
+		//up = ViewMatrix.c1.ToVector3();
 
 		ScreenBuffer::SetBuffer( Colour::BLACK );
 		drawPlane();
 		drawCube();
-
+		drawAxes();
 
 		// Left
 		if ( Input::IsKeyDown( KeyCode::A ) )
 		{
-			//CameraPosition.x -= 0.1f;
 			CameraPosition -= movement * right;
 		}
 
 		// Right
 		if ( Input::IsKeyDown( KeyCode::D ) )
 		{
-			//CameraPosition.x += 0.1f;
 			CameraPosition += movement * right;
 		}
 
 		// Forward
 		if ( Input::IsKeyDown( KeyCode::W ) )
 		{
-			//CameraPosition.z += 0.1f;
 			CameraPosition += movement * forward;
 		}
 
 		// Back
 		if ( Input::IsKeyDown( KeyCode::S ) )
 		{
-			//CameraPosition.z -= 0.1f;
 			CameraPosition -= movement * forward;
 		}
 
 		// Up
 		if ( Input::IsKeyDown( KeyCode::E ) )
 		{
-			//CameraPosition.y += 0.1f;
 			CameraPosition += movement * up;
 		}
 
 		// Down
 		if ( Input::IsKeyDown( KeyCode::Q ) )
 		{
-			//CameraPosition.y -= 0.1f;
 			CameraPosition -= movement * up;
 		}
 
@@ -185,51 +222,18 @@ int main()
 			Running = false;
 		}
 
-		//CubeRotation.y += 0.01f;
+		CubeRotation.y += 0.01f;
 		//CubeRotation.x += 0.01f;
 
-		//CameraRotation.y += 0.001f;
 		Vector2 MouseDelta = Input::GetMouseDelta();
 		CameraRotation.y += Math::Radians( MouseDelta.x * 1.0f );
 		CameraRotation.x += Math::Radians( MouseDelta.y * 1.0f );
+		//CameraRotation.y = Math::Clamp( CameraRotation.y, Math::Radians( 0.0f ), Math::Radians( 360.0f ) );
+		CameraRotation.x = Math::Clamp( CameraRotation.x, Math::Radians( -179.0f ), Math::Radians( 179.0f ) );
 
 		Input::Tick();
 		ConsoleWindow::WriteBuffer();
-	}
-	
-	/*for ( int x = 0; x < 256; x += 1 )
-	{
-		Sleep( 25 );
-		for ( int y = 0; y < 128; ++y )
-		{
-			for ( int z = 0; z < 128; ++z )
-			{
-				ScreenBuffer::SetPixel( { short(y), short(z) }, ScreenBuffer::GetPixelColourMap().ConvertColour( Colour( x, y * 2, z * 2 ) ) );
-			}
-		}
-		ConsoleWindow::WriteBuffer();
-
-		if ( x == 252 )
-		{
-			x = 0;
-		}
-	}*/
-
-	/*Rect rect1 = { { 1, 1 }, { 45, 20 } };
-	Rect rect2 = { { 5, 15 }, { 45, 100 } };
-	ScreenBuffer::BlendingEnabled = true;
-	float f = 0.0f;
-	while ( true )
-	{
-		f += 0.1f;
-		ScreenBuffer::SetBuffer( Colour::WHITE );
-		ScreenBuffer::SetRect( rect1, Colour::YELLOW );
-		ScreenBuffer::SetRect( rect2, Colour( Colour::DARK_BLUE, 32 ) );
-		Primitive::DrawLine( { 64, 64 }, { sin( f ) * 90 + 64, cos( f ) * 90 + 64 }, Colour( Colour::DARK_RED, 128 ) );
-		ConsoleWindow::WriteBuffer();
-	}*/
-
-	
+	}	
 	
 	Input::Deinitialize();
 	return 0;
