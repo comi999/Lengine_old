@@ -691,7 +691,7 @@ public:
 
 private:
 
-	template < typename T, size_t Span, size_t Increment = 1  >
+	template < typename T, size_t Span, size_t I = 1  >
 	struct Indexer
 	{
 		typedef typename T ValueType;
@@ -699,12 +699,12 @@ private:
 
 		inline auto& operator[]( size_t a_Index )
 		{
-			return reinterpret_cast< ValueType* >( this )[ a_Index * Increment ];
+			return reinterpret_cast< ValueType* >( this )[ a_Index * I ];
 		}
 
 		inline constexpr auto& operator[]( size_t a_Index ) const
 		{
-			return reinterpret_cast< const ValueType* >( this )[ a_Index * Increment ];
+			return reinterpret_cast< const ValueType* >( this )[ a_Index * I ];
 		}
 	};
 
@@ -827,25 +827,33 @@ private:
 	};
 };
 
-template < typename T, size_t S, size_t Increment = 1 >
+template < typename T, size_t S, size_t I = 1 >
 struct IVector
 {
 	inline auto& operator[]( size_t a_Index )
 	{
-		return reinterpret_cast< T* >( this )[ a_Index * Increment ];
+		return reinterpret_cast< T* >( this )[ a_Index * I ];
 	}
 
 	inline const auto& operator[]( size_t a_Index ) const
 	{
-		return reinterpret_cast< const T* >( this )[ a_Index * Increment ];
+		return reinterpret_cast< const T* >( this )[ a_Index * I ];
 	}
 
-	template < typename U, size_t I >
-	IVector< T, S, Increment >& operator=( const IVector< U, S, I >& a_IVector )
+	template < typename U, size_t S0, size_t I0 >
+	IVector< T, S, I >& operator=( const IVector< U, S0, I0 >& a_IVector )
 	{
-		for ( size_t i = 0; i < S; ++i )
+		size_t i = 0;
+		size_t Size = Math::Min( S0, S );
+
+		for ( ; i < Size; ++i )
 		{
 			operator[]( i ) = a_IVector[ i ];
+		}
+
+		for ( ; i < S; ++i )
+		{
+			operator[]( i ) = static_cast< T >( 0 );
 		}
 
 		return *this;
@@ -1226,15 +1234,28 @@ struct Vector< T, 2 > : public IVector< T, 2 >
 		, y( static_cast< T >( a_Y ) )
 	{ }
 
-	template < typename U, size_t S, size_t I >
-	Vector( const IVector< U, S, I >& a_Vector )
+	template < typename U, size_t S0, size_t I0, typename... V >
+	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
-		size_t Size = S < 2 ? S : 2;
+		size_t Size = Math::Min( S0, static_cast< size_t >( 2 ) );
 		size_t i = 0;
+		auto Trailing = std::forward_as_tuple( a_Trailing... );
 
 		for ( ; i < Size; ++i )
 		{
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		{
+			++i;
+			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		{
+			++i;
+			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
 		}
 
 		for ( ; i < 2; ++i )
@@ -1325,15 +1346,34 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 		, z( static_cast< T >( a_Z ) )
 	{ }
 
-	template < typename U, size_t S, size_t I >
-	Vector( const IVector< U, S, I >& a_Vector )
+	template < typename U, size_t S0, size_t I0, typename... V >
+	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
-		size_t Size = S < 3 ? S : 3;
+		size_t Size = Math::Min( S0, static_cast< size_t >( 3 ) );
 		size_t i = 0;
+		auto Trailing = std::forward_as_tuple( a_Trailing... );
 
 		for ( ; i < Size; ++i )
 		{
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		if constexpr ( S0 < 3 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		{
+			++i;
+			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		{
+			++i;
+			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 2 )
+		{
+			++i;
+			this->operator[]( S0 + 2 ) = static_cast< T >( std::get< 2 >( Trailing ) );
 		}
 
 		for ( ; i < 3; ++i )
@@ -1730,15 +1770,40 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 		, w( static_cast< T >( a_W ) )
 	{ }
 
-	template < typename U, size_t S, size_t I >
-	Vector( const IVector< U, S, I >& a_Vector )
+	template < typename U, size_t S0, size_t I0, typename... V >
+	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
-		size_t Size = S < 4 ? S : 4;
+		size_t Size = Math::Min( S0, static_cast< size_t >( 3 ) );
 		size_t i = 0;
+		auto Trailing = std::forward_as_tuple( a_Trailing... );
 
 		for ( ; i < Size; ++i )
 		{
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
+		}
+
+		if constexpr ( S0 < 4 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		{
+			++i;
+			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 3 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		{
+			++i;
+			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 2 )
+		{
+			++i;
+			this->operator[]( S0 + 2 ) = static_cast< T >( std::get< 2 >( Trailing ) );
+		}
+
+		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 3 )
+		{
+			++i;
+			this->operator[]( S0 + 3 ) = static_cast< T >( std::get< 3 >( Trailing ) );
 		}
 
 		for ( ; i < 4; ++i )
@@ -2210,6 +2275,13 @@ struct Matrix< T, 2 > : IMatrix< T, 2 >
 		, y1( static_cast< T >( a_Y1 ) )
 	{ }
 
+	template < typename U, typename V, size_t S0, size_t S1, size_t I0, size_t I1 >
+	Matrix( const IVector< U, S0, I0 >& a_VectorX, const IVector< V, S1, I1 >& a_VectorY )
+	{
+		c0 = a_VectorX;
+		c1 = a_VectorY;
+	}
+
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U > && a_InitializerList )
 	{
@@ -2312,6 +2384,14 @@ struct Matrix< T, 3 > : IMatrix< T, 3 >
 		, y2( static_cast< T >( a_Y2 ) )
 		, z2( static_cast< T >( a_Z2 ) )
 	{ }
+
+	template < typename U, typename V, typename W, size_t S0, size_t S1, size_t S2, size_t I0, size_t I1, size_t I2 >
+	Matrix( const IVector< U, S0, I0 >& a_VectorX, const IVector< V, S1, I1 >& a_VectorY, const IVector< W, S2, I2 >& a_VectorZ )
+	{
+		c0 = a_VectorX;
+		c1 = a_VectorY;
+		c2 = a_VectorZ;
+	}
 
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
@@ -2524,7 +2604,13 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	{ }
 
 	template < typename U, typename V, typename W, typename X, size_t S0, size_t S1, size_t S2, size_t S3, size_t I0, size_t I1, size_t I2, size_t I3 >
-	Matrix( const IVector< U, S0, I0 >& a_VectorX, const IVector< V, S1, I1 >& a_VectorY,  )
+	Matrix( const IVector< U, S0, I0 >& a_VectorX, const IVector< V, S1, I1 >& a_VectorY, const IVector< W, S2, I2 >& a_VectorZ, const IVector< X, S3, I3 >& a_VectorW )
+	{
+		c0 = a_VectorX;
+		c1 = a_VectorY;
+		c2 = a_VectorZ;
+		c3 = a_VectorW;
+	}
 
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
 	Matrix( std::initializer_list< U >&& a_InitializerList )
@@ -2545,27 +2631,27 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ),
 			static_cast< T >( 0 ),
 			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.x ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.y ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
 			static_cast< T >( a_Vector.z ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 
 	template < typename U, typename V >
 	inline static void Translate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector )
 	{
-		a_Matrix.w0 += static_cast< U >( a_Vector.x );
-		a_Matrix.w1 += static_cast< U >( a_Vector.y );
-		a_Matrix.w2 += static_cast< U >( a_Vector.z );
+		a_Matrix.x3 += static_cast< U >( a_Vector.x );
+		a_Matrix.y3 += static_cast< U >( a_Vector.y );
+		a_Matrix.z3 += static_cast< U >( a_Vector.z );
 	}
 
 	template < typename U >
@@ -2575,48 +2661,46 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		{
 		case RotationOrder::XYZ:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationZ( a_Vector.z );
+			auto Rotation = CreateRotationX( a_Vector.x );
 			RotateY( Rotation, a_Vector.y );
-			RotateX( Rotation, a_Vector.x );
+			RotateZ( Rotation, a_Vector.z );
 			return Rotation;
 		}
 		case RotationOrder::XZY:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
+			auto Rotation = CreateRotationX( static_cast< T >( a_Vector.x ) );
 			RotateZ( Rotation, a_Vector.z );
-			RotateX( Rotation, a_Vector.x );
+			RotateY( Rotation, a_Vector.y );
 			return Rotation; 
 		}
 		case RotationOrder::YXZ:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
+			auto Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
 			RotateX( Rotation, a_Vector.x );
-			RotateY( Rotation, a_Vector.y );
+			RotateZ( Rotation, a_Vector.z );
 			return Rotation; 
 		}
 		case RotationOrder::YZX:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationX( static_cast< T >( a_Vector.x ) );
+			auto Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
 			RotateZ( Rotation, a_Vector.z );
-			RotateY( Rotation, a_Vector.y );
-			return Rotation; 
+			RotateX( Rotation, a_Vector.x );
+			return Rotation;
 		}
 		case RotationOrder::ZXY:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
+			auto Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
 			RotateX( Rotation, a_Vector.x );
-			RotateZ( Rotation, a_Vector.z );
-			return Rotation; 
+			RotateY( Rotation, a_Vector.y );
+			return Rotation;
 		}
 		case RotationOrder::ZYX:
 		{
-			Matrix< T, 4 > Rotation = CreateRotationX( static_cast< T >( a_Vector.x ) );
+			Matrix< T, 4 > Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
 			RotateY( Rotation, a_Vector.y );
-			RotateZ( Rotation, a_Vector.z );
+			RotateX( Rotation, a_Vector.x );
 			return Rotation; 
 		}
-		default:
-			break;
 		}
 	}
 
@@ -2624,7 +2708,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static Matrix< T, 4 > CreateRotationX( U a_Radians )
 	{
 		U C = Math::Cos( a_Radians );
-		U S = -Math::Sin( a_Radians );
+		U S = Math::Sin( a_Radians );
 
 		return Matrix< T, 4 >( 
 			static_cast< T >( 1 ), 
