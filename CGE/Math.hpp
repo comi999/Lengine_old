@@ -2910,12 +2910,14 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		Translate( Result, a_Position );
 		return Math::Inverse( Result );
 
+		/*auto Result = CreateTranslation( -a_Position );
+		Rotate( Result, -a_Rotation, RotationOrder::YXZ );
+		return Result;*/
 	}
 	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )
 	{
 		float HalfCot = 1.0f / Math::Tan( a_FOV * 0.5f );
-		float FarRatio = a_FarZ / ( a_FarZ - a_NearZ );
 
 		return Matrix< T, 4 >(
 			static_cast< T >( HalfCot / a_Aspect ),
@@ -2928,11 +2930,11 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
-			static_cast< T >( FarRatio ),
+			static_cast< T >( ( a_FarZ + a_NearZ ) / ( a_FarZ - a_NearZ ) ),
 			static_cast< T >( 1 ),
 			static_cast< T >( 0 ), 
 			static_cast< T >( 0 ), 
-			static_cast< T >( FarRatio * a_NearZ ), 
+			static_cast< T >( 2.0f * a_FarZ * a_NearZ / ( a_NearZ - a_FarZ ) ), 
 			static_cast< T >( 0 ) );
 	}
 

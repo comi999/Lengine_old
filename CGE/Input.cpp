@@ -1,6 +1,6 @@
 #include "Input.hpp"
 
-unsigned char Input::KeyCodes[ 98 ] = 
+unsigned char Input::KeyCodes[ 99 ] = 
 {
 	0x08,
 	0x09,
@@ -9,6 +9,7 @@ unsigned char Input::KeyCodes[ 98 ] =
 	0x11,
 	0x12,
 	0x14,
+	0x1B,
 	0x20,
 	0x21,
 	0x22,
@@ -109,7 +110,7 @@ unsigned char Input::MouseCodes[ 3 ] =
 	0x04
 };
 
-std::bitset< 98 > Input::KeyStates;
+std::bitset< 99 > Input::KeyStates;
 std::bitset< 3  > Input::MouseStates;
 Vector2           Input::MousePosition;
 std::thread*      Input::InputProcessor;

@@ -77,7 +77,7 @@ int main()
 	Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
 	Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
-	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 90.0f ), 1.0f );
+	auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f );
 	auto ViewMatrix = Matrix4();
 	auto PVMatrix = Matrix4();
 	Vector3 forward = Vector3::Forward;
@@ -163,78 +163,86 @@ int main()
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
 	};
 
-	bool Running = true;
 	float movement = 0.01f;
 	float sensitivity = 0.0000001f;
 
-	while ( Running )
-	{
-		ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
-		PVMatrix = Math::Multiply( ProjectionMatrix, ViewMatrix );
-		//PVMatrix = Math::Multiply( ViewMatrix, ProjectionMatrix );
-		//forward = ViewMatrix.c2.ToVector3();
-		//right = ViewMatrix.c0.ToVector3();
-		//up = ViewMatrix.c1.ToVector3();
-
-		ScreenBuffer::SetBuffer( Colour::BLACK );
-		drawPlane();
-		drawCube();
-		drawAxes();
-
-		// Left
-		if ( Input::IsKeyDown( KeyCode::A ) )
+	CGE::Run( [&]()
 		{
-			CameraPosition -= movement * right;
-		}
+			ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
+			PVMatrix = Math::Multiply( ProjectionMatrix, ViewMatrix );
 
-		// Right
-		if ( Input::IsKeyDown( KeyCode::D ) )
-		{
-			CameraPosition += movement * right;
-		}
+			ScreenBuffer::SetBuffer( Colour::BLACK );
+			drawPlane();
+			drawCube();
+			drawAxes();
 
-		// Forward
-		if ( Input::IsKeyDown( KeyCode::W ) )
-		{
-			CameraPosition += movement * forward;
-		}
+			right = ViewMatrix.r0.ToVector();
+			up = ViewMatrix.r1.ToVector();
+			forward = ViewMatrix.r2.ToVector();
 
-		// Back
-		if ( Input::IsKeyDown( KeyCode::S ) )
-		{
-			CameraPosition -= movement * forward;
-		}
+			// Left
+			if ( Input::IsKeyDown( KeyCode::A ) )
+			{
+				CameraPosition -= movement * right;
+			}
 
-		// Up
-		if ( Input::IsKeyDown( KeyCode::E ) )
-		{
-			CameraPosition += movement * up;
-		}
+			// Right
+			if ( Input::IsKeyDown( KeyCode::D ) )
+			{
+				CameraPosition += movement * right;
+			}
 
-		// Down
-		if ( Input::IsKeyDown( KeyCode::Q ) )
-		{
-			CameraPosition -= movement * up;
-		}
+			// Forward
+			if ( Input::IsKeyDown( KeyCode::W ) )
+			{
+				CameraPosition += movement * forward;
+			}
 
-		if ( Input::IsKeyDown( KeyCode::M ) )
-		{
-			Running = false;
-		}
+			// Back
+			if ( Input::IsKeyDown( KeyCode::S ) )
+			{
+				CameraPosition -= movement * forward;
+			}
 
-		CubeRotation.y += 0.01f;
-		//CubeRotation.x += 0.01f;
+			// Up
+			if ( Input::IsKeyDown( KeyCode::E ) )
+			{
+				CameraPosition += movement * up;
+			}
 
-		Vector2 MouseDelta = Input::GetMouseDelta();
-		CameraRotation.y += Math::Radians( MouseDelta.x * 1.0f );
-		CameraRotation.x += Math::Radians( MouseDelta.y * 1.0f );
-		//CameraRotation.y = Math::Clamp( CameraRotation.y, Math::Radians( 0.0f ), Math::Radians( 360.0f ) );
-		CameraRotation.x = Math::Clamp( CameraRotation.x, Math::Radians( -179.0f ), Math::Radians( 179.0f ) );
+			// Down
+			if ( Input::IsKeyDown( KeyCode::Q ) )
+			{
+				CameraPosition -= movement * up;
+			}
 
-		Input::Tick();
-		ConsoleWindow::WriteBuffer();
-	}	
+			if ( Input::IsKeyDown( KeyCode::Esc ) )
+			{
+				CGE::Quit();
+			}
+
+			if ( Input::IsKeyDown( KeyCode::Shift ) )
+			{
+				movement = 0.04f;
+			}
+
+			else
+			{
+				movement = 0.01f;
+			}
+
+			CubeRotation.x += 0.01f;
+			CubeRotation.y += 0.001f;
+
+			if ( Input::IsMouseDown( MouseCode::RightMouse ) )
+			{
+				Vector2 MouseDelta = Input::GetMouseDelta();
+				CameraRotation.y -= Math::Radians( MouseDelta.x * 1.0f );
+				CameraRotation.x -= Math::Radians( MouseDelta.y * 1.0f );
+			}
+
+		});
+
 	
-	Input::Deinitialize();
 	return 0;
 }

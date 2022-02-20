@@ -2,6 +2,9 @@
 #include <Windows.h>
 #include <string>
 #include "ConsoleWindow.hpp"
+#include "Delegate.hpp"
+#include "Input.hpp"
+#include "Time.hpp"
 
 class CGE
 {
@@ -20,14 +23,24 @@ public:
     }
 
     // Begin ticking.
-    static bool Run()
+    static void Run( const Action<>& a_Action )
     {
         s_Running = true;
+        Input::Initialize();
 
         while ( s_Running )
         {
+            a_Action.Invoke();
 
+            Input::Tick();
+            float deltaTime = 1000.0f / Time::GetDeltaTime();
+            std::string Delta = std::to_string((int)deltaTime);
+            Time::Tick();
+            ConsoleWindow::SetTitle( Delta.c_str() );
+            ConsoleWindow::WriteBuffer();
         }
+
+        Input::Deinitialize();
     }
 
     static bool Quit()

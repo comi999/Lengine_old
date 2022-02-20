@@ -14,6 +14,7 @@ enum class KeyCode : unsigned char
 	Ctrl          ,
 	Alt           ,
 	Caps          ,
+	Esc           ,
 	Space         ,
 	PageUp        ,
 	PageDown      ,
@@ -192,6 +193,7 @@ public:
 
 	//private:
 
+
 	static void Tick()
 	{
 		for ( int i = 0; i < KeyStates.size(); ++i )
@@ -207,9 +209,9 @@ public:
 		MousePosition = GetMousePosition();
 	}
 
-	static unsigned char     KeyCodes  [ 98 ];
+	static unsigned char     KeyCodes  [ 99 ];
 	static unsigned char     MouseCodes[ 3  ];
-	static std::bitset< 98 > KeyStates;
+	static std::bitset< 99 > KeyStates;
 	static std::bitset< 3  > MouseStates;
 	static Vector2           MousePosition;
 

@@ -167,21 +167,26 @@
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
+    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGE.h" />
     <ClInclude Include="Colour.h" />
     <ClInclude Include="ConsoleColour.hpp" />
     <ClInclude Include="ConsoleWindow.hpp" />
+    <ClInclude Include="Delegate.hpp" />
     <ClInclude Include="entt\entt.hpp" />
     <ClInclude Include="entt\fwd.hpp" />
+    <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="Input.hpp" />
+    <ClInclude Include="Invoker.hpp" />
     <ClInclude Include="Line.hpp" />
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />
+    <ClInclude Include="Time.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
