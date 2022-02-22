@@ -17,8 +17,8 @@ public:
     {
         size_t Length = strlen( a_Title ) + 1;
         Length = Length > 64 ? 64 : Length;
-        mbstowcs_s( nullptr, s_Title, Length, a_Title, Length );
-        SetConsoleTitle( s_Title );
+        mbstowcs_s( nullptr, s_TitleBuffer, Length, a_Title, Length );
+        SetConsoleTitle( s_TitleBuffer );
     }
 
     static inline Vector2Int GetWindowSize()
@@ -224,12 +224,13 @@ private:
             { 0, 0 },
             &s_WindowRegion );
     }
-    private:
+
     friend class CGE;
 
-    static ConsoleHandle     s_ConsoleHandle;
-    static WindowHandle      s_WindowHandle;
-    static WindowRegion      s_WindowRegion;
+    static ConsoleHandle      s_ConsoleHandle;
+    static WindowHandle       s_WindowHandle;
+    static WindowRegion       s_WindowRegion;
     static Vector< short, 2 > s_PixelSize;
-    static wchar_t           s_Title[ 64 ];
+    static wchar_t            s_TitleBuffer[ 64 ];
+    static std::string        s_Title;
 };

@@ -58,6 +58,9 @@ int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
+	CGE::ShowFPS( true );
+	CGE::SetTargetFPS( 0.0f );
+	ScreenBuffer::BlendingEnabled = true;
 	Cube cube;
 	Plane plane;
 	Axes axes;
@@ -102,18 +105,31 @@ int main()
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
 
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::WHITE );
-		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::WHITE );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 4 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 7 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
 	};
 
 	auto drawPlane = [&]()
@@ -134,10 +150,13 @@ int main()
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
 
-		for ( int i = 0; i < 35; i += 2 )
+		/*for ( int i = 0; i < 35; i += 2 )
 		{
 			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
-		}
+		}*/
+
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 17 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 17 ].ToVector2(), Verts[ 16 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
 	};
 
 	auto drawAxes = [&]()
@@ -163,15 +182,17 @@ int main()
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
 	};
 
-	float movement = 0.01f;
+	float movement = 1.0f;
 	float sensitivity = 0.0000001f;
-
+	float i = 0;
 	CGE::Run( [&]()
 		{
 			ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
 			PVMatrix = Math::Multiply( ProjectionMatrix, ViewMatrix );
 
 			ScreenBuffer::SetBuffer( Colour::BLACK );
+			//Primitive::DrawTriangle( Vector2( 60, 63 ), Vector2( 63.0f + 50.0f * Math::Cos( i ), 63.0f + 50.0f * Math::Sin( i+= 0.01f ) ), Vector2( 66, 63 ), Colour::GREEN );
+			//Primitive::DrawTriangle( Vector2( 20, 50 ), Vector2( 80, 50 ), Vector2( 50, 80 ), Colour::GREEN );
 			drawPlane();
 			drawCube();
 			drawAxes();
@@ -183,37 +204,37 @@ int main()
 			// Left
 			if ( Input::IsKeyDown( KeyCode::A ) )
 			{
-				CameraPosition -= movement * right;
+				CameraPosition -= movement * right * Time::GetDeltaTime();
 			}
 
 			// Right
 			if ( Input::IsKeyDown( KeyCode::D ) )
 			{
-				CameraPosition += movement * right;
+				CameraPosition += movement * right * Time::GetDeltaTime();
 			}
 
 			// Forward
 			if ( Input::IsKeyDown( KeyCode::W ) )
 			{
-				CameraPosition += movement * forward;
+				CameraPosition += movement * forward * Time::GetDeltaTime();
 			}
 
 			// Back
 			if ( Input::IsKeyDown( KeyCode::S ) )
 			{
-				CameraPosition -= movement * forward;
+				CameraPosition -= movement * forward * Time::GetDeltaTime();
 			}
 
 			// Up
 			if ( Input::IsKeyDown( KeyCode::E ) )
 			{
-				CameraPosition += movement * up;
+				CameraPosition += movement * Time::GetDeltaTime() * up;
 			}
 
 			// Down
 			if ( Input::IsKeyDown( KeyCode::Q ) )
 			{
-				CameraPosition -= movement * up;
+				CameraPosition -= movement * up * Time::GetDeltaTime();
 			}
 
 			if ( Input::IsKeyDown( KeyCode::Esc ) )
@@ -223,16 +244,15 @@ int main()
 
 			if ( Input::IsKeyDown( KeyCode::Shift ) )
 			{
-				movement = 0.04f;
+				movement = 4.0f;
 			}
-
 			else
 			{
-				movement = 0.01f;
+				movement = 1.0f;
 			}
 
-			CubeRotation.x += 0.01f;
-			CubeRotation.y += 0.001f;
+			CubeRotation.x += 1.0f * Time::GetDeltaTime();
+			CubeRotation.y += 0.1f * Time::GetDeltaTime();
 
 			if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 			{

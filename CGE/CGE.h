@@ -30,14 +30,22 @@ public:
 
         while ( s_Running )
         {
+            PadDeltaTime();
             a_Action.Invoke();
 
+            // Update calls.
             Input::Tick();
-            float deltaTime = 1000.0f / Time::GetDeltaTime();
-            std::string Delta = std::to_string((int)deltaTime);
             Time::Tick();
-            ConsoleWindow::SetTitle( Delta.c_str() );
+            
+            // Draw calls.
             ConsoleWindow::WriteBuffer();
+
+            // Console Window
+            if ( s_ShowFPS )
+            {
+                float FPS = Time::GetFPS();
+                ConsoleWindow::SetTitle( std::to_string((int)FPS).c_str() );
+            }
         }
 
         Input::Deinitialize();
@@ -54,10 +62,48 @@ public:
         return true;
     }
 
-    static bool IsRunning()
+    inline static bool IsRunning()
     {
         return s_Running;
     }
 
-    static bool s_Running;
+    inline static void ShowFPS( bool a_Value )
+    {
+        s_ShowFPS = a_Value;
+    }
+
+    inline static void SetTargetFPS( float a_Value )
+    {
+        s_TargetFPS = Math::Max( a_Value, 0.0f );
+
+        if ( s_TargetFPS )
+        {
+            s_TargetDeltaTime = 1.0f / s_TargetFPS;
+        }
+    }
+
+    inline static float GetTargetFPS()
+    {
+        return s_TargetFPS;
+    }
+
+private:
+
+    static void PadDeltaTime()
+    {
+        if ( s_TargetFPS )
+        {
+            float RealDeltaTime = Time::GetRealDeltaTime();
+
+            if ( RealDeltaTime < s_TargetDeltaTime )
+            {
+                Sleep( 1000.0f * ( s_TargetDeltaTime - RealDeltaTime ) );
+            }
+        }
+    }
+
+    static bool  s_Running;
+    static bool  s_ShowFPS;
+    static float s_TargetFPS;
+    static float s_TargetDeltaTime;
 };
