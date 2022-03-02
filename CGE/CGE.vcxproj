@@ -162,31 +162,43 @@
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Name.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGE.h" />
     <ClInclude Include="Colour.h" />
+    <ClInclude Include="Component.hpp" />
     <ClInclude Include="ConsoleColour.hpp" />
     <ClInclude Include="ConsoleWindow.hpp" />
     <ClInclude Include="Delegate.hpp" />
     <ClInclude Include="entt\entt.hpp" />
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="FunctionTraits.hpp" />
+    <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Invoker.hpp" />
     <ClInclude Include="Line.hpp" />
     <ClInclude Include="Math.hpp" />
+    <ClInclude Include="MonoBehaviour.hpp" />
+    <ClInclude Include="Name.hpp" />
+    <ClInclude Include="Object.hpp" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
+    <ClInclude Include="Scene.hpp" />
+    <ClInclude Include="SceneHeirarchy.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />
     <ClInclude Include="Time.hpp" />
+    <ClInclude Include="Transform.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

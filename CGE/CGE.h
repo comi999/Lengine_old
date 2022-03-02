@@ -43,8 +43,8 @@ public:
             // Console Window
             if ( s_ShowFPS )
             {
-                float FPS = Time::GetFPS();
-                ConsoleWindow::SetTitle( std::to_string((int)FPS).c_str() );
+                //float FPS = Time::GetFPS();
+                //ConsoleWindow::SetTitle( std::to_string((int)FPS).c_str() );
             }
         }
 
