@@ -1,51 +1,109 @@
 #pragma once
 #include "Object.hpp"
-#include "GameObject.hpp"
 #include "entt/entt.hpp"
 
 typedef ObjectID ComponentID;
 
-class Component : public Object
+class GameObject;
+
+class ComponentBase
 {
-protected:
+private:
 
-	Component( const Name& a_Name, ObjectID a_ObjectID, GameObject& a_GameObject )
-		: Object( a_Name, a_ObjectID )
-		, m_GameObject( &a_GameObject )
-	{ }
+	bool m_StartRun : 1;
+	bool m_Ticking  : 1;
 
-	inline ComponentID GetComponentID() const
-	{
-		return Object::GetObjectID();
-	}
+public:
 
 	inline GameObject& GetGameObject()
 	{
-		//return *m_GameObject;
+		return *m_GameObject;
 	}
 
 	inline const GameObject& GetGameObject() const
 	{
-		//return *m_GameObject;
-	}
-
-	inline GameObjectID GetGameObjectID() const
-	{
-		return m_GameObjectID;
-	}
-
-	inline Transform& GetTransform()
-	{
-		//return m_GameObject->GetTransform();
-	}
-
-	inline const Transform& GetTransform() const
-	{
-		//return m_GameObject->GetTransform();
+		return *m_GameObject;
 	}
 
 private:
 
-	GameObjectID m_GameObjectID;
-	static entt::basic_registry< GameObject > s_Registry;
+	friend class ECS;
+
+	GameObject* m_GameObject;
 };
+
+template < typename T >
+class IComponent : public ComponentBase
+{
+private:
+
+	template < typename... T >
+	struct combine_tuple
+	{
+	};
+
+	template < typename... T, typename... U >
+	struct combine_tuple< std::tuple< T... >, std::tuple< U... > >
+	{
+		using Tuple = std::tuple< T..., U... >;
+	};
+
+	template < typename T >
+	struct unwrappable : public std::false_type
+	{
+	};
+
+	template < template < typename > class T, typename U >
+	struct unwrappable< T< U > > : public std::true_type
+	{
+	};
+
+	template < typename T >
+	struct unwrap
+	{
+		using Tuple = std::tuple<>;
+	};
+
+	template < template < typename... > class T, typename U >
+	struct unwrap< T< U > > : public unwrap< U >
+	{
+		using Tuple = typename combine_tuple< std::tuple< T< void > >, typename unwrap< U >::Tuple >::Tuple;
+	};
+
+	template < template < typename... > class T >
+	struct unwrap< T< void > >
+	{
+		using Tuple = std::tuple< T< void > >;
+	};
+
+public:
+
+	using InheritanceTrace = typename unwrap< IComponent< T > >::Tuple;
+	using LeadingType = std::tuple_element_t< std::tuple_size_v< InheritanceTrace > - 1, InheritanceTrace >;
+};
+
+typedef IComponent< void > Component;
+
+template < typename T >
+class IGraphic : public IComponent< IGraphic< T > >
+{
+
+};
+
+typedef IGraphic< void > Graphic;
+
+template < typename T >
+class IInteractable : public IGraphic< IInteractable< T > >
+{
+
+};
+
+typedef IInteractable< void > Interactable;
+
+template < typename T >
+class IButton : public IInteractable< IButton< T > >
+{
+
+};
+
+typedef IButton< void > Button;

@@ -2,6 +2,7 @@
 #include "Primitive.hpp"
 #include "entt/entt.hpp"
 #include "Input.hpp"
+#include "Component.hpp"
 
 struct Cube
 {
@@ -54,8 +55,18 @@ struct Axes
 	};
 };
 
+#include "Transform.hpp"
+#include "GameObject.hpp"
+
 int main()
 {
+	Vector3 v( 0, 1, 0 );
+	Quaternion q( Math::Normalize( Vector3( 1, 1, 0 ) ), Math::Radians( 180.0f ) );
+
+	auto euler  = Quaternion::ToEulerAngles( q, RotationOrder::ZYX );
+	auto quat   = Quaternion::ToQuaternion( euler, RotationOrder::ZYX );
+	auto euler2 = Quaternion::ToEulerAngles( quat, RotationOrder::ZYX );
+
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );

@@ -2779,6 +2779,36 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ) );
 	}
 
+	template < typename U >
+	static Vector< T, 3 > ExtractRotation( const Matrix< U, 4 >& a_Matrix, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	{
+		switch ( a_RotationOrder )
+		{
+		case RotationOrder::XYZ:
+			break;
+		case RotationOrder::XZY:
+			break;
+		case RotationOrder::YXZ:
+			break;
+		case RotationOrder::YZX:
+			break;
+		case RotationOrder::ZXY:
+		{//possibly patchy, need to check math.
+			float M12 = static_cast< float >( a_Matrix[ 6 ] );
+			float InverseXC = Math::InverseSqrt( 1.0f - M12 * M12 );
+
+			return -Vector< T, 3 >(
+				Math::ASin( -M12 ),
+				Math::ASin( InverseXC * a_Matrix[ 2 ] ),
+				Math::ASin( InverseXC * a_Matrix[ 4 ] ) );
+		}
+		case RotationOrder::ZYX:
+			break;
+		default:
+			break;
+		}
+	}
+
 	template < typename U, typename V >
 	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
@@ -2879,40 +2909,9 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U, typename V >
 	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Vector< V, 3 >& a_Rotation )
 	{
-		/*float cosPitch = Math::Cos( a_Rotation.x );
-		float sinPitch = Math::Sin( a_Rotation.x );
-		float cosYaw   = Math::Cos( a_Rotation.y );
-		float sinYaw   = Math::Sin( a_Rotation.y );
-
-		Vector3 AxisX( cosYaw, 0.0f, -sinYaw );
-		Vector3 AxisY( sinYaw * sinPitch, cosPitch, cosYaw * sinPitch );
-		Vector3 AxisZ( sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw );
-	
-		return Matrix< T, 4 >(
-			static_cast< T >( AxisX.x ),
-			static_cast< T >( AxisY.x ),
-			static_cast< T >( AxisZ.x ),
-			static_cast< T >( 0 ),
-			static_cast< T >( AxisX.y ),
-			static_cast< T >( AxisY.y ),
-			static_cast< T >( AxisZ.y ),
-			static_cast< T >( 0 ),
-			static_cast< T >( AxisX.z ),
-			static_cast< T >( AxisY.z ),
-			static_cast< T >( AxisZ.z ),
-			static_cast< T >( 0 ),
-			static_cast< T >( -Math::Dot( AxisX, a_Position ) ),
-			static_cast< T >( -Math::Dot( AxisY, a_Position ) ),
-			static_cast< T >( -Math::Dot( AxisZ, a_Position ) ),
-			static_cast< T >( 1 ) );*/
-
 		auto Result = CreateRotation( a_Rotation );
 		Translate( Result, a_Position );
 		return Math::Inverse( Result );
-
-		/*auto Result = CreateTranslation( -a_Position );
-		Rotate( Result, -a_Rotation, RotationOrder::YXZ );
-		return Result;*/
 	}
 	
 	inline static Matrix< T, 4 > CreateProjection( float a_FOV, float a_Aspect, float a_NearZ = 0.1f, float a_FarZ = 1000.0f )
@@ -2958,3 +2957,291 @@ template < typename T > const Matrix< T, 4 > Matrix< T, 4 >::Identity = []()
 	return Result;
 }( );
 
+struct Quaternion
+{
+	float w, x, y, z;
+
+	Quaternion()
+		: w( 0 )
+		, x( 0 )
+		, y( 0 )
+		, z( 0 )
+	{ }
+
+	template < typename T, typename U, typename V, typename W >
+	Quaternion( T a_W, U a_X, V a_Y, W a_Z )
+		: w( a_W )
+		, x( a_X )
+		, y( a_Y )
+		, z( a_Z )
+	{ }
+
+	template < typename T, typename U >
+	Quaternion( const IVector< T, 3 >& a_EulerAxis, U a_Radians )
+	{
+		float HalfRadians = 0.5f * a_Radians;
+		float S = Math::Sin( HalfRadians );
+
+		w = Math::Cos( HalfRadians );
+		x = S * a_EulerAxis[ 0 ];
+		y = S * a_EulerAxis[ 1 ];
+		z = S * a_EulerAxis[ 2 ];
+	}
+
+	static Quaternion Inverse( const Quaternion& a_Quaternion )
+	{
+		return Quaternion( a_Quaternion.w, -a_Quaternion.x, -a_Quaternion.y, -a_Quaternion.z );
+	}
+
+	template < typename T, typename U, typename V >
+	static void Rotate( Vector< T, 3 >& a_Vector, const Vector< U, 3 >& a_Axis, V a_Radians )
+	{
+		float c = Math::Cos( 0.5f * a_Radians );
+		float s = Math::Sin( 0.5f * a_Radians );
+		float c2 = c * c;
+		float s2 = s * s;
+		float x2 = a_Axis[ 0 ] * a_Axis[ 0 ];
+		float y2 = a_Axis[ 1 ] * a_Axis[ 1 ];
+		float z2 = a_Axis[ 2 ] * a_Axis[ 2 ];
+		float xp = a_Vector[ 0 ];
+		float yp = a_Vector[ 1 ];
+		float zp = a_Vector[ 2 ];
+		float xxp = xp * a_Axis[ 0 ];
+		float yyp = yp * a_Axis[ 1 ];
+		float zzp = zp * a_Axis[ 2 ];
+
+		a_Vector[ 0 ] = static_cast< T >( s2 * ( xp * ( +x2 - y2 - z2 + c2 ) + 2.0f * ( a_Axis[ 0 ] * ( yyp + zzp ) + c * ( zp * a_Axis[ 1 ] - yp * a_Axis[ 2 ] ) ) ) );
+		a_Vector[ 1 ] = static_cast< T >( s2 * ( yp * ( -x2 + y2 - z2 + c2 ) + 2.0f * ( a_Axis[ 1 ] * ( xxp + zzp ) + c * ( xp * a_Axis[ 2 ] - zp * a_Axis[ 0 ] ) ) ) );
+		a_Vector[ 0 ] = static_cast< T >( s2 * ( zp * ( -x2 - y2 + z2 + c2 ) + 2.0f * ( a_Axis[ 2 ] * ( xxp + yyp ) + c * ( yp * a_Axis[ 0 ] - xp * a_Axis[ 1 ] ) ) ) );
+	}
+
+	static Matrix3 ToMatrix3( const Quaternion& a_Quaternion )
+	{
+		return Matrix3(
+			2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x ) - 1.0f
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z )
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.w * a_Quaternion.y )
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.w * a_Quaternion.z )
+			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.y * a_Quaternion.y ) - 1.0f
+			, 2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.w * a_Quaternion.x )
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y )
+			, 2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.w * a_Quaternion.x )
+			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.z * a_Quaternion.z ) - 1.0f );
+	}
+
+	static Matrix4 ToMatrix4( const Quaternion& a_Quaternion )
+	{
+		return Matrix4(
+			  2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x ) - 1.0f
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z )
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.w * a_Quaternion.y )
+			, 0.0f
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.w * a_Quaternion.z )
+			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.y * a_Quaternion.y ) - 1.0f
+			, 2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.w * a_Quaternion.x )
+			, 0.0f
+			, 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y )
+			, 2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.w * a_Quaternion.x )
+			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.z * a_Quaternion.z ) - 1.0f
+			, 0.0f
+			, 0.0f
+			, 0.0f
+			, 0.0f
+			, 1.0f );
+	}
+
+	static Vector3 ToEulerAngles( const Quaternion& a_Quaternion, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	{
+		return Vector3();
+		/*const auto threeaxisrot = []( double r11, double r12, double r21, double r31, double r32, double res[ ] )
+		{
+			res[ 0 ] = atan2( r31, r32 );
+			res[ 1 ] = asin( r21 );
+			res[ 2 ] = atan2( r11, r12 );
+		};
+
+		float R11, R12, R21, R31, R32;
+
+		auto quaternion2Euler = []( const Quaternion & q, double res[ ], RotationOrder rotSeq )
+		{
+			switch ( rotSeq )
+			{
+			case RotationOrder::ZYX:
+			{
+				R11 = 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w )
+			}
+				threeaxisrot( 2 * ( q.x * q.y + q.w * q.z ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					-2 * ( q.x * q.z - q.w * q.y ),
+					2 * ( q.y * q.z + q.w * q.x ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					res );
+				break;
+
+			case zyz:
+				twoaxisrot( 2 * ( q.y * q.z - q.w * q.x ),
+					2 * ( q.x * q.z + q.w * q.y ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					2 * ( q.y * q.z + q.w * q.x ),
+					-2 * ( q.x * q.z - q.w * q.y ),
+					res );
+				break;
+
+			case zxy:
+				threeaxisrot( -2 * ( q.x * q.y - q.w * q.z ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					2 * ( q.y * q.z + q.w * q.x ),
+					-2 * ( q.x * q.z - q.w * q.y ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					res );
+				break;
+
+			case zxz:
+				twoaxisrot( 2 * ( q.x * q.z + q.w * q.y ),
+					-2 * ( q.y * q.z - q.w * q.x ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					2 * ( q.x * q.z - q.w * q.y ),
+					2 * ( q.y * q.z + q.w * q.x ),
+					res );
+				break;
+
+			case yxz:
+				threeaxisrot( 2 * ( q.x * q.z + q.w * q.y ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					-2 * ( q.y * q.z - q.w * q.x ),
+					2 * ( q.x * q.y + q.w * q.z ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					res );
+				break;
+
+			case yxy:
+				twoaxisrot( 2 * ( q.x * q.y - q.w * q.z ),
+					2 * ( q.y * q.z + q.w * q.x ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					2 * ( q.x * q.y + q.w * q.z ),
+					-2 * ( q.y * q.z - q.w * q.x ),
+					res );
+				break;
+
+			case yzx:
+				threeaxisrot( -2 * ( q.x * q.z - q.w * q.y ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					2 * ( q.x * q.y + q.w * q.z ),
+					-2 * ( q.y * q.z - q.w * q.x ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					res );
+				break;
+
+			case yzy:
+				twoaxisrot( 2 * ( q.y * q.z + q.w * q.x ),
+					-2 * ( q.x * q.y - q.w * q.z ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					2 * ( q.y * q.z - q.w * q.x ),
+					2 * ( q.x * q.y + q.w * q.z ),
+					res );
+				break;
+
+			case xyz:
+				threeaxisrot( -2 * ( q.y * q.z - q.w * q.x ),
+					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+					2 * ( q.x * q.z + q.w * q.y ),
+					-2 * ( q.x * q.y - q.w * q.z ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					res );
+				break;
+
+			case xyx:
+				twoaxisrot( 2 * ( q.x * q.y + q.w * q.z ),
+					-2 * ( q.x * q.z - q.w * q.y ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					2 * ( q.x * q.y - q.w * q.z ),
+					2 * ( q.x * q.z + q.w * q.y ),
+					res );
+				break;
+
+			case xzy:
+				threeaxisrot( 2 * ( q.y * q.z + q.w * q.x ),
+					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+					-2 * ( q.x * q.y - q.w * q.z ),
+					2 * ( q.x * q.z + q.w * q.y ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					res );
+				break;
+
+			case xzx:
+				twoaxisrot( 2 * ( q.x * q.z - q.w * q.y ),
+					2 * ( q.x * q.y + q.w * q.z ),
+					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+					2 * ( q.x * q.z + q.w * q.y ),
+					-2 * ( q.x * q.y - q.w * q.z ),
+					res );
+				break;
+			default:
+				std::cout << "Unknown rotation sequence" << std::endl;
+				break;
+			}
+		};*/
+	}
+
+	static Quaternion ToQuaternion( const Vector3& a_EulerAngles, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	{
+		Vector3 Half = 0.5f * a_EulerAngles;
+
+		float cx = Math::Cos( Half.x );
+		float cy = Math::Cos( Half.y );
+		float cz = Math::Cos( Half.z );
+		float sx = Math::Sin( Half.x );
+		float sy = Math::Sin( Half.y );
+		float sz = Math::Sin( Half.z );
+
+		float qx = sx * cy * cz - cx * sy * sz;
+		float qy = cx * cy * sz + sx * sy * cz;
+		float qz = cx * sy * cz - sx * cy * sz;
+		float qw = cx * cy * cz + sx * sy * sz;
+
+		// x = pitch
+		// y = yaw
+		// z = roll
+
+		switch ( a_RotationOrder )
+		{
+		case RotationOrder::XYZ:
+		{
+			return Quaternion( qw, qx, qy, qz );
+		}
+		case RotationOrder::XZY:
+		{
+			return Quaternion( qw, qx, qz, qy );
+		}
+		case RotationOrder::YXZ:
+		{
+			return Quaternion( qw, qy, qx, qz );
+		}
+		case RotationOrder::YZX:
+		{
+			return Quaternion( qw, qy, qz, qx );
+		}
+		case RotationOrder::ZXY:
+		{
+			return Quaternion( qw, qz, qx, qy );
+		}
+		case RotationOrder::ZYX:
+		{
+			float w = cx * cx * cy - sx * sy * sz;
+			float x = cx * sy * cz + cx * sx * cy;
+			float y = cx * sy * cz - sx * cy * sz;
+			float z = cx * cy * sz + sx * sy * cz;
+			return Quaternion( w, x, y, z );
+		}
+		}
+	}
+};
+
+static Quaternion operator*( const Quaternion& a_QuaternionA, const Quaternion& a_QuaternionB )
+{
+	return Quaternion(
+		a_QuaternionA.w * a_QuaternionB.w - a_QuaternionA.x * a_QuaternionB.x - a_QuaternionA.y * a_QuaternionB.y - a_QuaternionA.z * a_QuaternionB.z,
+		a_QuaternionA.w * a_QuaternionB.x + a_QuaternionA.x * a_QuaternionB.w + a_QuaternionA.z * a_QuaternionB.y - a_QuaternionA.y * a_QuaternionB.z,
+		a_QuaternionA.y * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.y + a_QuaternionA.z * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.z,
+		a_QuaternionA.z * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.z + a_QuaternionA.y * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.y );
+}
