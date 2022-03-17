@@ -63,18 +63,18 @@ int main()
 	Vector3 v( 0, 1, 0 );
 	Quaternion q( Math::Normalize( Vector3( 1, 1, 0 ) ), Math::Radians( 180.0f ) );
 
-	auto euler  = Quaternion::ToEulerAngles( q, RotationOrder::ZYX );
-	auto quat   = Quaternion::ToQuaternion( euler, RotationOrder::ZYX );
-	auto euler2 = Quaternion::ToEulerAngles( quat, RotationOrder::ZYX );
+	auto euler  = Quaternion::ToEulerAngles( q,     RotationOrder::ZYX );
+	auto quat   = Quaternion::ToQuaternion ( euler, RotationOrder::ZYX );
+	auto euler2 = Quaternion::ToEulerAngles( quat,  RotationOrder::ZYX );
 
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
 	ScreenBuffer::BlendingEnabled = true;
-	Cube cube;
+	Cube  cube;
 	Plane plane;
-	Axes axes;
+	Axes  axes;
 
 	Vector3 CubePosition = Vector3( 0.0f, 0.5f, 0.0f );
 	Vector3 CubeRotation = Vector3::Zero;
