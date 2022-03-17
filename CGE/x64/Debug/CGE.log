@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 ﻿  GameObject.cpp
   Graphics.cpp
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
@@ -167,10 +168,46 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(341,24): war
               T=float
           ]
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+=======
+﻿  CGE.cpp
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Time.hpp(37,41): warning C4244: '=': conversion from '_Rep' to 'float', possible loss of data
+          with
+          [
+              _Rep=__int64
+          ]
+  Main.cpp
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Time.hpp(37,41): warning C4244: '=': conversion from '_Rep' to 'float', possible loss of data
+          with
+          [
+              _Rep=__int64
+          ]
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2919): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
           with
           [
@@ -195,16 +232,30 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(54,14): warning C
               T=float
           ]
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3056): message : see reference to function template instantiation 'T Math::ASin<float>(T)' being compiled
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2920): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2919): message : while compiling class template member function 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)'
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(80): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(80): message : see reference to class template instantiation 'Matrix<float,4,4>' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3091): message : see reference to function template instantiation 'T Math::Cos<T>(T)' being compiled
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2710): message : see reference to function template instantiation 'T Math::Cos<U>(T)' being compiled
+>>>>>>> Stashed changes
           with
           [
               T=float
@@ -214,11 +265,16 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning 
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3094): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2664): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationX<T>(U)' being compiled
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
+<<<<<<< Updated upstream
   PixelColourMap.cpp
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
@@ -230,6 +286,9 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
   Rect.hpp
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(72,15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2664): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationX<T>(U)' being compiled
+>>>>>>> Stashed changes
           with
           [
               T=float
@@ -259,21 +318,40 @@ C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3091): message : 
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2909): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2909): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(171): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateView<float,float>(const Vector<float,3> &,const Vector<float,3> &)' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(171): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateView<float,float>(const Vector<float,3> &,const Vector<float,3> &)' being compiled
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3094): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2711): message : see reference to function template instantiation 'T Math::Sin<U>(T)' being compiled
+>>>>>>> Stashed changes
           with
           [
               T=float
           ]
   Time.cpp
   Generating Code...
+<<<<<<< Updated upstream
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3086): warning C4715: 'Quaternion::ToEulerAngles': not all control paths return a value
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3138): warning C4715: 'Quaternion::ToQuaternion': not all control paths return a value
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ScreenBuffer.hpp(220): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
 C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2705): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
   CGE.vcxproj -> C:\Users\l_farag\source\repos\Console-Game-Engine\x64\Debug\CGE.exe
+=======
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\ScreenBuffer.hpp(220): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
+C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2705): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
+  CGE.vcxproj -> C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\x64\Debug\CGE.exe
+>>>>>>> Stashed changes
