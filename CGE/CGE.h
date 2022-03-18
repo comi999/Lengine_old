@@ -53,7 +53,7 @@ public:
 
     static bool SetLockedFPS( float a_LockedFPS )
     {
-        s_LockedFPS = 1000.0f / a_LockedFPS;
+        //s_LockedFPS = 1000.0f / a_LockedFPS;
     }
 
     static bool Quit()

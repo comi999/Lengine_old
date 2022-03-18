@@ -3050,9 +3050,69 @@ struct Quaternion
 			, 1.0f );
 	}
 
-	static Vector3 ToEulerAngles( const Quaternion& a_Quaternion, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	static Vector3 ToEulerAngles( const Quaternion& q, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
-		return Vector3();
+		float R00, R01, R11, R20, R21;
+
+		switch ( a_RotationOrder )
+		{
+			case RotationOrder::XYZ:
+			{
+				R00 = -2.0f * ( q.y * q.z - q.w * q.x );
+				R01 = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
+				R11 = 2.0f * ( q.x * q.z + q.w * q.y );
+				R20 = -2.0f * ( q.x * q.y - q.w * q.z );
+				R21 = q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z;
+				break;
+			}
+			case RotationOrder::XZY:
+			{
+				R00 = 2.0f * ( q.y * q.z + q.w * q.x );
+				R01 = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
+				R11 = -2.0f * ( q.x * q.y - q.w * q.z );
+				R20 = 2.0f * ( q.x * q.z + q.w * q.y );
+				R21 = q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z;
+				break;
+			}
+			case RotationOrder::YXZ:
+			{
+				R00 = 2.0f * ( q.x * q.z + q.w * q.y );
+				R01 = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
+				R11 = -2.0f * ( q.y * q.z - q.w * q.x );
+				R20 = 2.0f * ( q.x * q.y + q.w * q.z );
+				R21 = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
+				break;
+			}
+			case RotationOrder::YZX:
+			{
+				R00 = -2.0f * ( q.x * q.z - q.w * q.y );
+				R01 = q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z;
+				R11 = 2.0f * ( q.x * q.y + q.w * q.z );
+				R20 = -2.0f * ( q.y * q.z - q.w * q.x );
+				R21 = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
+				break;
+			}
+			case RotationOrder::ZXY:
+			{
+				R00 = -2.0f * ( q.x * q.y - q.w * q.z );
+				R01 = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
+				R11 = 2.0f * ( q.y * q.z + q.w * q.x );
+				R20 = -2.0f * ( q.x * q.z - q.w * q.y );
+				R21 = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
+				break;
+			}
+			case RotationOrder::ZYX:
+			{
+				R00 = 2.0f * ( q.x * q.y + q.w * q.z );
+				R01 = q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z;
+				R11 = -2.0f * ( q.x * q.z - q.w * q.y );
+				R20 = 2.0f * ( q.y * q.z + q.w * q.x );
+				R21 = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
+				break;
+			}
+		}
+
+		return Vector3( Math::ATan( R20, R21 ), Math::ASin( R11 ), Math::ATan( R00, R01 ) );
 		/*const auto threeaxisrot = []( double r11, double r12, double r21, double r31, double r32, double res[ ] )
 		{
 			res[ 0 ] = atan2( r31, r32 );
@@ -3064,12 +3124,7 @@ struct Quaternion
 
 		auto quaternion2Euler = []( const Quaternion & q, double res[ ], RotationOrder rotSeq )
 		{
-			switch ( rotSeq )
-			{
-			case RotationOrder::ZYX:
-			{
-				R11 = 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w )
-			}
+			case zyx:
 				threeaxisrot( 2 * ( q.x * q.y + q.w * q.z ),
 					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
 					-2 * ( q.x * q.z - q.w * q.y ),
@@ -3077,16 +3132,6 @@ struct Quaternion
 					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
 					res );
 				break;
-
-			case zyz:
-				twoaxisrot( 2 * ( q.y * q.z - q.w * q.x ),
-					2 * ( q.x * q.z + q.w * q.y ),
-					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-					2 * ( q.y * q.z + q.w * q.x ),
-					-2 * ( q.x * q.z - q.w * q.y ),
-					res );
-				break;
-
 			case zxy:
 				threeaxisrot( -2 * ( q.x * q.y - q.w * q.z ),
 					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
@@ -3095,16 +3140,6 @@ struct Quaternion
 					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
 					res );
 				break;
-
-			case zxz:
-				twoaxisrot( 2 * ( q.x * q.z + q.w * q.y ),
-					-2 * ( q.y * q.z - q.w * q.x ),
-					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-					2 * ( q.x * q.z - q.w * q.y ),
-					2 * ( q.y * q.z + q.w * q.x ),
-					res );
-				break;
-
 			case yxz:
 				threeaxisrot( 2 * ( q.x * q.z + q.w * q.y ),
 					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
@@ -3113,16 +3148,6 @@ struct Quaternion
 					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
 					res );
 				break;
-
-			case yxy:
-				twoaxisrot( 2 * ( q.x * q.y - q.w * q.z ),
-					2 * ( q.y * q.z + q.w * q.x ),
-					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
-					2 * ( q.x * q.y + q.w * q.z ),
-					-2 * ( q.y * q.z - q.w * q.x ),
-					res );
-				break;
-
 			case yzx:
 				threeaxisrot( -2 * ( q.x * q.z - q.w * q.y ),
 					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
@@ -3131,16 +3156,6 @@ struct Quaternion
 					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
 					res );
 				break;
-
-			case yzy:
-				twoaxisrot( 2 * ( q.y * q.z + q.w * q.x ),
-					-2 * ( q.x * q.y - q.w * q.z ),
-					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
-					2 * ( q.y * q.z - q.w * q.x ),
-					2 * ( q.x * q.y + q.w * q.z ),
-					res );
-				break;
-
 			case xyz:
 				threeaxisrot( -2 * ( q.y * q.z - q.w * q.x ),
 					q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
@@ -3149,16 +3164,6 @@ struct Quaternion
 					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
 					res );
 				break;
-
-			case xyx:
-				twoaxisrot( 2 * ( q.x * q.y + q.w * q.z ),
-					-2 * ( q.x * q.z - q.w * q.y ),
-					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
-					2 * ( q.x * q.y - q.w * q.z ),
-					2 * ( q.x * q.z + q.w * q.y ),
-					res );
-				break;
-
 			case xzy:
 				threeaxisrot( 2 * ( q.y * q.z + q.w * q.x ),
 					q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
@@ -3166,18 +3171,6 @@ struct Quaternion
 					2 * ( q.x * q.z + q.w * q.y ),
 					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
 					res );
-				break;
-
-			case xzx:
-				twoaxisrot( 2 * ( q.x * q.z - q.w * q.y ),
-					2 * ( q.x * q.y + q.w * q.z ),
-					q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
-					2 * ( q.x * q.z + q.w * q.y ),
-					-2 * ( q.x * q.y - q.w * q.z ),
-					res );
-				break;
-			default:
-				std::cout << "Unknown rotation sequence" << std::endl;
 				break;
 			}
 		};*/
@@ -3207,11 +3200,21 @@ struct Quaternion
 		{
 		case RotationOrder::XYZ:
 		{
-			return Quaternion( qw, qx, qy, qz );
+			return Quaternion( 
+				cx * cy * cz + sx * sy * sz,
+				sx * cy * cz - cx * sy * sz,
+				cx * sy * cz + sx * cy * sz,
+				cx * cy * sz - sx * sy * cz
+			);
 		}
 		case RotationOrder::XZY:
 		{
-			return Quaternion( qw, qx, qz, qy );
+			return Quaternion(
+				cx * cy * cz - sx * sy * sz,
+				sx * cy * cz + cx * sy * sz,
+				cx * sy * cz + sx * cy * sz,
+				cx * cy * sz - sx * sy * cz
+			);
 		}
 		case RotationOrder::YXZ:
 		{

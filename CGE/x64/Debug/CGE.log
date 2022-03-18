@@ -1,357 +1,167 @@
-<<<<<<< Updated upstream
-﻿  GameObject.cpp
-  Graphics.cpp
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(72,15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+﻿  Main.cpp
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\CGE.h(105,32): warning C4244: 'argument': conversion from 'float' to 'DWORD', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(253,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3055): message : see reference to function template instantiation 'T Math::ATan<float>(T,T)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(254,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(54,14): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(255,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3056): message : see reference to function template instantiation 'T Math::ASin<float>(T)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(283,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(284,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3091): message : see reference to function template instantiation 'T Math::Cos<T>(T)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(288,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(289,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3094): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(298,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-  Input.cpp
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-  Main.cpp
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\CGE.h(100,32): warning C4244: 'argument': conversion from 'float' to 'DWORD', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(253,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(299,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(254,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(303,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(255,36): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(304,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(283,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(320,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(284,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(321,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(288,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(325,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(289,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(326,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(298,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(335,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(299,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(336,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(303,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(340,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(304,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Primitive.hpp(341,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(320,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(321,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(2919): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(325,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(2918): message : while compiling class template member function 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)'
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Main.cpp(98): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3033): message : see reference to class template instantiation 'Matrix<float,4,4>' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(72,15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(326,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3115): message : see reference to function template instantiation 'T Math::ATan<float>(T,T)' being compiled
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(335,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(54,14): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(336,21): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3115): message : see reference to function template instantiation 'T Math::ASin<float>(T)' being compiled
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(340,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Primitive.hpp(341,24): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3183): message : see reference to function template instantiation 'T Math::Cos<T>(T)' being compiled
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-=======
-﻿  CGE.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Time.hpp(37,41): warning C4244: '=': conversion from '_Rep' to 'float', possible loss of data
-          with
-          [
-              _Rep=__int64
-          ]
-  Main.cpp
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Time.hpp(37,41): warning C4244: '=': conversion from '_Rep' to 'float', possible loss of data
-          with
-          [
-              _Rep=__int64
-          ]
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(83,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(88,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(93,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Line.hpp(98,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(663,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
->>>>>>> Stashed changes
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2919): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3186): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
           with
           [
               T=float
           ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2918): message : while compiling class template member function 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)'
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Main.cpp(94): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)' being compiled
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3033): message : see reference to class template instantiation 'Matrix<float,4,4>' being compiled
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(72,15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3055): message : see reference to function template instantiation 'T Math::ATan<float>(T,T)' being compiled
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(54,14): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3056): message : see reference to function template instantiation 'T Math::ASin<float>(T)' being compiled
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2920): message : see reference to function template instantiation 'T Math::Tan<float>(T)' being compiled
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2919): message : while compiling class template member function 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)'
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(80): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateProjection(float,float,float,float)' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(80): message : see reference to class template instantiation 'Matrix<float,4,4>' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3091): message : see reference to function template instantiation 'T Math::Cos<T>(T)' being compiled
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2710): message : see reference to function template instantiation 'T Math::Cos<U>(T)' being compiled
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3094): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2664): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationX<T>(U)' being compiled
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-  PixelColourMap.cpp
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(42,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(52,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(53,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(54,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(75,16): warning C4244: 'initializing': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(86,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(87,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Colour.h(88,39): warning C4244: '=': conversion from 'float' to 'Colour::Channel', possible loss of data
-  Rect.hpp
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(72,15): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2664): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotationX<T>(U)' being compiled
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3055): message : see reference to function template instantiation 'T Math::ATan<float>(T,T)' being compiled
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(54,14): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3056): message : see reference to function template instantiation 'T Math::ASin<float>(T)' being compiled
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(198,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3091): message : see reference to function template instantiation 'T Math::Cos<T>(T)' being compiled
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2909): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2909): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateRotation<float>(const Vector<float,3> &,RotationOrder)' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(171): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateView<float,float>(const Vector<float,3> &,const Vector<float,3> &)' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Main.cpp(171): message : see reference to function template instantiation 'Matrix<float,4,4> Matrix<float,4,4>::CreateView<float,float>(const Vector<float,3> &,const Vector<float,3> &)' being compiled
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(618,13): warning C4244: 'return': conversion from 'double' to 'T', possible loss of data
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3094): message : see reference to function template instantiation 'T Math::Sin<T>(T)' being compiled
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2711): message : see reference to function template instantiation 'T Math::Sin<U>(T)' being compiled
->>>>>>> Stashed changes
-          with
-          [
-              T=float
-          ]
-  Time.cpp
-  Generating Code...
-<<<<<<< Updated upstream
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3086): warning C4715: 'Quaternion::ToEulerAngles': not all control paths return a value
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(3138): warning C4715: 'Quaternion::ToQuaternion': not all control paths return a value
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\ScreenBuffer.hpp(220): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
-C:\Users\l_farag\source\repos\Console-Game-Engine\CGE\Math.hpp(2705): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
-  CGE.vcxproj -> C:\Users\l_farag\source\repos\Console-Game-Engine\x64\Debug\CGE.exe
-=======
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\ScreenBuffer.hpp(220): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
-C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\CGE\Math.hpp(2705): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
-  CGE.vcxproj -> C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\x64\Debug\CGE.exe
->>>>>>> Stashed changes
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(3240): warning C4715: 'Quaternion::ToQuaternion': not all control paths return a value
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\Math.hpp(2705): warning C4715: 'Matrix<float,4,4>::CreateRotation<float>': not all control paths return a value
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\ConsoleWindow.hpp(149): warning C4715: 'ConsoleWindow::Initialize': not all control paths return a value
+C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\CGE\ScreenBuffer.hpp(220): warning C4715: 'ScreenBuffer::Initialize': not all control paths return a value
+  CGE.vcxproj -> C:\Users\l_farag\Downloads\Repos\Console-Game-Engine\x64\Debug\CGE.exe

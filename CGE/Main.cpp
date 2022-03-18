@@ -60,12 +60,16 @@ struct Axes
 
 int main()
 {
-	Vector3 v( 0, 1, 0 );
-	Quaternion q( Math::Normalize( Vector3( 1, 1, 0 ) ), Math::Radians( 180.0f ) );
+	Vector3 v( Math::Radians( -45.0f ), Math::Radians( -180.0f ), Math::Radians( -45.0f ) );
+	auto q = Quaternion::ToQuaternion( v, RotationOrder::XZY );
+	auto v1 = Quaternion::ToEulerAngles( q, RotationOrder::YZX );
+	Vector3 v2( Math::Degrees( v1.x ), Math::Degrees( v1.y ), Math::Degrees( v1.z ) );
 
-	auto euler  = Quaternion::ToEulerAngles( q,     RotationOrder::ZYX );
-	auto quat   = Quaternion::ToQuaternion ( euler, RotationOrder::ZYX );
-	auto euler2 = Quaternion::ToEulerAngles( quat,  RotationOrder::ZYX );
+	Vector3 p( 1, 0, 0 );
+	auto m0 = Matrix4::CreateRotation( v, RotationOrder::XZY );
+	auto m1 = Matrix4::CreateRotation( v1, RotationOrder::XZY );
+	auto vfinal0 = Math::Multiply( m0, Vector4( p ) );
+	auto vfinal1 = Math::Multiply( m1, Vector4( p ) );
 
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
