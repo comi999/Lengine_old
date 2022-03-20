@@ -3050,7 +3050,7 @@ struct Quaternion
 			, 1.0f );
 	}
 
-	static Vector3 ToEulerAngles( const Quaternion& a_Quaternion, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	static Vector3 ToEulerAngles( const Quaternion& q, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
 		switch ( a_RotationOrder )
 		{
