@@ -57,19 +57,62 @@ struct Axes
 
 #include "Transform.hpp"
 #include "GameObject.hpp"
+void foo()
+{
 
+}
 int main()
 {
-	Vector3 v( Math::Radians( -45.0f ), Math::Radians( -180.0f ), Math::Radians( -45.0f ) );
-	auto q = Quaternion::ToQuaternion( v, RotationOrder::XZY );
-	auto v1 = Quaternion::ToEulerAngles( q, RotationOrder::YZX );
-	Vector3 v2( Math::Degrees( v1.x ), Math::Degrees( v1.y ), Math::Degrees( v1.z ) );
+	float highestError = 0.0f;
 
-	Vector3 p( 1, 0, 0 );
-	auto m0 = Matrix4::CreateRotation( v, RotationOrder::XZY );
-	auto m1 = Matrix4::CreateRotation( v1, RotationOrder::XZY );
-	auto vfinal0 = Math::Multiply( m0, Vector4( p ) );
-	auto vfinal1 = Math::Multiply( m1, Vector4( p ) );
+	for ( int i = 0; i < 6; i++ )
+	{
+		RotationOrder rotOrder = ( RotationOrder )i;
+
+		for ( float x = 0; x <= 2.0f * Math::Pi(); x += 0.125f * Math::Pi() )
+		{
+			for ( float y = 0; y <= 2.0f * Math::Pi(); y += 0.125f * Math::Pi() )
+			{
+				for ( float z = 0; z <= 2.0f * Math::Pi(); z += 0.125f * Math::Pi() )
+				{
+					Vector3 v0( Math::Radians( x ), Math::Radians( y ), Math::Radians( z ) );
+					auto q = Quaternion::ToQuaternion( v0, rotOrder );
+					auto v1 = Quaternion::ToEulerAngles( q, rotOrder );
+
+					Vector3 p( 1, 0, 0 );
+					auto m0 = Matrix4::CreateRotation( v0, rotOrder );
+					auto m1 = Matrix4::CreateRotation( v1, rotOrder );
+					auto pfinal0 = Math::Multiply( m0, Vector4( p ) );
+					auto pfinal1 = Math::Multiply( m1, Vector4( p ) );
+
+					auto isClose = [&]( float a, float b )
+					{
+						float error = Math::Abs( a - b );
+						
+						if ( highestError < error )
+						{
+							highestError = error;
+						}
+						
+						return error < 0.0000001f;
+					};
+
+					if ( !( isClose( pfinal0.x, pfinal1.x ) && isClose( pfinal0.y, pfinal1.y ) && isClose( pfinal0.z, pfinal1.z ) ) )
+					{
+						foo();
+					}
+
+					auto mat3 = Quaternion::ToMatrix3( q );
+					auto q3 = Quaternion::FromMatrix3( mat3 );
+
+					if ( !( isClose( q.w, q3.w ), isClose( q.x, q3.x ), isClose( q.y, q3.y ), isClose( q.z, q3.z ) ) )
+					{
+						foo();
+					}
+				}
+			}
+		}
+	}
 
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
