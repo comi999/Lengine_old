@@ -63,34 +63,6 @@ void foo()
 }
 int main()
 {
-	/*auto e0 = Vector3( Math::Radians( 10.0f ), Math::Radians( 20.0f ), Math::Radians( 15.0f ) );
-	auto q0 = Quaternion::ToQuaternion( e0, RotationOrder::XYZ );
-	auto e1 = Quaternion::ToEulerAngles( q0, RotationOrder::XYZ );
-	e1 = Vector3( Math::Degrees( e1.x ), Math::Degrees( e1.y ), Math::Degrees( e1.z ) );
-	auto m0 = Matrix4::CreateRotation( q0 );
-	auto q1 = Quaternion::ToQuaternion( m0 );
-	auto e2 = Quaternion::ToEulerAngles( q1, RotationOrder::XYZ );
-	e2 = Vector3( Math::Degrees( e2.x ), Math::Degrees( e2.y ), Math::Degrees( e2.z ) );*/
-
-	auto v0 = Vector3::Right;
-	//auto q0 = Quaternion::ToQuaternion( Vector3::Up, Math::Radians( 90.0f ) );
-	auto q0 = Quaternion::ToQuaternion( Vector3( 0.0f, Math::Radians( .0f ), 0.0f ), RotationOrder::XYZ );
-	auto m0 = Quaternion::ToMatrix3( q0 );
-	auto q1 = Quaternion::ToQuaternion( m0 );
-	auto m1 = Quaternion::ToMatrix3( q1 );
-	
-	auto r0 = Math::Multiply( m1, v0 );
-	
-	Vector3 pos;
-	Vector3 sca;
-	Quaternion qua;
-	auto tra = Matrix4::CreateTransform( 
-		Vector3( 10, 20, 30 ), 
-		Quaternion::ToQuaternion( Vector3( Math::Radians( 10.0f ), Math::Radians( 20.0f ), Math::Radians( 15.0f ) ), RotationOrder::XYZ ), 
-		Vector3( 2, 3, 4 ) );
-
-	Matrix4::Decompose( tra, pos, qua, sca );
-	foo();
 	//CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	//Input::Initialize();
 	//CGE::ShowFPS( true );
@@ -99,7 +71,7 @@ int main()
 	//Cube  cube;
 	//Plane plane;
 	//Axes  axes;
-
+	//
 	//Vector3 CubePosition = Vector3( 0.0f, 0.5f, 0.0f );
 	//Vector3 CubeRotation = Vector3::Zero;
 	//Vector3 CubeScale = Vector3::One * 1.0f;
@@ -113,7 +85,7 @@ int main()
 	//Vector3 AxesScale = Vector3::One * 3.0f;
 
 	//Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
-	//Quaternion CameraRotation;
+	//Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
 
 	//auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f );
 	//auto ViewMatrix = Matrix4();
