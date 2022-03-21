@@ -2656,153 +2656,15 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		a_Matrix.z3 += static_cast< U >( a_Vector.z );
 	}
 
-	template < typename U >
-	static Matrix< T, 4 > CreateRotation( const Vector< U, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	inline static Matrix4 CreateRotation( const Quaternion& a_Quaternion )
 	{
-		switch ( a_RotationOrder )
-		{
-		case RotationOrder::XYZ:
-		{
-			auto Rotation = CreateRotationX( a_Vector.x );
-			RotateY( Rotation, a_Vector.y );
-			RotateZ( Rotation, a_Vector.z );
-			return Rotation;
-		}
-		case RotationOrder::XZY:
-		{
-			auto Rotation = CreateRotationX( static_cast< T >( a_Vector.x ) );
-			RotateZ( Rotation, a_Vector.z );
-			RotateY( Rotation, a_Vector.y );
-			return Rotation; 
-		}
-		case RotationOrder::YXZ:
-		{
-			auto Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
-			RotateX( Rotation, a_Vector.x );
-			RotateZ( Rotation, a_Vector.z );
-			return Rotation; 
-		}
-		case RotationOrder::YZX:
-		{
-			auto Rotation = CreateRotationY( static_cast< T >( a_Vector.y ) );
-			RotateZ( Rotation, a_Vector.z );
-			RotateX( Rotation, a_Vector.x );
-			return Rotation;
-		}
-		case RotationOrder::ZXY:
-		{
-			auto Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
-			RotateX( Rotation, a_Vector.x );
-			RotateY( Rotation, a_Vector.y );
-			return Rotation;
-		}
-		case RotationOrder::ZYX:
-		{
-			auto Rotation = CreateRotationZ( static_cast< T >( a_Vector.z ) );
-			RotateY( Rotation, a_Vector.y );
-			RotateX( Rotation, a_Vector.x );
-			return Rotation; 
-		}
-		}
+		return Quaternion::ToMatrix4( a_Quaternion );
 	}
 
 	template < typename U >
-	static Matrix< T, 4 > CreateRotationX( U a_Radians )
+	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Quaternion& a_Rotation )
 	{
-		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
-
-		return Matrix< T, 4 >( 
-			static_cast< T >( 1 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( C ),
-			static_cast< T >( -S ),
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( S ),
-			static_cast< T >( C ),
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 0 ), 
-			static_cast< T >( 1 ) );
-	}
-
-	template < typename U >
-	static Matrix< T, 4 > CreateRotationY( U a_Radians )
-	{
-		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
-
-		return Matrix< T, 4 >(
-			static_cast< T >( C ),
-			static_cast< T >( 0 ),
-			static_cast< T >( S ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( -S ),
-			static_cast< T >( 0 ),
-			static_cast< T >( C ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ) );
-	}
-
-	template < typename U >
-	static Matrix< T, 4 > CreateRotationZ( U a_Radians )
-	{
-		U C = Math::Cos( a_Radians );
-		U S = Math::Sin( a_Radians );
-
-		return Matrix< T, 4 >(
-			static_cast< T >( C ),
-			static_cast< T >( -S ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( S ),
-			static_cast< T >( C ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ) );
-	}
-
-	template < typename U, typename V >
-	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
-	{
-		a_Matrix = Math::Multiply( CreateRotation( a_Vector, a_RotationOrder ), a_Matrix );
-	}
-
-	template < typename U, typename V >
-	inline static void RotateX( Matrix< U, 4 >& a_Matrix, V a_Radians )
-	{
-		a_Matrix = Math::Multiply( CreateRotationX( a_Radians ), a_Matrix );
-	}
-
-	template < typename U, typename V >
-	inline static void RotateY( Matrix< U, 4 >& a_Matrix, V a_Radians )
-	{
-		a_Matrix = Math::Multiply( CreateRotationY( a_Radians ), a_Matrix );
-	}
-
-	template < typename U, typename V >
-	inline static void RotateZ( Matrix< U, 4 >& a_Matrix, V a_Radians )
-	{
-		a_Matrix = Math::Multiply( CreateRotationZ( a_Radians ), a_Matrix );
+		a_Matrix = Math::Multiply( CreateRotation( a_Rotation ), a_Matrix );
 	}
 
 	template < typename U >
@@ -2835,11 +2697,11 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		a_Matrix.z2 *= static_cast< U >( a_Vector.z );
 	}
 
-	template < typename U, typename V, typename W >
-	inline static Matrix< T, 4 > CreateTransform( const Vector< U, 3 >& a_Translation, const Vector< V, 3 >& a_Rotation, const Vector< W, 3 >& a_Scale, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	template < typename U, typename V >
+	inline static Matrix< T, 4 > CreateTransform( const Vector< U, 3 >& a_Translation, const Quaternion& a_Rotation, const Vector< V, 3 >& a_Scale )
 	{
 		auto Result = CreateScale( a_Scale );
-		Rotate( Result, a_Rotation, a_RotationOrder );
+		Rotate( Result, a_Rotation );
 		Translate( Result, a_Translation );
 		return Result;
 	}
@@ -2894,7 +2756,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	}
 
 	template < typename U, typename V >
-	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Vector< V, 3 >& a_Rotation )
+	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Quaternion& a_Rotation )
 	{
 		auto Result = CreateRotation( a_Rotation );
 		Translate( Result, a_Position );
@@ -2953,7 +2815,7 @@ struct Quaternion : public IVector< float, 4 >
 	};
 
 	Quaternion()
-		: w( 0 )
+		: w( 1 )
 		, x( 0 )
 		, y( 0 )
 		, z( 0 )
@@ -2979,13 +2841,13 @@ struct Quaternion : public IVector< float, 4 >
 	{
 		return Matrix3(
 			1.0f - 2.0f * ( a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
-			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
-			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
 			2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.z * a_Quaternion.w ),
-			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
-			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
 			2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
 			2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.x * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
 			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y )
 		);
 	}
@@ -2994,15 +2856,15 @@ struct Quaternion : public IVector< float, 4 >
 	{
 		return Matrix4(
 			1.0f - 2.0f * ( a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
-			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
-			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
-			0.0f,
 			2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.z * a_Quaternion.w ),
-			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
-			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
-			0.0f,
 			2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.y * a_Quaternion.w ),
+			0.0f,
+			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
 			2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.x * a_Quaternion.w ),
+			0.0f,
+			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
 			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y ),
 			0.0f,
 			0.0f,
@@ -3012,7 +2874,7 @@ struct Quaternion : public IVector< float, 4 >
 		);
 	}
 
-	static Vector3 ToEulerAngles( const Quaternion& q, RotationOrder a_RotationOrder = RotationOrder::ZXY )
+	static Vector3 ToEulerAngles( const Quaternion& a_Quaternion, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
 		switch ( a_RotationOrder )
 		{
@@ -3162,12 +3024,12 @@ struct Quaternion : public IVector< float, 4 >
 			if ( a_Matrix[ 0 ] > a_Matrix[ 4 ] )
 			{
 				t = 1.0f + a_Matrix[ 0 ] - a_Matrix[ 4 ] - a_Matrix[ 8 ];
-				Result = Quaternion( a_Matrix[ 7 ] - a_Matrix[ 5 ], t, a_Matrix[ 3 ] + a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 6 ] );
+				Result = Quaternion( a_Matrix[ 5 ] - a_Matrix[ 7 ], t, a_Matrix[ 1 ] + a_Matrix[ 3 ], a_Matrix[ 6 ] + a_Matrix[ 2 ] );
 			}
 			else
 			{
 				t = 1.0f - a_Matrix[ 0 ] + a_Matrix[ 4 ] - a_Matrix[ 8 ];
-				Result = Quaternion( a_Matrix[ 2 ] - a_Matrix[ 6 ], a_Matrix[ 3 ] + a_Matrix[ 1 ], t, a_Matrix[ 7 ] + a_Matrix[ 5 ] );
+				Result = Quaternion( a_Matrix[ 6 ] - a_Matrix[ 2 ], a_Matrix[ 1 ] + a_Matrix[ 3 ], t, a_Matrix[ 5 ] + a_Matrix[ 7 ] );
 			}
 		}
 		else
@@ -3175,12 +3037,12 @@ struct Quaternion : public IVector< float, 4 >
 			if ( a_Matrix[ 0 ] < -a_Matrix[ 4 ] )
 			{
 				t = 1.0f - a_Matrix[ 0 ] - a_Matrix[ 4 ] + a_Matrix[ 8 ];
-				Result = Quaternion( a_Matrix[ 3 ] - a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 6 ], a_Matrix[ 7 ] + a_Matrix[ 5 ], t );
+				Result = Quaternion( a_Matrix[ 1 ] - a_Matrix[ 3 ], a_Matrix[ 6 ] + a_Matrix[ 2 ], a_Matrix[ 5 ] + a_Matrix[ 7 ], t );
 			}
 			else
 			{
 				t = 1.0f + a_Matrix[ 0 ] + a_Matrix[ 4 ] + a_Matrix[ 8 ];
-				Result = Quaternion( t, a_Matrix[ 7 ] - a_Matrix[ 5 ], a_Matrix[ 2 ] - a_Matrix[ 6 ], a_Matrix[ 3 ] - a_Matrix[ 1 ] );
+				Result = Quaternion( t, a_Matrix[ 5 ] - a_Matrix[ 7 ], a_Matrix[ 6 ] - a_Matrix[ 2 ], a_Matrix[ 1 ] - a_Matrix[ 3 ] );
 			}
 		}
 
@@ -3204,12 +3066,12 @@ struct Quaternion : public IVector< float, 4 >
 			if ( a_Matrix[ 0 ] > a_Matrix[ 5 ] )
 			{
 				t = 1.0f + a_Matrix[ 0 ] - a_Matrix[ 5 ] - a_Matrix[ 10 ];
-				Result = Quaternion( a_Matrix[ 9 ] - a_Matrix[ 6 ], t, a_Matrix[ 4 ] + a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 8 ] );
+				Result = Quaternion( a_Matrix[ 6 ] - a_Matrix[ 9 ], t, a_Matrix[ 1 ] + a_Matrix[ 4 ], a_Matrix[ 8 ] + a_Matrix[ 2 ] );
 			}
 			else
 			{
 				t = 1.0f - a_Matrix[ 0 ] + a_Matrix[ 5 ] - a_Matrix[ 10 ];
-				Result = Quaternion( a_Matrix[ 2 ] - a_Matrix[ 8 ], a_Matrix[ 4 ] + a_Matrix[ 1 ], t, a_Matrix[ 9 ] + a_Matrix[ 6 ] );
+				Result = Quaternion( a_Matrix[ 8 ] - a_Matrix[ 2 ], a_Matrix[ 1 ] + a_Matrix[ 4 ], t, a_Matrix[ 6 ] + a_Matrix[ 9 ] );
 			}
 		}
 		else
@@ -3217,12 +3079,12 @@ struct Quaternion : public IVector< float, 4 >
 			if ( a_Matrix[ 0 ] < -a_Matrix[ 5 ] )
 			{
 				t = 1.0f - a_Matrix[ 0 ] - a_Matrix[ 5 ] + a_Matrix[ 10 ];
-				Result = Quaternion( a_Matrix[ 4 ] - a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 8 ], a_Matrix[ 9 ] + a_Matrix[ 6 ], t );
+				Result = Quaternion( a_Matrix[ 1 ] - a_Matrix[ 4 ], a_Matrix[ 8 ] + a_Matrix[ 2 ], a_Matrix[ 6 ] + a_Matrix[ 9 ], t );
 			}
 			else
 			{
 				t = 1.0f + a_Matrix[ 0 ] + a_Matrix[ 5 ] + a_Matrix[ 10 ];
-				Result = Quaternion( t, a_Matrix[ 9 ] - a_Matrix[ 6 ], a_Matrix[ 2 ] - a_Matrix[ 8 ], a_Matrix[ 4 ] - a_Matrix[ 1 ] );
+				Result = Quaternion( t, a_Matrix[ 6 ] - a_Matrix[ 9 ], a_Matrix[ 8 ] - a_Matrix[ 2 ], a_Matrix[ 1 ] - a_Matrix[ 4 ] );
 			}
 		}
 
