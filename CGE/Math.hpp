@@ -7,6 +7,8 @@ struct Vector;
 template < typename T, size_t M, size_t N = M >
 struct Matrix;
 
+struct Quaternion;
+
 enum class RotationOrder : char
 {
 	XYZ,
@@ -500,6 +502,56 @@ public:
 	{
 		return reinterpret_cast< const MatrixIndexer< Indexer< T, S, S >, Indexer< T, S > >& >( a_Matrix ).Minor();
 	}
+	
+	template < typename T1, typename T2, size_t S >
+	inline static Vector< T1, S > Multiply( const Vector< T1, S >& a_VectorA, const Vector< T2, S >& a_VectorB )
+	{
+		return a_VectorA * a_VectorB;
+	}
+
+	template < typename T1, typename T2, size_t M, size_t N >
+	static Vector< T1, M > Multiply( const Matrix< T1, M, N >& a_Matrix, const Vector< T2, N >& a_Vector )
+	{
+		Vector< T1, M > Result;
+
+		for ( size_t m = 0; m < M; ++m )
+		{
+			Result[ m ] = Manhatten( a_Matrix.GetRow( m ) * a_Vector );
+		}
+
+		return Result;
+	}
+
+	template < typename T1, typename T2, size_t M, size_t N >
+	static Vector< T1, N > Multiply( const Vector< T1, M >& a_Vector, const Matrix< T2, M, N >& a_Matrix )
+	{
+		Vector< T1, N > Result;
+
+		for ( size_t n = 0; n < N; ++n )
+		{
+			Result[ n ] = Manhatten( a_Matrix.GetCol( n ) * a_Vector );
+		}
+
+		return Result;
+	}
+
+	template < typename T1, typename T2, size_t M, size_t N0, size_t N1 >
+	static Matrix< T1, N0, N1 > Multiply( const Matrix< T1, M, N0 >& a_MatrixA, const Matrix< T2, N0, N1 >& a_MatrixB )
+	{
+		Matrix< T1, N0, N1 > Result;
+
+		for ( size_t m = 0; m < N0; ++m )
+		{
+			auto& Row = Result.GetRow( m );
+
+			for ( size_t n = 0; n < N1; ++n )
+			{
+				Row[ n ] = Manhatten( a_MatrixA.GetRow( m ) * a_MatrixB.GetCol( n ) );
+			}
+		}
+
+		return Result;
+	}
 
 	template < typename T, size_t S >
 	inline static Vector< T, S > Normalize( Vector< T, S > a_Vector )
@@ -554,56 +606,6 @@ public:
 		}
 
 		return a_Vector;
-	}
-
-	template < typename T1, typename T2, size_t S >
-	inline static Vector< T1, S > Multiply( const Vector< T1, S >& a_VectorA, const Vector< T2, S >& a_VectorB )
-	{
-		return a_VectorA * a_VectorB;
-	}
-
-	template < typename T1, typename T2, size_t M, size_t N >
-	static Vector< T1, M > Multiply( const Matrix< T1, M, N >& a_Matrix, const Vector< T2, N >& a_Vector )
-	{
-		Vector< T1, M > Result;
-
-		for ( size_t m = 0; m < M; ++m )
-		{
-			Result[ m ] = Manhatten( a_Matrix.GetRow( m ) * a_Vector );
-		}
-
-		return Result;
-	}
-
-	template < typename T1, typename T2, size_t M, size_t N >
-	static Vector< T1, N > Multiply( const Vector< T1, M >& a_Vector, const Matrix< T2, M, N >& a_Matrix )
-	{
-		Vector< T1, N > Result;
-
-		for ( size_t n = 0; n < N; ++n )
-		{
-			Result[ n ] = Manhatten( a_Matrix.GetCol( n ) * a_Vector );
-		}
-
-		return Result;
-	}
-
-	template < typename T1, typename T2, size_t M, size_t N0, size_t N1 >
-	static Matrix< T1, N0, N1 > Multiply( const Matrix< T1, M, N0 >& a_MatrixA, const Matrix< T2, N0, N1 >& a_MatrixB )
-	{
-		Matrix< T1, N0, N1 > Result;
-
-		for ( size_t m = 0; m < N0; ++m )
-		{
-			auto& Row = Result.GetRow( m );
-
-			for ( size_t n = 0; n < N1; ++n )
-			{
-				Row[ n ] = Manhatten( a_MatrixA.GetRow( m ) * a_MatrixB.GetCol( n ) );
-			}
-		}
-
-		return Result;
 	}
 
 	template < typename T >
@@ -2631,18 +2633,18 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ),
 			static_cast< T >( 0 ),
 			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 0 ),
+			static_cast< T >( 1 ),
+			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.x ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( a_Vector.y ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 1 ),
 			static_cast< T >( a_Vector.z ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 
@@ -2779,36 +2781,6 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ) );
 	}
 
-	template < typename U >
-	static Vector< T, 3 > ExtractRotation( const Matrix< U, 4 >& a_Matrix, RotationOrder a_RotationOrder = RotationOrder::ZXY )
-	{
-		switch ( a_RotationOrder )
-		{
-		case RotationOrder::XYZ:
-			break;
-		case RotationOrder::XZY:
-			break;
-		case RotationOrder::YXZ:
-			break;
-		case RotationOrder::YZX:
-			break;
-		case RotationOrder::ZXY:
-		{//possibly patchy, need to check math.
-			float M12 = static_cast< float >( a_Matrix[ 6 ] );
-			float InverseXC = Math::InverseSqrt( 1.0f - M12 * M12 );
-
-			return -Vector< T, 3 >(
-				Math::ASin( -M12 ),
-				Math::ASin( InverseXC * a_Matrix[ 2 ] ),
-				Math::ASin( InverseXC * a_Matrix[ 4 ] ) );
-		}
-		case RotationOrder::ZYX:
-			break;
-		default:
-			break;
-		}
-	}
-
 	template < typename U, typename V >
 	inline static void Rotate( Matrix< U, 4 >& a_Matrix, const Vector< V, 3 >& a_Vector, RotationOrder a_RotationOrder = RotationOrder::ZXY )
 	{
@@ -2878,6 +2850,21 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 		Scale( a_Matrix, a_Scale );
 		Rotate( a_Matrix, a_Rotation, a_RotationOrder );
 		Translate( a_Matrix, a_Translation );
+	}
+
+	template < typename T >
+	static void Decompose( const Matrix< T, 4 >& a_Matrix, Vector3& a_Translation, Quaternion& a_Rotation, Vector3& a_Scale )
+	{
+		Matrix< T, 4 > M = a_Matrix;
+		a_Translation = M.GetCol( 3 );
+		M.GetCol( 3 ) = Vector3::Zero;
+		a_Scale.x = Math::Length( M.GetCol( 0 ).ToVector() );
+		a_Scale.y = Math::Length( M.GetCol( 1 ).ToVector() );
+		a_Scale.z = Math::Length( M.GetCol( 2 ).ToVector() );
+		M.GetCol( 0 ) /= a_Scale.x;
+		M.GetCol( 1 ) /= a_Scale.y;
+		M.GetCol( 2 ) /= a_Scale.z;
+		a_Rotation = Quaternion::ToQuaternion( M );
 	}
 
 	template < typename U, typename V, typename W >
@@ -2957,9 +2944,13 @@ template < typename T > const Matrix< T, 4 > Matrix< T, 4 >::Identity = []()
 	return Result;
 }( );
 
-struct Quaternion
+struct Quaternion : public IVector< float, 4 >
 {
-	float w, x, y, z;
+	union
+	{
+		struct { float w, x, y, z; };
+		struct { float w; Vector3 xyz; };
+	};
 
 	Quaternion()
 		: w( 0 )
@@ -2968,8 +2959,8 @@ struct Quaternion
 		, z( 0 )
 	{ }
 
-	template < typename T, typename U, typename V, typename W >
-	Quaternion( T a_W, U a_X, V a_Y, W a_Z )
+	template < typename T >
+	Quaternion( T a_W, T a_X, T a_Y, T a_Z )
 		: w( a_W )
 		, x( a_X )
 		, y( a_Y )
@@ -2977,77 +2968,48 @@ struct Quaternion
 	{ }
 
 	template < typename T, typename U >
-	Quaternion( const IVector< T, 3 >& a_EulerAxis, U a_Radians )
-	{
-		float HalfRadians = 0.5f * a_Radians;
-		float S = Math::Sin( HalfRadians );
-
-		w = Math::Cos( HalfRadians );
-		x = S * a_EulerAxis[ 0 ];
-		y = S * a_EulerAxis[ 1 ];
-		z = S * a_EulerAxis[ 2 ];
-	}
-
-	static Quaternion Inverse( const Quaternion& a_Quaternion )
-	{
-		return Quaternion( a_Quaternion.w, -a_Quaternion.x, -a_Quaternion.y, -a_Quaternion.z );
-	}
-
-	template < typename T, typename U, typename V >
-	static void Rotate( Vector< T, 3 >& a_Vector, const Vector< U, 3 >& a_Axis, V a_Radians )
-	{
-		float c = Math::Cos( 0.5f * a_Radians );
-		float s = Math::Sin( 0.5f * a_Radians );
-		float c2 = c * c;
-		float s2 = s * s;
-		float x2 = a_Axis[ 0 ] * a_Axis[ 0 ];
-		float y2 = a_Axis[ 1 ] * a_Axis[ 1 ];
-		float z2 = a_Axis[ 2 ] * a_Axis[ 2 ];
-		float xp = a_Vector[ 0 ];
-		float yp = a_Vector[ 1 ];
-		float zp = a_Vector[ 2 ];
-		float xxp = xp * a_Axis[ 0 ];
-		float yyp = yp * a_Axis[ 1 ];
-		float zzp = zp * a_Axis[ 2 ];
-
-		a_Vector[ 0 ] = static_cast< T >( s2 * ( xp * ( +x2 - y2 - z2 + c2 ) + 2.0f * ( a_Axis[ 0 ] * ( yyp + zzp ) + c * ( zp * a_Axis[ 1 ] - yp * a_Axis[ 2 ] ) ) ) );
-		a_Vector[ 1 ] = static_cast< T >( s2 * ( yp * ( -x2 + y2 - z2 + c2 ) + 2.0f * ( a_Axis[ 1 ] * ( xxp + zzp ) + c * ( xp * a_Axis[ 2 ] - zp * a_Axis[ 0 ] ) ) ) );
-		a_Vector[ 0 ] = static_cast< T >( s2 * ( zp * ( -x2 - y2 + z2 + c2 ) + 2.0f * ( a_Axis[ 2 ] * ( xxp + yyp ) + c * ( yp * a_Axis[ 0 ] - xp * a_Axis[ 1 ] ) ) ) );
-	}
+	Quaternion( T a_W, const Vector< U, 3 >& a_Vector )
+		: w( a_W )
+		, x( a_Vector[ 0 ] )
+		, y( a_Vector[ 1 ] )
+		, z( a_Vector[ 2 ] )
+	{ }
 
 	static Matrix3 ToMatrix3( const Quaternion& a_Quaternion )
 	{
 		return Matrix3(
-			  2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x ) - 1.0f
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z )
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.w * a_Quaternion.y )
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.w * a_Quaternion.z )
-			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.y * a_Quaternion.y ) - 1.0f
-			, 2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.w * a_Quaternion.x )
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y )
-			, 2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.w * a_Quaternion.x )
-			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.z * a_Quaternion.z ) - 1.0f );
+			1.0f - 2.0f * ( a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.z * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.x * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y )
+		);
 	}
 
 	static Matrix4 ToMatrix4( const Quaternion& a_Quaternion )
 	{
 		return Matrix4(
-			  2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x ) - 1.0f
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z )
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.w * a_Quaternion.y )
-			, 0.0f
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.w * a_Quaternion.z )
-			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.y * a_Quaternion.y ) - 1.0f
-			, 2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.w * a_Quaternion.x )
-			, 0.0f
-			, 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y )
-			, 2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.w * a_Quaternion.x )
-			, 2.0f * ( a_Quaternion.w * a_Quaternion.w + a_Quaternion.z * a_Quaternion.z ) - 1.0f
-			, 0.0f
-			, 0.0f
-			, 0.0f
-			, 0.0f
-			, 1.0f );
+			1.0f - 2.0f * ( a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.x * a_Quaternion.z - a_Quaternion.y * a_Quaternion.w ),
+			0.0f,
+			2.0f * ( a_Quaternion.x * a_Quaternion.y - a_Quaternion.z * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.z * a_Quaternion.z ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z + a_Quaternion.x * a_Quaternion.w ),
+			0.0f,
+			2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.y * a_Quaternion.w ),
+			2.0f * ( a_Quaternion.y * a_Quaternion.z - a_Quaternion.x * a_Quaternion.w ),
+			1.0f - 2.0f * ( a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y ),
+			0.0f,
+			0.0f,
+			0.0f,
+			0.0f,
+			1.0f
+		);
 	}
 
 	static Vector3 ToEulerAngles( const Quaternion& a_Quaternion, RotationOrder a_RotationOrder = RotationOrder::ZXY )
@@ -3103,6 +3065,19 @@ struct Quaternion
 				);
 			}
 		}
+	}
+
+	template < typename T, typename U >
+	static Quaternion ToQuaternion( const Vector< T, 3 >& a_EulerAxis, U a_Radians )
+	{
+		Quaternion Result;
+		float HalfRadians = 0.5f * a_Radians;
+		float S = Math::Sin( HalfRadians );
+		Result.w = Math::Cos( HalfRadians );
+		Result.x = S * a_EulerAxis[ 0 ];
+		Result.y = S * a_EulerAxis[ 1 ];
+		Result.z = S * a_EulerAxis[ 2 ];
+		return Result;
 	}
 
 	template < typename T >
@@ -3177,35 +3152,100 @@ struct Quaternion
 	}
 
 	template < typename T >
-	static Quaternion FromMatrix3( const Matrix< T, 3, 3 >& a_Matrix )
+	static Quaternion ToQuaternion( const Matrix< T, 3 >& a_Matrix )
 	{
 		Quaternion Result;
-		Result.w = 0.5f * Math::Sqrt( 1.0f + static_cast< float >( a_Matrix[ 0 ] + a_Matrix[ 4 ] + a_Matrix[ 8 ] ) );
-		float InvW = 0.25f / Result.w;
-		Result.x = InvW * ( a_Matrix[ 7 ] - a_Matrix[ 5 ] );
-		Result.y = InvW * ( a_Matrix[ 2 ] - a_Matrix[ 6 ] );
-		Result.z = InvW * ( a_Matrix[ 3 ] - a_Matrix[ 1 ] );
+		float t;
+
+		if ( a_Matrix[ 8 ] < 0 )
+		{
+			if ( a_Matrix[ 0 ] > a_Matrix[ 4 ] )
+			{
+				t = 1.0f + a_Matrix[ 0 ] - a_Matrix[ 4 ] - a_Matrix[ 8 ];
+				Result = Quaternion( a_Matrix[ 7 ] - a_Matrix[ 5 ], t, a_Matrix[ 3 ] + a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 6 ] );
+			}
+			else
+			{
+				t = 1.0f - a_Matrix[ 0 ] + a_Matrix[ 4 ] - a_Matrix[ 8 ];
+				Result = Quaternion( a_Matrix[ 2 ] - a_Matrix[ 6 ], a_Matrix[ 3 ] + a_Matrix[ 1 ], t, a_Matrix[ 7 ] + a_Matrix[ 5 ] );
+			}
+		}
+		else
+		{
+			if ( a_Matrix[ 0 ] < -a_Matrix[ 4 ] )
+			{
+				t = 1.0f - a_Matrix[ 0 ] - a_Matrix[ 4 ] + a_Matrix[ 8 ];
+				Result = Quaternion( a_Matrix[ 3 ] - a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 6 ], a_Matrix[ 7 ] + a_Matrix[ 5 ], t );
+			}
+			else
+			{
+				t = 1.0f + a_Matrix[ 0 ] + a_Matrix[ 4 ] + a_Matrix[ 8 ];
+				Result = Quaternion( t, a_Matrix[ 7 ] - a_Matrix[ 5 ], a_Matrix[ 2 ] - a_Matrix[ 6 ], a_Matrix[ 3 ] - a_Matrix[ 1 ] );
+			}
+		}
+
+		float s = 0.5f * Math::InverseSqrt( t );
+		Result.w *= s;
+		Result.x *= s;
+		Result.y *= s;
+		Result.z *= s;
+
 		return Result;
 	}
 
 	template < typename T >
-	static Quaternion FromMatrix4( const Matrix< T, 4, 4 >& a_Matrix )
+	static Quaternion ToQuaternion( const Matrix< T, 4 >& a_Matrix )
 	{
 		Quaternion Result;
-		Result.w = 0.5f * Math::Sqrt( 1.0f + static_cast< float >( a_Matrix[ 0 ] + a_Matrix[ 5 ] + a_Matrix[ 10 ] ) );
-		float InvW = 0.25f / Result.w;
-		Result.x = InvW * ( a_Matrix[ 9 ] - a_Matrix[ 6 ] );
-		Result.y = InvW * ( a_Matrix[ 2 ] - a_Matrix[ 8 ] );
-		Result.z = InvW * ( a_Matrix[ 4 ] - a_Matrix[ 1 ] );
+		float t;
+
+		if ( a_Matrix[ 10 ] < 0 )
+		{
+			if ( a_Matrix[ 0 ] > a_Matrix[ 5 ] )
+			{
+				t = 1.0f + a_Matrix[ 0 ] - a_Matrix[ 5 ] - a_Matrix[ 10 ];
+				Result = Quaternion( a_Matrix[ 9 ] - a_Matrix[ 6 ], t, a_Matrix[ 4 ] + a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 8 ] );
+			}
+			else
+			{
+				t = 1.0f - a_Matrix[ 0 ] + a_Matrix[ 5 ] - a_Matrix[ 10 ];
+				Result = Quaternion( a_Matrix[ 2 ] - a_Matrix[ 8 ], a_Matrix[ 4 ] + a_Matrix[ 1 ], t, a_Matrix[ 9 ] + a_Matrix[ 6 ] );
+			}
+		}
+		else
+		{
+			if ( a_Matrix[ 0 ] < -a_Matrix[ 5 ] )
+			{
+				t = 1.0f - a_Matrix[ 0 ] - a_Matrix[ 5 ] + a_Matrix[ 10 ];
+				Result = Quaternion( a_Matrix[ 4 ] - a_Matrix[ 1 ], a_Matrix[ 2 ] + a_Matrix[ 8 ], a_Matrix[ 9 ] + a_Matrix[ 6 ], t );
+			}
+			else
+			{
+				t = 1.0f + a_Matrix[ 0 ] + a_Matrix[ 5 ] + a_Matrix[ 10 ];
+				Result = Quaternion( t, a_Matrix[ 9 ] - a_Matrix[ 6 ], a_Matrix[ 2 ] - a_Matrix[ 8 ], a_Matrix[ 4 ] - a_Matrix[ 1 ] );
+			}
+		}
+
+		float s = 0.5f * Math::InverseSqrt( t );
+		Result.w *= s;
+		Result.x *= s;
+		Result.y *= s;
+		Result.z *= s;
+
 		return Result;
 	}
-};
 
-static Quaternion operator*( const Quaternion& a_QuaternionA, const Quaternion& a_QuaternionB )
-{
-	return Quaternion(
+	static Quaternion Inverse( const Quaternion& a_Quaternion )
+	{
+		return Quaternion( a_Quaternion.w, -a_Quaternion.xyz );
+	}
+
+	static Quaternion Concatenate( const Quaternion& a_QuaternionA, const Quaternion& a_QuaternionB )
+	{
+		return Quaternion(
 		a_QuaternionA.w * a_QuaternionB.w - a_QuaternionA.x * a_QuaternionB.x - a_QuaternionA.y * a_QuaternionB.y - a_QuaternionA.z * a_QuaternionB.z,
 		a_QuaternionA.w * a_QuaternionB.x + a_QuaternionA.x * a_QuaternionB.w + a_QuaternionA.z * a_QuaternionB.y - a_QuaternionA.y * a_QuaternionB.z,
 		a_QuaternionA.y * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.y + a_QuaternionA.z * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.z,
 		a_QuaternionA.z * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.z + a_QuaternionA.y * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.y );
-}
+	}
+};

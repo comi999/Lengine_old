@@ -63,56 +63,14 @@ void foo()
 }
 int main()
 {
-	float highestError = 0.0f;
-
-	for ( int i = 0; i < 6; i++ )
-	{
-		RotationOrder rotOrder = ( RotationOrder )i;
-
-		for ( float x = 0; x <= 2.0f * Math::Pi(); x += 0.125f * Math::Pi() )
-		{
-			for ( float y = 0; y <= 2.0f * Math::Pi(); y += 0.125f * Math::Pi() )
-			{
-				for ( float z = 0; z <= 2.0f * Math::Pi(); z += 0.125f * Math::Pi() )
-				{
-					Vector3 v0( Math::Radians( x ), Math::Radians( y ), Math::Radians( z ) );
-					auto q = Quaternion::ToQuaternion( v0, rotOrder );
-					auto v1 = Quaternion::ToEulerAngles( q, rotOrder );
-
-					Vector3 p( 1, 0, 0 );
-					auto m0 = Matrix4::CreateRotation( v0, rotOrder );
-					auto m1 = Matrix4::CreateRotation( v1, rotOrder );
-					auto pfinal0 = Math::Multiply( m0, Vector4( p ) );
-					auto pfinal1 = Math::Multiply( m1, Vector4( p ) );
-
-					auto isClose = [&]( float a, float b )
-					{
-						float error = Math::Abs( a - b );
-						
-						if ( highestError < error )
-						{
-							highestError = error;
-						}
-						
-						return error < 0.0000001f;
-					};
-
-					if ( !( isClose( pfinal0.x, pfinal1.x ) && isClose( pfinal0.y, pfinal1.y ) && isClose( pfinal0.z, pfinal1.z ) ) )
-					{
-						foo();
-					}
-
-					auto mat3 = Quaternion::ToMatrix3( q );
-					auto q3 = Quaternion::FromMatrix3( mat3 );
-
-					if ( !( isClose( q.w, q3.w ), isClose( q.x, q3.x ), isClose( q.y, q3.y ), isClose( q.z, q3.z ) ) )
-					{
-						foo();
-					}
-				}
-			}
-		}
-	}
+	auto e0 = Vector3( Math::Radians( 10.0f ), Math::Radians( 20.0f ), Math::Radians( 15.0f ) );
+	auto q0 = Quaternion::ToQuaternion( e0, RotationOrder::XYZ );
+	auto e1 = Quaternion::ToEulerAngles( q0, RotationOrder::XYZ );
+	e1 = Vector3( Math::Degrees( e1.x ), Math::Degrees( e1.y ), Math::Degrees( e1.z ) );
+	auto m0 = Matrix4::CreateRotation( e0, RotationOrder::XYZ );
+	auto q1 = Quaternion::ToQuaternion( m0 );
+	auto e2 = Quaternion::ToEulerAngles( q1, RotationOrder::XYZ );
+	e2 = Vector3( Math::Degrees( e2.x ), Math::Degrees( e2.y ), Math::Degrees( e2.z ) );
 
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
