@@ -84,7 +84,7 @@ public:
     }
 
     static void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
-    {
+    { if ( a_Coord.x < 0 || a_Coord.x >= ScreenBuffer::GetBufferWidth() || a_Coord.y < 0 || a_Coord.y >= ScreenBuffer::GetBufferHeight() ) return;
         int Index = GetIndex( a_Coord );
 
         if ( BlendingEnabled )

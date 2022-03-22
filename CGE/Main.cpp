@@ -57,218 +57,202 @@ struct Axes
 
 #include "Transform.hpp"
 #include "GameObject.hpp"
-void foo()
-{
+#include "Camera.hpp"
 
-}
 int main()
 {
-	//CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
-	//Input::Initialize();
-	//CGE::ShowFPS( true );
-	//CGE::SetTargetFPS( 0.0f );
-	//ScreenBuffer::BlendingEnabled = true;
-	//Cube  cube;
-	//Plane plane;
-	//Axes  axes;
-	//
-	//Vector3 CubePosition = Vector3( 0.0f, 0.5f, 0.0f );
-	//Vector3 CubeRotation = Vector3::Zero;
-	//Vector3 CubeScale = Vector3::One * 1.0f;
+	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
+	Input::Initialize();
+	CGE::ShowFPS( true );
+	CGE::SetTargetFPS( 0.0f );
+	ScreenBuffer::BlendingEnabled = true;
+	Cube  cube;
+	Plane plane;
+	Axes  axes;
 
-	//Vector3 PlanePosition = Vector3( 0, 0, 0 );
-	//Vector3 PlaneRotation = Vector3::Zero;
-	//Vector3 PlaneScale = Vector3::One * 5.0f;
+	GameObject& CubeObject  = GameObject::Instantiate( "Cube"_N );
+	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 0.2f );
+	GameObject& PlaneObject = GameObject::Instantiate( "Plane"_N );
+	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	GameObject& AxesObject  = GameObject::Instantiate( "Axes"_N );
+	AxesObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	GameObject& CameraObject = GameObject::Instantiate( "Camera"_N );
+	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
+	CameraObject.GetTransform().SetGlobalPosition( Vector3( 0.0f, 0.0f, -30.0f ) );
+	CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero, RotationOrder::XYZ ) );
+	CameraComponent->SetFOV( Math::Radians( 90.0f ) );
+	CameraComponent->SetNearZ( 0.1f );
+	CameraComponent->SetFarZ( 1000.0f );
 
-	//Vector3 AxesPosition = Vector3::Left * 5.0f;
-	//Vector3 AxesRotation = Vector3::Zero;
-	//Vector3 AxesScale = Vector3::One * 3.0f;
+	auto PVMatrix = Matrix4();
+	Vector3 forward = Vector3::Forward;
+	Vector3 right = Vector3::Right;
+	Vector3 up = Vector3::Up;
 
-	//Vector3 CameraPosition = Vector3( 0.0f, 0.0f, -3.0f );
-	//Vector3 CameraRotation = Vector3( Math::Radians( -0.0f ), 0.0f, 0.0f );
+	auto drawCube = [&]()
+	{
+		auto PVM = Math::Multiply( PVMatrix, CubeObject.GetTransform().GetGlobalMatrix() );
+		Vector4 Verts[ 8 ];
 
-	//auto ProjectionMatrix = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f );
-	//auto ViewMatrix = Matrix4();
-	//auto PVMatrix = Matrix4();
-	//Vector3 forward = Vector3::Forward;
-	//Vector3 right = Vector3::Right;
-	//Vector3 up = Vector3::Up;
+		for ( int i = 0; i < 8; ++i )
+		{
+			Verts[ i ] = Math::Multiply( PVM, cube.Corners[ i ] );
+			Verts[ i ] /= Verts[ i ].w;
+			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
+			Verts[ i ] += Vector4( 64, 64, 0, 0 );
+		}
 
-	//auto drawCube = [&]()
-	//{
-	//	Matrix4 CubeMatrix = Matrix4::CreateTransform( CubePosition, CubeRotation, CubeScale );
-	//	auto PVM = Math::Multiply( PVMatrix, CubeMatrix );
-	//	//auto PVM = Math::Multiply( CubeMatrix, PVMatrix );
-	//	Vector4 Verts[ 8 ];
+		/*Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 4 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 7 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );*/
 
-	//	for ( int i = 0; i < 8; ++i )
-	//	{
-	//		Verts[ i ] = Math::Multiply( PVM, cube.Corners[ i ] );
-	//		//Verts[ i ] = Math::Multiply( cube.Corners[ i ], PVM );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
+		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
+	};
 
-	//		Verts[ i ] /= Verts[ i ].w;
-	//		//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
-	//		Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-	//		Verts[ i ] += Vector4( 64, 64, 0, 0 );
-	//	}
+	auto drawPlane = [&]()
+	{
+		auto PVM = Math::Multiply( PVMatrix, PlaneObject.GetTransform().GetGlobalMatrix() );
+		Vector4 Verts[ 36 ];
 
-	//	Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 4 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 7 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		for ( int i = 0; i < 36; ++i )
+		{
+			Verts[ i ] = Math::Multiply( PVM, plane.Corners[ i ] );
+			Verts[ i ] /= Verts[ i ].w;
+			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
+			Verts[ i ] += Vector4( 64, 64, 0, 0 );
+		}
 
-	//	Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
-	//	Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
-	//};
+		/*for ( int i = 0; i < 35; i += 2 )
+		{
+			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
+		}*/
 
-	//auto drawPlane = [&]()
-	//{
-	//	Matrix4 PlaneMatrix = Matrix4::CreateTransform( PlanePosition, PlaneRotation, PlaneScale );
-	//	auto PVM = Math::Multiply( PVMatrix, PlaneMatrix );
-	//	//auto PVM = Math::Multiply( PlaneMatrix, PVMatrix );
-	//	Vector4 Verts[ 36 ];
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 17 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 17 ].ToVector2(), Verts[ 16 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
+	};
 
-	//	for ( int i = 0; i < 36; ++i )
-	//	{
-	//		Verts[ i ] = Math::Multiply( PVM, plane.Corners[ i ] );
-	//		//Verts[ i ] = Math::Multiply( plane.Corners[ i ], PVM );
+	auto drawAxes = [&]()
+	{
+		auto PVM = Math::Multiply( PVMatrix, AxesObject.GetTransform().GetGlobalMatrix() );
+		Vector4 Verts[ 4 ];
 
-	//		Verts[ i ] /= Verts[ i ].w;
-	//		//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
-	//		Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-	//		Verts[ i ] += Vector4( 64, 64, 0, 0 );
-	//	}
+		for ( int i = 0; i < 4; ++i )
+		{
+			Verts[ i ] = Math::Multiply( PVM, axes.Corners[ i ] );
+			Verts[ i ] /= Verts[ i ].w;
+			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
+			Verts[ i ] += Vector4( 64, 64, 0, 0 );
+		}
 
-	//	/*for ( int i = 0; i < 35; i += 2 )
-	//	{
-	//		Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
-	//	}*/
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::RED );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
+		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
+	};
 
-	//	Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 17 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
-	//	Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 17 ].ToVector2(), Verts[ 16 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
-	//};
+	float movement = 1.0f;
+	float sensitivity = 0.0000001f;
+	float i = 0;
+	CGE::Run( [&]()
+	{
+		CameraObject.GetTransform().UpdateTransform();
+		PVMatrix = CameraComponent->GetProjectionViewMatrix();
 
-	//auto drawAxes = [&]()
-	//{
-	//	Matrix4 AxesMatrix = Matrix4::CreateTransform( AxesPosition, AxesRotation, AxesScale );
-	//	auto PVM = Math::Multiply( PVMatrix, AxesMatrix );
-	//	//auto PVM = Math::Multiply( PlaneMatrix, PVMatrix );
-	//	Vector4 Verts[ 4 ];
+		ScreenBuffer::SetBuffer( Colour::BLACK );
+		//drawPlane();
+		//drawCube();
+		//drawAxes();
 
-	//	for ( int i = 0; i < 4; ++i )
-	//	{
-	//		Verts[ i ] = Math::Multiply( PVM, axes.Corners[ i ] );
-	//		//Verts[ i ] = Math::Multiply( plane.Corners[ i ], PVM );
+		right = CameraObject.GetTransform().GetGlobalRight();
+		up = CameraObject.GetTransform().GetGlobalUp();
+		forward = CameraObject.GetTransform().GetGlobalForward();
 
-	//		Verts[ i ] /= Verts[ i ].w;
-	//		//Verts[ i ].z = Math::Max( Verts[ i ].z, 0.0f );
-	//		Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-	//		Verts[ i ] += Vector4( 64, 64, 0, 0 );
-	//	}
+		// Left
+		if ( Input::IsKeyDown( KeyCode::A ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * right * Time::GetDeltaTime() );
+		}
 
-	//	Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::RED );
-	//	Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
-	//	Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
-	//};
+		// Right
+		if ( Input::IsKeyDown( KeyCode::D ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * right * Time::GetDeltaTime() );
+		}
 
-	//float movement = 1.0f;
-	//float sensitivity = 0.0000001f;
-	//float i = 0;
-	//CGE::Run( [&]()
-	//	{
-	//		ViewMatrix = Matrix4::CreateView( CameraPosition, CameraRotation );
-	//		PVMatrix = Math::Multiply( ProjectionMatrix, ViewMatrix );
+		// Forward
+		if ( Input::IsKeyDown( KeyCode::W ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * forward * Time::GetDeltaTime() );
+		}
 
-	//		ScreenBuffer::SetBuffer( Colour::BLACK );
-	//		//Primitive::DrawTriangle( Vector2( 60, 63 ), Vector2( 63.0f + 50.0f * Math::Cos( i ), 63.0f + 50.0f * Math::Sin( i+= 0.01f ) ), Vector2( 66, 63 ), Colour::GREEN );
-	//		//Primitive::DrawTriangle( Vector2( 20, 50 ), Vector2( 80, 50 ), Vector2( 50, 80 ), Colour::GREEN );
-	//		drawPlane();
-	//		drawCube();
-	//		drawAxes();
+		// Back
+		if ( Input::IsKeyDown( KeyCode::S ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * forward * Time::GetDeltaTime() );
+		}
 
-	//		right = ViewMatrix.r0.ToVector();
-	//		up = ViewMatrix.r1.ToVector();
-	//		forward = ViewMatrix.r2.ToVector();
+		// Up
+		if ( Input::IsKeyDown( KeyCode::E ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * up * Time::GetDeltaTime() );
+		}
 
-	//		// Left
-	//		if ( Input::IsKeyDown( KeyCode::A ) )
-	//		{
-	//			CameraPosition -= movement * right * Time::GetDeltaTime();
-	//		}
+		// Down
+		if ( Input::IsKeyDown( KeyCode::Q ) )
+		{
+			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * up * Time::GetDeltaTime() );
+		}
 
-	//		// Right
-	//		if ( Input::IsKeyDown( KeyCode::D ) )
-	//		{
-	//			CameraPosition += movement * right * Time::GetDeltaTime();
-	//		}
+		if ( Input::IsKeyDown( KeyCode::Esc ) )
+		{
+			CGE::Quit();
+		}
 
-	//		// Forward
-	//		if ( Input::IsKeyDown( KeyCode::W ) )
-	//		{
-	//			CameraPosition += movement * forward * Time::GetDeltaTime();
-	//		}
+		if ( Input::IsKeyDown( KeyCode::Shift ) )
+		{
+			movement = 4.0f;
+		}
+		else
+		{
+			movement = 1.0f;
+		}
 
-	//		// Back
-	//		if ( Input::IsKeyDown( KeyCode::S ) )
-	//		{
-	//			CameraPosition -= movement * forward * Time::GetDeltaTime();
-	//		}
+		Quaternion CubeRotation = CubeObject.GetTransform().GetGlobalRotation();
+		Vector3 EulerRotation = Quaternion::ToEulerAngles( CubeRotation );
+		EulerRotation.x += 1.0f * Time::GetDeltaTime();
+		EulerRotation.y += 0.1f * Time::GetDeltaTime();
+		CubeObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( EulerRotation ) );
 
-	//		// Up
-	//		if ( Input::IsKeyDown( KeyCode::E ) )
-	//		{
-	//			CameraPosition += movement * Time::GetDeltaTime() * up;
-	//		}
+		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
+		{
+			Vector2 MouseDelta = Input::GetMouseDelta();
+			Quaternion CameraRotation = CameraObject.GetTransform().GetGlobalRotation();
+			Vector3 CameraEuler = Quaternion::ToEulerAngles( CameraRotation );
+			CameraEuler.y -= Math::Radians( MouseDelta.x * 1.0f );
+			CameraEuler.x -= Math::Radians( MouseDelta.y * 1.0f );
+			CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
+		}
 
-	//		// Down
-	//		if ( Input::IsKeyDown( KeyCode::Q ) )
-	//		{
-	//			CameraPosition -= movement * up * Time::GetDeltaTime();
-	//		}
-
-	//		if ( Input::IsKeyDown( KeyCode::Esc ) )
-	//		{
-	//			CGE::Quit();
-	//		}
-
-	//		if ( Input::IsKeyDown( KeyCode::Shift ) )
-	//		{
-	//			movement = 4.0f;
-	//		}
-	//		else
-	//		{
-	//			movement = 1.0f;
-	//		}
-
-	//		CubeRotation.x += 1.0f * Time::GetDeltaTime();
-	//		CubeRotation.y += 0.1f * Time::GetDeltaTime();
-
-	//		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
-	//		{
-	//			Vector2 MouseDelta = Input::GetMouseDelta();
-	//			CameraRotation.y -= Math::Radians( MouseDelta.x * 1.0f );
-	//			CameraRotation.x -= Math::Radians( MouseDelta.y * 1.0f );
-	//		}
-
-	//	});
+	} );
 
 	
 	return 0;

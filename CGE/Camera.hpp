@@ -5,6 +5,11 @@
 #include "GameObject.hpp"
 #include "Transform.hpp"
 
+struct Frustum
+{
+
+};
+
 template < typename T >
 class ICamera;
 
@@ -29,8 +34,8 @@ public:
 
 	inline Matrix4 GetViewMatrix()
 	{
-		Transform& OwnerTransform = GetGameObject().GetTransform();
-		return Matrix4::CreateView( OwnerTransform.GetGlobalPostion(), OwnerTransform.GetGlobalRotation() );
+		Transform& OwnerTransform = ComponentBase::GetGameObject().GetTransform();
+		return Matrix4::CreateView( OwnerTransform.GetGlobalPosition(), OwnerTransform.GetGlobalRotation() );
 	}
 
 	inline Matrix4 GetProjectionViewMatrix()

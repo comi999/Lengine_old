@@ -2718,15 +2718,169 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	static void Decompose( const Matrix< T, 4 >& a_Matrix, Vector3& a_Translation, Quaternion& a_Rotation, Vector3& a_Scale )
 	{
 		Matrix< T, 4 > M = a_Matrix;
+
+		// Extract translation
 		a_Translation = M.GetCol( 3 );
 		M.GetCol( 3 ) = Vector3::Zero;
-		a_Scale.x = Math::Length( M.GetCol( 0 ).ToVector() );
-		a_Scale.y = Math::Length( M.GetCol( 1 ).ToVector() );
-		a_Scale.z = Math::Length( M.GetCol( 2 ).ToVector() );
-		M.GetCol( 0 ) /= a_Scale.x;
-		M.GetCol( 1 ) /= a_Scale.y;
-		M.GetCol( 2 ) /= a_Scale.z;
+
+		// Extract scale
+		for ( int i = 0; i < 3; ++i )
+		{
+			a_Scale[ i ] = Math::Length( M.GetCol( i ).ToVector() );
+			M.GetCol( i ) /= a_Scale[ i ];
+		}
+
+		// Extract rotation
 		a_Rotation = Quaternion::ToQuaternion( M );
+	}
+
+	template < typename T >
+	inline static Vector3 ExtractTranslation( const Matrix< T, 4 >& a_Matrix )
+	{
+		return Vector3( a_Matrix.GetCol( 3 ) );
+	}
+
+	template < typename T >
+	inline static Vector3 ExtractTranslationX( const Matrix< T, 4 >& a_Matrix )
+	{
+		return a_Matrix.GetCol( 3 )[ 0 ];
+	}
+
+	template < typename T >
+	inline static Vector3 ExtractTranslationY( const Matrix< T, 4 >& a_Matrix )
+	{
+		return a_Matrix.GetCol( 3 )[ 1 ];
+	}
+
+	template < typename T >
+	inline static Vector3 ExtractTranslationZ( const Matrix< T, 4 >& a_Matrix )
+	{
+		return a_Matrix.GetCol( 3 )[ 2 ];
+	}
+
+	template < typename T >
+	static Quaternion ExtractRotation( const Matrix< T, 4 >& a_Matrix )
+	{
+		Matrix< T, 4 > M = a_Matrix;
+
+		// Sanitize translation
+		M.GetCol( 3 ) = Vector3::Zero;
+
+		// Sanitize scale
+		for ( int i = 0; i < 3; ++i )
+		{
+			M.GetCol( i ) /= Math::Length( M.GetCol( i ).ToVector() );
+		}
+
+		// Extract rotation
+		return Quaternion::ToQuaternion( M );
+	}
+
+	template < typename T >
+	static Vector3 ExtractScale( const Matrix< T, 4 >& a_Matrix )
+	{
+		Vector3 Result;
+
+		// Sanitize scale
+		for ( int i = 0; i < 3; ++i )
+		{
+			Result[ i ] = Math::Length( a_Matrix.GetCol( i ).ToVector() );
+		}
+
+		return Result;
+	}
+
+	template < typename T >
+	static float ExtractScaleX( const Matrix< T, 4 >& a_Matrix )
+	{
+		return Math::Length( a_Matrix.GetCol( 0 ).ToVector() );
+	}
+
+	template < typename T >
+	static float ExtractScaleY(const Matrix< T, 4 >& a_Matrix )
+	{
+		return Math::Length( a_Matrix.GetCol( 1 ).ToVector() );
+	}
+
+	template < typename T >
+	static float ExtractScaleZ( const Matrix< T, 4 >& a_Matrix )
+	{
+		return Math::Length( a_Matrix.GetCol( 2 ).ToVector() );
+	}
+
+	template < typename T, typename U >
+	static void SetTranslation( Matrix< T, 4 >& a_Matrix, const Vector< U, 3 >& a_Translation )
+	{
+		a_Matrix.GetCol( 3 ) = a_Translation;
+	}
+
+	template < typename T, typename U >
+	static void SetTranslationX( Matrix< T, 4 >& a_Matrix, U a_X )
+	{
+		a_Matrix.GetCol( 3 )[ 0 ] = a_X;
+	}
+
+	template < typename T, typename U >
+	static void SetTranslationY( Matrix< T, 4 >& a_Matrix, U a_Y )
+	{
+		a_Matrix.GetCol( 3 )[ 1 ] = a_Y;
+	}
+
+	template < typename T, typename U >
+	static void SetTranslationZ( Matrix< T, 4 >& a_Matrix, U a_Z )
+	{
+		a_Matrix.GetCol( 3 )[ 2 ] = a_Z;
+	}
+
+	template < typename T >
+	static void SetRotation( Matrix< T, 4 >& a_Matrix, const Quaternion& a_Rotation )
+	{
+		Vector< T, 3 > Translation = ExtractTranslation( a_Matrix );
+		Vector< T, 3 > Scale = ExtractScale( a_Matrix );
+		a_Matrix = Quaternion::ToMatrix4( a_Rotation );
+		SetTranslation( a_Matrix, Translation );
+		SetScale( a_Matrix, Scale );
+	}
+
+	template < typename T, typename U >
+	static void SetScale( Matrix< T, 4 >& a_Matrix, const Vector< U, 3 >& a_Scale )
+	{
+		SetScaleX( a_Matrix, a_Scale[ 0 ] );
+		SetScaleY( a_Matrix, a_Scale[ 1 ] );
+		SetScaleZ( a_Matrix, a_Scale[ 2 ] );
+	}
+
+	template < typename T, typename U >
+	static void SetScaleX( Matrix< T, 4 >& a_Matrix, U a_X )
+	{
+		T X = ExtractScaleX( a_Matrix );
+		
+		for ( int m = 0; m < 3; ++m )
+		{
+			a_Matrix.GetCol( 0 )[ m ] *= static_cast< T >( a_X ) / X;
+		}
+	}
+
+	template < typename T, typename U >
+	static void SetScaleY( Matrix< T, 4 >& a_Matrix, U a_Y )
+	{
+		T Y = ExtractScaleY( a_Matrix );
+		
+		for ( int m = 0; m < 3; ++m )
+		{
+			a_Matrix.GetCol( 1 )[ m ] *= static_cast< T >( a_Y ) / Y;
+		}
+	}
+
+	template < typename T, typename U >
+	static void SetScaleZ( Matrix< T, 4 >& a_Matrix, U a_Z )
+	{
+		T Z = ExtractScaleZ( a_Matrix );
+		
+		for ( int m = 0; m < 3; ++m )
+		{
+			a_Matrix.GetCol( 2 )[ m ] *= static_cast< T >( a_Z ) / Z;
+		}
 	}
 
 	template < typename U, typename V, typename W >
@@ -2755,7 +2909,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( 1 ) );
 	}
 
-	template < typename U, typename V >
+	template < typename U >
 	inline static Matrix< T, 4 > CreateView( const Vector< U, 3 >& a_Position, const Quaternion& a_Rotation )
 	{
 		auto Result = CreateRotation( a_Rotation );
@@ -3046,12 +3200,7 @@ struct Quaternion : public IVector< float, 4 >
 			}
 		}
 
-		float s = 0.5f * Math::InverseSqrt( t );
-		Result.w *= s;
-		Result.x *= s;
-		Result.y *= s;
-		Result.z *= s;
-
+		Result *= 0.5f * Math::InverseSqrt( t );
 		return Result;
 	}
 
@@ -3088,12 +3237,7 @@ struct Quaternion : public IVector< float, 4 >
 			}
 		}
 
-		float s = 0.5f * Math::InverseSqrt( t );
-		Result.w *= s;
-		Result.x *= s;
-		Result.y *= s;
-		Result.z *= s;
-
+		Result *= 0.5f * Math::InverseSqrt( t );
 		return Result;
 	}
 

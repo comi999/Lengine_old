@@ -11,20 +11,21 @@ private:
 
 	GameObject( const Name& a_Name, GameObjectID a_ObjectID )
 		: Object( a_Name, ObjectID( a_ObjectID ) )
-		, m_Transform( ECS::AddComponent< Transform >( *this, GameObjectID( a_ObjectID ) ) )
 		, m_ToDestroy( false )
-	{ }
+	{
+		ECS::AddComponent< Transform >( *this, GameObjectID( a_ObjectID ) );
+	}
 
 public:
 
 	inline Transform& GetTransform()
 	{
-		return *m_Transform;
+		return *ECS::GetComponent< Transform >( GameObjectID( GetObjectID() ) );
 	}
 
 	const Transform& GetTransform() const
 	{
-		return *m_Transform;
+		return *ECS::GetComponent< Transform >( GameObjectID( GetObjectID() ) );
 	}
 
 	template < typename T >
@@ -98,7 +99,6 @@ private:
 
 	template < class, class > class std::vector;
 
-	Transform* m_Transform;
 	bool m_ToDestroy;
 	
 	static std::map< Hash, std::vector< GameObject > > s_GameObjectLookup;
