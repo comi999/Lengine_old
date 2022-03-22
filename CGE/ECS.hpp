@@ -2,13 +2,16 @@
 #include "entt/entt.hpp"
 #include "TypeMap.hpp"
 #include "Component.hpp"
+#include "Name.hpp"
 
-typedef entt::entity GameObjectID;
+typedef uint32_t GameObjectID;
 
 class GameObject;
 
 class ECS
 {
+private:
+
 	template < typename T >
 	struct HasAwake_0
 	{
@@ -36,34 +39,82 @@ class ECS
 		static constexpr bool Value = sizeof( test< T >( 0 ) ) == sizeof( char );
 	};
 
-	inline static GameObjectID GenerateGameObjectID()
+	static GameObjectID Generate()
 	{
-		return GameObjectID( s_Registry.create() );
+		auto New = s_Registry.create();
+		return reinterpret_cast< GameObjectID& >( New );
 	}
 
 public:
+
+	inline static GameObjectID Instantiate()
+	{
+		auto New = Generate();
+		AttachAlias( New, ""_N );
+		AttachTransform( New, GameObjectID( -1 ) );
+		return New;
+	}
+
+	inline static GameObjectID Instantiate( const Name& a_Name )
+	{
+		auto New = Generate();
+		AttachAlias( New, a_Name );
+		AttachTransform( New, GameObjectID( -1 ) );
+		return New;
+	}
+
+	inline static GameObjectID Instantiate( GameObjectID a_Parent )
+	{
+		auto New = Generate();
+		AttachAlias( New, ""_N );
+		AttachTransform( New, a_Parent );
+		return New;
+	}
+
+	inline static GameObjectID Instantiate( const Name& a_Name, GameObjectID a_Parent )
+	{
+		auto New = Generate();
+		AttachAlias( New, a_Name );
+		AttachTransform( New, a_Parent );
+		return New;
+	}
 
 	template < typename T >
 	static T* AddComponent( GameObjectID a_GameObjectID )
 	{
 		static bool Registered = 
 			s_TypeMap.RegisterTypes< typename T::InheritanceTrace >() || 
-			s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetComponentImpl< T > );
+			s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > ) ||
+			[]( entt::registry& a_Registry )
+		{
+			a_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
+			return true;
+		}( s_Registry );
 
-		if ( s_Registry.all_of< T >( a_GameObjectID ) )
+		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
 		{
 			return nullptr;
 		}
 
-		auto& NewComponent = s_Registry.emplace< T >( a_GameObjectID );
-		NewComponent.m_GameObject = a_GameObjectID;
+		if ( s_Registry.all_of< T >( entt::entity( a_GameObjectID ) ) )
+		{
+			return nullptr;
+		}
+
+		auto& NewComponent = s_Registry.emplace< T >( entt::entity( a_GameObjectID ) );
+		NewComponent.m_GameObjectID = a_GameObjectID;
 		return &NewComponent;
 	}
 
 	template < typename T >
 	static T* GetComponent( GameObjectID a_GameObjectID )
 	{
-		T* Found = s_Registry.try_get< T >( a_GameObjectID );
+		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
+		{
+			return nullptr;
+		}
+
+		T* Found = s_Registry.try_get< T >( entt::entity( a_GameObjectID ) );
 
 		if ( Found )
 		{
@@ -89,20 +140,40 @@ public:
 	}
 
 	template < typename T >
+	static T* GetExactComponent( GameObjectID a_GameObjectID )
+	{
+		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
+		{
+			return nullptr;
+		}
+
+		return s_Registry.try_get< T >( entt::entity( a_GameObjectID ) );
+	}
+
+	template < typename T >
 	static bool DestroyComponent( GameObjectID a_GameObjectID )
 	{
+		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
+		{
+			return nullptr;
+		}
+
 		return false;//return s_Registry.remove_if_exists< T >( a_GameObjectID );
 	}
 
 private:
 
+	friend class ComponentBase;
+
+	static void AttachTransform( GameObjectID a_GameObjectID, GameObjectID a_Parent );
+	static void AttachAlias( GameObjectID a_GameObjectID, const Name& a_Name );
+
 	template < typename T >
-	static T* GetComponentImpl( GameObjectID a_GameObjectID )
+	static void ComponentOnConstruct( entt::registry& a_Registry, entt::entity a_Entity )
 	{
-		return s_Registry.try_get< T >( a_GameObjectID );
+		reinterpret_cast< ComponentBase& >( a_Registry.get< T >( a_Entity ) ).m_GameObjectID = GameObjectID( a_Entity );
 	}
 
-	static TypeMap										s_TypeMap;
-	static std::map< size_t, void*(*)( GameObjectID ) > s_TypeAccessors;
-	static entt::registry								s_Registry;
+	static TypeMap		  s_TypeMap;
+	static entt::registry s_Registry;
 };

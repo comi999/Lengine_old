@@ -162,10 +162,8 @@
   <ItemGroup>
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
-    <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="ECS.cpp" />
-    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -175,9 +173,9 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Time.cpp" />
-    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Alias.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="CGE.h" />
     <ClInclude Include="Colour.h" />

@@ -2721,13 +2721,19 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 
 		// Extract translation
 		a_Translation = M.GetCol( 3 );
-		M.GetCol( 3 ) = Vector3::Zero;
+		M[ 3 ]  = 0;
+		M[ 7 ]  = 0;
+		M[ 11 ] = 0;
 
 		// Extract scale
 		for ( int i = 0; i < 3; ++i )
 		{
 			a_Scale[ i ] = Math::Length( M.GetCol( i ).ToVector() );
-			M.GetCol( i ) /= a_Scale[ i ];
+			float InvScale = 1.0f / a_Scale[ i ];
+			//M.GetCol( i ) /= a_Scale[ i ];
+			M[ i ] *= InvScale;
+			M[ i + 4 ] *= InvScale;
+			M[ i + 8 ] *= InvScale;
 		}
 
 		// Extract rotation
