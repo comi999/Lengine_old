@@ -41,6 +41,8 @@ class ECS
 		return GameObjectID( s_Registry.create() );
 	}
 
+public:
+
 	template < typename T >
 	static T* AddComponent( GameObject& a_GameObject, GameObjectID a_GameObjectID )
 	{
@@ -92,13 +94,13 @@ class ECS
 		return false;//return s_Registry.remove_if_exists< T >( a_GameObjectID );
 	}
 
+private:
+
 	template < typename T >
 	static T* GetComponentImpl( GameObjectID a_GameObjectID )
 	{
 		return s_Registry.try_get< T >( a_GameObjectID );
 	}
-
-	friend class GameObject;
 
 	static TypeMap										s_TypeMap;
 	static std::map< size_t, void*(*)( GameObjectID ) > s_TypeAccessors;

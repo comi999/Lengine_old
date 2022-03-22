@@ -2,6 +2,8 @@
 #include "Component.hpp"
 #include "Math.hpp"
 
+typedef ObjectID GameObjectID;
+
 template < typename T > class ITransform;
 typedef ITransform< void > Transform;
 
@@ -16,7 +18,7 @@ public:
 		, m_LocalPosition( Vector3::Zero )
 		, m_LocalScale( Vector3::One )
 		, m_IsDirty( true )
-		, m_Parent( nullptr )
+		, m_Parent( GameObjectID( -1 ) )
 	{ }
 
 	inline void SetDirty()
@@ -26,12 +28,12 @@ public:
 
 	inline Transform* GetParent()
 	{
-		return m_Parent;
+		return m_Parent == GameObjectID( -1 ) ? nullptr : GetTransform( m_Parent );
 	}
 
 	inline const Transform* GetParent() const
 	{
-		return m_Parent;
+		return m_Parent == GameObjectID( -1 ) ? nullptr : GetTransform( m_Parent );
 	}
 
 	void SetParent( Transform* a_Parent, bool a_RetainGlobalTransform = true )
@@ -620,11 +622,13 @@ public:
 
 	inline void SetParentImpl( Transform* a_Transform, bool a_RetainGlobalTransform, size_t a_ChildIndex = -1 )
 	{
+		GameObjectID ThisID = ComponentBase::GetGameObject().GetObjectID();
+
 		// unset parent
-		if ( m_Parent )
+		if ( m_Parent != GameObjectID( -1 ) )
 		{
 			m_LocalMatrix = m_GlobalMatrix;
-			auto Where = a_ChildIndex == -1 ? std::find( m_Parent->m_Children.begin(), m_Parent->m_Children.end(), this ) : m_Parent->m_Children.begin() + a_ChildIndex;
+			auto Where = a_ChildIndex == -1 ? std::find( m_Parent->m_Children.begin(), m_Parent->m_Children.end(), ThisID ) : m_Parent->m_Children.begin() + a_ChildIndex;
 			m_Parent->m_Children.erase( Where );
 		}
 
@@ -632,10 +636,10 @@ public:
 		if ( a_Transform )
 		{
 			m_LocalMatrix = Math::Multiply( Math::Inverse( a_Transform->m_GlobalMatrix ), m_LocalMatrix );
-			a_Transform->m_Children.push_back( this );
+			a_Transform->m_Children.push_back( ThisID );
 		}
 
-		m_Parent = a_Transform;
+		m_Parent = a_Transform->GetGameObject().GetObjectID();
 	}
 
 	void UpdateTransform()
@@ -646,9 +650,9 @@ public:
 			m_IsDirty = false;
 		}
 
-		if ( m_Parent )
+		if ( m_Parent != GameObjectID( -1 ) )
 		{
-			m_GlobalMatrix = Math::Multiply( m_Parent->GetGlobalMatrix(), m_LocalMatrix );
+			m_GlobalMatrix = Math::Multiply( GetParent()->GetGlobalMatrix(), m_LocalMatrix );
 		}
 
 		for ( auto Begin = m_Children.begin(), End = m_Children.end(); Begin != End; ++Begin )
@@ -657,12 +661,14 @@ public:
 		}
 	}
 
-	Matrix4    m_GlobalMatrix;
-	Matrix4    m_LocalMatrix;
-	Vector3    m_LocalPosition;
-	Quaternion m_LocalRotation;
-	Vector3    m_LocalScale;
-	bool       m_IsDirty;
-	Transform* m_Parent;
-	std::vector< Transform* > m_Children;
+	Matrix4      m_GlobalMatrix;
+	Matrix4      m_LocalMatrix;
+	Vector3      m_LocalPosition;
+	Quaternion   m_LocalRotation;
+	Vector3      m_LocalScale;
+	bool         m_IsDirty;
+	GameObjectID m_Parent;
+	std::vector< GameObjectID > m_Children;
 };
+
+Transform* GetTransform( GameObjectID a_GameObjectID );

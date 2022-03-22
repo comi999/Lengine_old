@@ -17,20 +17,22 @@ public:
 
 	inline GameObject& GetGameObject()
 	{
-		return *m_GameObject;
+		return *GetGameObjectFromID( m_GameObject );
 	}
 
 	inline const GameObject& GetGameObject() const
 	{
-		return *m_GameObject;
+		return *GetGameObjectFromID( m_GameObject );
 	}
 
 private:
 
 	friend class ECS;
 
-	GameObject* m_GameObject;
+	GameObjectID m_GameObject;
 };
+
+GameObject* GetGameObjectFromID( GameObjectID a_GameObjectID );
 
 template < typename T >
 class IComponent : public ComponentBase

@@ -81,6 +81,11 @@ int main()
 	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 3.0f );
 	CubeObject.GetTransform().SetGlobalPosition( Vector3::Up );
 
+	GameObject& SubCubeObject = GameObject::Instantiate( "SubCube"_N );
+	SubCubeObject.GetTransform().SetParent( &CubeObject.GetTransform() );
+	SubCubeObject.GetTransform().SetLocalPosition( Vector3::Left );
+	SubCubeObject.GetTransform().SetLocalScale( Vector3::One * 1.0f );
+
 	GameObject& PlaneObject = GameObject::Instantiate( "Plane"_N );
 	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 10.0f );
 
@@ -101,9 +106,9 @@ int main()
 	Vector3 right = Vector3::Right;
 	Vector3 up = Vector3::Up;
 
-	auto drawCube = [&]()
+	auto drawCube = [&]( Transform& transform )
 	{
-		auto PVM = Math::Multiply( PVMatrix, CubeObject.GetTransform().GetGlobalMatrix() );
+		auto PVM = Math::Multiply( PVMatrix, transform.GetGlobalMatrix() );
 		Vector4 Verts[ 8 ];
 
 		for ( int i = 0; i < 8; ++i )
@@ -196,7 +201,8 @@ int main()
 
 		ScreenBuffer::SetBuffer( Colour::BLACK );
 		drawPlane();
-		drawCube();
+		drawCube( CubeObject.GetTransform() );
+		drawCube( SubCubeObject.GetTransform() );
 		drawAxes();
 
 		right = CameraObject.GetTransform().GetGlobalRight();
