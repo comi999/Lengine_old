@@ -1,15 +1,39 @@
 #pragma once
-#include "Object.hpp"
+//#include "Object.hpp"
 #include "Transform.hpp"
 #include "ECS.hpp"
+#include "Name.hpp"
 
 typedef entt::entity GameObjectID;
 
-class GameObject : public Object
+class GameObject : public IComponent< GameObject >
 {
 private:
 
-	GameObject( const Name& a_Name, GameObjectID a_ObjectID )
+public:
+
+	template < typename T >
+	T* AddComponent()
+	{
+		return ECS::AddComponent< T >( m_ID );
+	}
+
+	template < typename T >
+	T* GetComponent()
+	{
+		return ECS::GetComponent< T >( ComponentBase:: );
+	}
+
+	Transform* GetTransform()
+	{
+		return ECS::GetComponent< Transform >( m_ID );
+	}
+
+private:
+
+	Name m_Name;
+
+	/*GameObject( const Name& a_Name, GameObjectID a_ObjectID )
 		: Object( a_Name, ObjectID( a_ObjectID ) )
 		, m_ToDestroy( false )
 	{
@@ -101,5 +125,5 @@ private:
 
 	bool m_ToDestroy;
 	
-	static std::map< Hash, std::vector< GameObject > > s_GameObjectLookup;
+	static std::map< Hash, std::vector< GameObject > > s_GameObjectLookup;*/
 };

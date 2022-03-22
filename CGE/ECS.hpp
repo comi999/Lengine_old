@@ -44,7 +44,7 @@ class ECS
 public:
 
 	template < typename T >
-	static T* AddComponent( GameObject& a_GameObject, GameObjectID a_GameObjectID )
+	static T* AddComponent( GameObjectID a_GameObjectID )
 	{
 		static bool Registered = 
 			s_TypeMap.RegisterTypes< typename T::InheritanceTrace >() || 
@@ -56,7 +56,7 @@ public:
 		}
 
 		auto& NewComponent = s_Registry.emplace< T >( a_GameObjectID );
-		NewComponent.m_GameObject = &a_GameObject;
+		NewComponent.m_GameObject = a_GameObjectID;
 		return &NewComponent;
 	}
 

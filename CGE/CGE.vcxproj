@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="GameObject.cpp" />

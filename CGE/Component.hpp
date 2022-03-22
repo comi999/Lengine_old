@@ -1,8 +1,5 @@
 #pragma once
-#include "Object.hpp"
-#include "entt/entt.hpp"
-
-typedef ObjectID ComponentID;
+#include "ECS.hpp"
 
 class GameObject;
 
@@ -15,7 +12,7 @@ private:
 
 public:
 
-	inline GameObject& GetGameObject()
+	/*inline GameObject& GetGameObject()
 	{
 		return *GetGameObjectFromID( m_GameObject );
 	}
@@ -23,9 +20,19 @@ public:
 	inline const GameObject& GetGameObject() const
 	{
 		return *GetGameObjectFromID( m_GameObject );
+	}*/
+
+	inline GameObject& GetGameObject()
+	{
+		return ECS::Get
 	}
 
-private:
+	inline const GameObject& GetGameObject() const
+	{
+
+	}
+
+protected:
 
 	friend class ECS;
 
