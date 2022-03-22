@@ -61,6 +61,13 @@ struct Axes
 
 int main()
 {
+	Vector3 p0 = Vector3::Forward;
+	Vector3 e0 = Vector3( Math::Radians( 45.0f ), Math::Radians( 45.0f ), 0.0f );
+	Quaternion q0 = Quaternion::ToQuaternion( e0, RotationOrder::YXZ );
+	Matrix4 m0 = Quaternion::ToMatrix4( q0 );
+	Vector3 p1 = Math::Multiply( m0, Vector4( p0 ) );
+
+
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
@@ -71,16 +78,18 @@ int main()
 	Axes  axes;
 
 	GameObject& CubeObject  = GameObject::Instantiate( "Cube"_N );
-	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 0.2f );
+	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	CubeObject.GetTransform().SetGlobalPosition( Vector3::Up );
 	GameObject& PlaneObject = GameObject::Instantiate( "Plane"_N );
-	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 10.0f );
 	GameObject& AxesObject  = GameObject::Instantiate( "Axes"_N );
 	AxesObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	AxesObject.GetTransform().SetGlobalPosition( Vector3::Left * 5.0f );
 	GameObject& CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
-	CameraObject.GetTransform().SetGlobalPosition( Vector3( 0.0f, 0.0f, -30.0f ) );
-	CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero, RotationOrder::XYZ ) );
-	CameraComponent->SetFOV( Math::Radians( 90.0f ) );
+	CameraObject.GetTransform().SetGlobalPosition( Vector3( 0.0f, 0.0f, -3.0f ) );
+	CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero ) );
+	CameraComponent->SetFOV( 60.0f );
 	CameraComponent->SetNearZ( 0.1f );
 	CameraComponent->SetFarZ( 1000.0f );
 
@@ -102,7 +111,7 @@ int main()
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
 
-		/*Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
+		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
@@ -113,7 +122,7 @@ int main()
 		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );*/
+		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
 
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::DARK_GREY );
 		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::DARK_GREY );
@@ -142,10 +151,10 @@ int main()
 			Verts[ i ] += Vector4( 64, 64, 0, 0 );
 		}
 
-		/*for ( int i = 0; i < 35; i += 2 )
+		for ( int i = 0; i < 35; i += 2 )
 		{
 			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
-		}*/
+		}
 
 		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 17 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
 		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 17 ].ToVector2(), Verts[ 16 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
@@ -172,15 +181,20 @@ int main()
 	float movement = 1.0f;
 	float sensitivity = 0.0000001f;
 	float i = 0;
+	float cubeRotation = 0.0f;
 	CGE::Run( [&]()
 	{
 		CameraObject.GetTransform().UpdateTransform();
+		PlaneObject.GetTransform().UpdateTransform();
+		CubeObject.GetTransform().UpdateTransform();
+		AxesObject.GetTransform().UpdateTransform();
+
 		PVMatrix = CameraComponent->GetProjectionViewMatrix();
 
 		ScreenBuffer::SetBuffer( Colour::BLACK );
-		//drawPlane();
-		//drawCube();
-		//drawAxes();
+		drawPlane();
+		drawCube();
+		drawAxes();
 
 		right = CameraObject.GetTransform().GetGlobalRight();
 		up = CameraObject.GetTransform().GetGlobalUp();
@@ -236,11 +250,11 @@ int main()
 			movement = 1.0f;
 		}
 
-		Quaternion CubeRotation = CubeObject.GetTransform().GetGlobalRotation();
-		Vector3 EulerRotation = Quaternion::ToEulerAngles( CubeRotation );
-		EulerRotation.x += 1.0f * Time::GetDeltaTime();
-		EulerRotation.y += 0.1f * Time::GetDeltaTime();
-		CubeObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( EulerRotation ) );
+		Quaternion CubeRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
+		CubeObject.GetTransform().SetGlobalRotation( CubeRotation );
+
+		//Quaternion PlaneRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
+		//PlaneObject.GetTransform().SetGlobalRotation( PlaneRotation );
 
 		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 		{
@@ -251,7 +265,6 @@ int main()
 			CameraEuler.x -= Math::Radians( MouseDelta.y * 1.0f );
 			CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
 		}
-
 	} );
 
 	

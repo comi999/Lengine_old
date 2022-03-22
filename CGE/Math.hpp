@@ -2811,7 +2811,9 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename T, typename U >
 	static void SetTranslation( Matrix< T, 4 >& a_Matrix, const Vector< U, 3 >& a_Translation )
 	{
-		a_Matrix.GetCol( 3 ) = a_Translation;
+		a_Matrix[ 3 ]  = a_Translation[ 0 ];
+		a_Matrix[ 7 ]  = a_Translation[ 1 ];
+		a_Matrix[ 11 ] = a_Translation[ 2 ];
 	}
 
 	template < typename T, typename U >
@@ -3035,36 +3037,20 @@ struct Quaternion : public IVector< float, 4 >
 			case RotationOrder::XYZ:
 			{
 				return Vector3(
-					Math::ATan( 2.0f * ( a_Quaternion.x * a_Quaternion.w + a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
-					Math::ASin( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ) ),
-					Math::ATan( 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.x - a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
+					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y ) ),
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.z - a_Quaternion.x * a_Quaternion.y ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
 				);
 			}
 			case RotationOrder::XZY:
 			{
 				return Vector3(
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.x - a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ),
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ), 
-					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z ) )
-				);
-			}
-			case RotationOrder::YXZ:
-			{
-				return Vector3(
-					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.w + a_Quaternion.y * a_Quaternion.z ) ),
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.z - a_Quaternion.x * a_Quaternion.y ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
-				);
-			}
-			case RotationOrder::YZX:
-			{
-				return Vector3( 
 					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.x + a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ),
 					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.y + a_Quaternion.x * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ),
 					Math::ASin( 2.0f * ( a_Quaternion.w * a_Quaternion.z - a_Quaternion.y * a_Quaternion.x ) )
 				);
 			}
-			case RotationOrder::ZXY:
+			case RotationOrder::YXZ:
 			{
 				return Vector3(
 					Math::ASin( 2.0f * ( a_Quaternion.w * a_Quaternion.x - a_Quaternion.y * a_Quaternion.z ) ),
@@ -3072,12 +3058,28 @@ struct Quaternion : public IVector< float, 4 >
 					Math::ATan( 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
 				);
 			}
+			case RotationOrder::YZX:
+			{
+				return Vector3(
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.x - a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ),
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z ), 
+					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.w * a_Quaternion.z ) )
+				);
+			}
+			case RotationOrder::ZXY:
+			{
+				return Vector3(
+					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.w + a_Quaternion.y * a_Quaternion.z ) ),
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
+					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.z - a_Quaternion.x * a_Quaternion.y ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x + a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
+				);
+			}
 			case RotationOrder::ZYX:
 			{
 				return Vector3(
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.x - a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
-					Math::ASin( 2.0f * ( a_Quaternion.x * a_Quaternion.z + a_Quaternion.w * a_Quaternion.y ) ),
-					Math::ATan( 2.0f * ( a_Quaternion.w * a_Quaternion.z - a_Quaternion.x * a_Quaternion.y ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
+					Math::ATan( 2.0f * ( a_Quaternion.x * a_Quaternion.w + a_Quaternion.y * a_Quaternion.z ), a_Quaternion.w * a_Quaternion.w - a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y + a_Quaternion.z * a_Quaternion.z ),
+					Math::ASin( 2.0f * ( a_Quaternion.w * a_Quaternion.y - a_Quaternion.x * a_Quaternion.z ) ),
+					Math::ATan( 2.0f * ( a_Quaternion.x * a_Quaternion.y + a_Quaternion.z * a_Quaternion.w ), a_Quaternion.w * a_Quaternion.w + a_Quaternion.x * a_Quaternion.x - a_Quaternion.y * a_Quaternion.y - a_Quaternion.z * a_Quaternion.z )
 				);
 			}
 		}
@@ -3110,60 +3112,60 @@ struct Quaternion : public IVector< float, 4 >
 
 		switch ( a_RotationOrder )
 		{
-		case RotationOrder::XYZ:
-		{
-			return Quaternion( 
-				cx * cy * cz + sx * sy * sz,
-				sx * cy * cz - cx * sy * sz,
-				cx * sy * cz + sx * cy * sz,
-				cx * cy * sz - sx * sy * cz
-			);
-		}
-		case RotationOrder::XZY:
-		{
-			return Quaternion(
-				cx * cy * cz - sx * sy * sz,
-				sx * cy * cz + cx * sy * sz,
-				cx * sy * cz + sx * cy * sz,
-				cx * cy * sz - sx * sy * cz
-			);
-		}
-		case RotationOrder::YXZ:
-		{
-			return Quaternion(
-				cx * cy * cz - sx * sy * sz,
-				sx * cy * cz - cx * sy * sz,
-				cx * sy * cz + sx * cy * sz,
-				cx * cy * sz + sx * sy * cz
-			);
-		}
-		case RotationOrder::YZX:
-		{
-			return Quaternion(
-				cx * cy * cz + sx * sy * sz,
-				sx * cy * cz - cx * sy * sz,
-				cx * sy * cz - sx * cy * sz,
-				cx * cy * sz + sx * sy * cz
-			);
-		}
-		case RotationOrder::ZXY:
-		{
-			return Quaternion(
-				cx * cy * cz + sx * sy * sz,
-				sx * cy * cz + cx * sy * sz,
-				cx * sy * cz - sx * cy * sz,
-				cx * cy * sz - sx * sy * cz
-			);
-		}
-		case RotationOrder::ZYX:
-		{
-			return Quaternion(
-				cx * cy * cz - sx * sy * sz,
-				sx * cy * cz + cx * sy * sz,
-				cx * sy * cz - sx * cy * sz,
-				cx * cy * sz + sx * sy * cz
-			);
-		}
+			case RotationOrder::XYZ:
+			{
+				return Quaternion(
+					cx * cy * cz - sx * sy * sz,
+					sx * cy * cz + cx * sy * sz,
+					cx * sy * cz - sx * cy * sz,
+					cx * cy * sz + sx * sy * cz
+				);
+			}
+			case RotationOrder::XZY:
+			{
+				return Quaternion(
+					cx * cy * cz + sx * sy * sz,
+					sx * cy * cz - cx * sy * sz,
+					cx * sy * cz - sx * cy * sz,
+					cx * cy * sz + sx * sy * cz
+				);
+			}
+			case RotationOrder::YXZ:
+			{
+				return Quaternion(
+					cx * cy * cz + sx * sy * sz,
+					sx * cy * cz + cx * sy * sz,
+					cx * sy * cz - sx * cy * sz,
+					cx * cy * sz - sx * sy * cz
+				);
+			}
+			case RotationOrder::YZX:
+			{
+				return Quaternion(
+					cx * cy * cz - sx * sy * sz,
+					sx * cy * cz + cx * sy * sz,
+					cx * sy * cz + sx * cy * sz,
+					cx * cy * sz - sx * sy * cz
+				);
+			}
+			case RotationOrder::ZXY:
+			{
+				return Quaternion(
+					cx * cy * cz - sx * sy * sz,
+					sx * cy * cz - cx * sy * sz,
+					cx * sy * cz + sx * cy * sz,
+					cx * cy * sz + sx * sy * cz
+				);
+			}
+			case RotationOrder::ZYX:
+			{
+				return Quaternion(
+					cx * cy * cz + sx * sy * sz,
+					sx * cy * cz - cx * sy * sz,
+					cx * sy * cz + sx * cy * sz,
+					cx * cy * sz - sx * sy * cz
+				);
+			}
 		}
 	}
 
