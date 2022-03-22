@@ -72,19 +72,22 @@ int main()
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
-	ScreenBuffer::BlendingEnabled = true;
+	ScreenBuffer::BlendingEnabled = false;
 	Cube  cube;
 	Plane plane;
 	Axes  axes;
 
 	GameObject& CubeObject  = GameObject::Instantiate( "Cube"_N );
-	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
+	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 3.0f );
 	CubeObject.GetTransform().SetGlobalPosition( Vector3::Up );
+
 	GameObject& PlaneObject = GameObject::Instantiate( "Plane"_N );
 	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 10.0f );
+
 	GameObject& AxesObject  = GameObject::Instantiate( "Axes"_N );
 	AxesObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
 	AxesObject.GetTransform().SetGlobalPosition( Vector3::Left * 5.0f );
+
 	GameObject& CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
 	CameraObject.GetTransform().SetGlobalPosition( Vector3( 0.0f, 0.0f, -3.0f ) );
