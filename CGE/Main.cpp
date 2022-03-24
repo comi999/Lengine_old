@@ -61,13 +61,6 @@ struct Axes
 
 int main()
 {
-	Vector3 p0 = Vector3::Forward;
-	Vector3 e0 = Vector3( Math::Radians( 45.0f ), Math::Radians( 45.0f ), 0.0f );
-	Quaternion q0 = Quaternion::ToQuaternion( e0, RotationOrder::YXZ );
-	Matrix4 m0 = Quaternion::ToMatrix4( q0 );
-	Vector3 p1 = Math::Multiply( m0, Vector4( p0 ) );
-
-
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
@@ -251,20 +244,6 @@ int main()
 			CGE::Quit();
 		}
 
-		if ( Input::IsKeyPressed( KeyCode::H ) )
-		{
-			if ( isAttached )
-			{
-				SubCubeObject.GetTransform()->DetachFromParent();
-				isAttached = false;
-			}
-			else
-			{
-				SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
-				isAttached = true;
-			}
-		}
-
 		if ( Input::IsKeyDown( KeyCode::Shift ) )
 		{
 			movement = 4.0f;
@@ -273,29 +252,6 @@ int main()
 		{
 			movement = 1.0f;
 		}
-
-		if ( Input::IsKeyDown( KeyCode::Left ) )
-		{
-			auto Scale = CubeObject.GetTransform()->GetGlobalScale();
-			Scale += Vector3::One * Time::GetDeltaTime();
-			CubeObject.GetTransform()->SetGlobalScale( Scale );
-		}
-
-		if ( Input::IsKeyDown( KeyCode::Right ) )
-		{
-			auto Scale = CubeObject.GetTransform()->GetGlobalScale();
-			Scale -= Vector3::One * Time::GetDeltaTime();
-			CubeObject.GetTransform()->SetGlobalScale( Scale );
-		}
-
-		Quaternion CubeRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
-		CubeObject.GetTransform()->SetGlobalRotation( CubeRotation );
-
-		Quaternion SubCubeRotation = Quaternion::ToQuaternion( Vector3::Up, cubeRotation * 2.0f );
-		SubCubeObject.GetTransform()->SetLocalRotation( SubCubeRotation );
-
-		//Quaternion PlaneRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
-		//PlaneObject.GetTransform().SetGlobalRotation( PlaneRotation );
 
 		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 		{
@@ -306,6 +262,8 @@ int main()
 			CameraEuler.x -= Math::Radians( MouseDelta.y * 1.0f );
 			CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
 		}
+
+		CameraObject.GetTransform()->SetLocalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetLocalPosition() ) );
 	} );
 
 	

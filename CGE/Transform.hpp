@@ -445,32 +445,32 @@ public:
 
 	inline Vector3 GetGlobalForward() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalBackward() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalRight() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalLeft() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalUp() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalDown() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
 	}
 
 	void SetLocalForward( const Vector3& a_Forward )

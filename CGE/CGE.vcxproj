@@ -167,6 +167,7 @@
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Name.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />
