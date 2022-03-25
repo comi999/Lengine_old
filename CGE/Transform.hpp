@@ -475,161 +475,174 @@ public:
 
 	void SetLocalForward( const Vector3& a_Forward )
 	{
-		Vector3 Forward = a_Forward;
-		Vector3 Up = Vector3::Up;
-		Vector3 Right = Math::Normalize( Math::Cross( Up, Forward ) );
-		Forward = Math::Cross( Right, Up );
-		//Up = Math::Normalize( Math::Cross( Right, Forward ) );
-
-		Matrix3 mat = Matrix3( Right, Up, Forward );
-		Quaternion quat = Quaternion::ToQuaternion( mat );
-		Matrix4::SetRotation( m_LocalMatrix, quat );
-		Matrix4::Decompose( m_LocalMatrix, m_LocalPosition, m_LocalRotation, m_LocalScale );
+		Matrix3 Rotation;
+		Rotation.c0 = Math::Normalize( Math::Cross( Vector3::Up, a_Forward ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( a_Forward, Rotation.c0.ToVector() ) );
+		Rotation.c2 = a_Forward;
+		m_LocalRotation = Quaternion::ToQuaternion( Rotation );
+		m_IsDirty = true;
 	}
 
 	void SetLocalBackward( const Vector3& a_Backward )
 	{
-
+		Matrix3 Rotation;
+		Rotation.c0 = Math::Normalize( Math::Cross( a_Backward, Vector3::Up ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( Rotation.c0.ToVector(), a_Backward ) );
+		Rotation.c2 = -a_Backward;
+		m_LocalRotation = Quaternion::ToQuaternion( Rotation );
+		m_IsDirty = true;
 	}
 
 	void SetLocalRight( const Vector3& a_Right )
 	{
-
+		Matrix3 Rotation;
+		Rotation.c2 = Math::Normalize( Math::Cross( a_Right, Vector3::Up ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( Rotation.c2.ToVector(), a_Right ) );
+		Rotation.c0 = a_Right;
+		m_LocalRotation = Quaternion::ToQuaternion( Rotation );
+		m_IsDirty = true;
 	}
 
 	void SetLocalLeft( const Vector3& a_Left )
 	{
-
-	}
-
-	void SetLocalUp( const Vector3& a_Up )
-	{
-
-	}
-
-	void SetLocalDown( const Vector3& a_Down )
-	{
-
+		Matrix3 Rotation;
+		Rotation.c2 = Math::Normalize( Math::Cross( Vector3::Up, a_Left ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( a_Left, Rotation.c2.ToVector() ) );
+		Rotation.c0 = -a_Left;
+		m_LocalRotation = Quaternion::ToQuaternion( Rotation );
+		m_IsDirty = true;
 	}
 
 	void SetGlobalForward( const Vector3& a_Forward )
 	{
-
+		Matrix3 Rotation;
+		Rotation.c0 = Math::Normalize( Math::Cross( Vector3::Up, a_Forward ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( a_Forward, Rotation.c0.ToVector() ) );
+		Rotation.c2 = a_Forward;
+		SetGlobalRotation( Quaternion::ToQuaternion( Rotation ) );
+	
 	}
 
 	void SetGlobalBackward( const Vector3& a_Backward )
 	{
-
+		Matrix3 Rotation;
+		Rotation.c0 = Math::Normalize( Math::Cross( a_Backward, Vector3::Up ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( Rotation.c0.ToVector(), a_Backward ) );
+		Rotation.c2 = -a_Backward;
+		SetGlobalRotation( Quaternion::ToQuaternion( Rotation ) );
 	}
 
 	void SetGlobalRight( const Vector3& a_Right )
 	{
-
+		Matrix3 Rotation;
+		Rotation.c2 = Math::Normalize( Math::Cross( a_Right, Vector3::Up ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( Rotation.c2.ToVector(), a_Right ) );
+		Rotation.c0 = a_Right;
+		SetGlobalRotation( Quaternion::ToQuaternion( Rotation ) );
 	}
 
 	void SetGlobalLeft( const Vector3& a_Left )
 	{
-
-	}
-
-	void SetGlobalUp( const Vector3& a_Up )
-	{
-
-	}
-
-	void SetGlobalDown( const Vector3& a_Down )
-	{
-
+		Matrix3 Rotation;
+		Rotation.c2 = Math::Normalize( Math::Cross( Vector3::Up, a_Left ) );
+		Rotation.c1 = Math::Normalize( Math::Cross( a_Left, Rotation.c2.ToVector() ) );
+		Rotation.c0 = -a_Left;
+		SetGlobalRotation( Quaternion::ToQuaternion( Rotation ) );
 	}
 
 	void TranslateLocal( const Vector3& a_Translation )
 	{
-
+		m_LocalPosition += a_Translation;
+		m_IsDirty = true;
 	}
 
 	void TranslateLocalX( float a_X )
 	{
-
+		m_LocalPosition.x += a_X;
+		m_IsDirty = true;
 	}
 
 	void TranslateLocalY( float a_Y )
 	{
-
+		m_LocalPosition.y = a_Y;
+		m_IsDirty = true;
 	}
 
 	void TranslateLocalZ( float a_Z )
 	{
-
+		m_LocalPosition.z = a_Z;
+		m_IsDirty = true;
 	}
 
-	void TranslateGlobal( const Vector3& a_Translation )
+	inline void TranslateGlobal( const Vector3& a_Translation )
 	{
-
+		SetGlobalPosition( a_Translation + Matrix4::ExtractTranslation( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ) );
 	}
 
-	void TranslateGlobalX( float a_X )
+	inline void TranslateGlobalX( float a_X )
 	{
-
+		SetGlobalPositionX( a_X + Matrix4::ExtractTranslationX( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ) );
 	}
 
-	void TranslateGlobalY( float a_Y )
+	inline void TranslateGlobalY( float a_Y )
 	{
-
+		SetGlobalPositionY( a_Y + Matrix4::ExtractTranslationY( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ) );
 	}
 
-	void TranslateGlobalZ( float a_Z )
+	inline void TranslateGlobalZ( float a_Z )
 	{
-
+		SetGlobalPositionZ( a_Z + Matrix4::ExtractTranslationZ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ) );
 	}
 
 	void RotateLocal( const Quaternion& a_Rotation )
 	{
-
+		m_LocalRotation = Quaternion::Concatenate( a_Rotation, m_LocalRotation );
+		m_IsDirty = true;
 	}
 
-	void RotateGlobal( const Quaternion& a_Rotation )
+	inline void RotateGlobal( const Quaternion& a_Rotation )
 	{
-
+		SetGlobalRotation( Quaternion::Concatenate( a_Rotation, GetGlobalRotation() ) );
 	}
 
-	void ScaleLocal( const Vector3& a_Scale )
+	inline void ScaleLocal( const Vector3& a_Scale )
 	{
-
+		SetLocalScale( GetLocalScale() * a_Scale );
 	}
 
-	void ScaleLocalX( float a_X )
+	inline void ScaleLocalX( float a_X )
 	{
-
+		SetLocalScaleX( GetLocalScaleX() * a_X );
 	}
 
-	void ScaleLocalY( float a_Y )
+	inline void ScaleLocalY( float a_Y )
 	{
-
+		SetLocalScaleY( GetLocalScaleY() * a_Y );
 	}
 
-	void ScaleLocalZ( float a_Z )
+	inline void ScaleLocalZ( float a_Z )
 	{
-
+		SetLocalScaleZ( GetLocalScaleZ() * a_Z );
 	}
 
-	void ScaleGlobal( const Vector3& a_Scale )
+	inline void ScaleGlobal( const Vector3& a_Scale )
 	{
-
+		SetGlobalScale( GetGlobalScale() * a_Scale );
 	}
 
-	void ScaleGlobalX( float a_X )
+	inline void ScaleGlobalX( float a_X )
 	{
-
+		SetGlobalScaleX( GetGlobalScaleX() * a_X );
 	}
 
-	void ScaleGlobalY( float a_Y )
+	inline void ScaleGlobalY( float a_Y )
 	{
-
+		SetGlobalScaleY( GetGlobalScaleY() * a_Y );
 	}
 
-	void ScaleGlobalZ( float a_Z )
+	inline void ScaleGlobalZ( float a_Z )
 	{
-
+		SetGlobalScaleZ( GetGlobalScaleZ() * a_Z );
 	}
 
 	inline const Matrix4& GetGlobalMatrix() const

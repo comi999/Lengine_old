@@ -8,48 +8,16 @@ enum class VertexIncludeFlags
 	Colour   = 0x1,
 	Position = 0x2,
 	Normal   = 0x4,
-	Texel    = 0x8
+	Texel    = 0x8,
 };
 
-struct VertexReference
+struct Vertex
 {
 private:
-
-	friend struct TriangleReference;
-	friend class Mesh;
-
-	VertexReference( const Colour& a_Colour, const Vector3& a_Position, const Vector3& a_Normal, const Vector2& a_Texel )
-		: VertexColour( a_Colour )
-		, VertexPosition( a_Position )
-		, VertexNormal( a_Normal )
-		, VertexTexel( a_Texel )
-	{ }
-
-public:
-
-	const Colour&  VertexColour;
-	const Vector3& VertexPosition;
-	const Vector3& VertexNormal;
-	const Vector2& VertexTexel;
 };
 
-struct TriangleReference
+struct Triangle
 {
-private:
-
-	friend class Mesh;
-
-	TriangleReference( const VertexReference& a_P0, const VertexReference& a_P1, const VertexReference& a_P2 )
-		: Vertices{ a_P0, a_P1, a_P2 }
-	{ }
-
-public:
-
-	union
-	{
-		VertexReference Vertices[ 3 ];
-		struct { VertexReference p0, p1, p2; };
-	};
 };
 
 class Mesh
@@ -60,26 +28,14 @@ public:
 		: m_Outermost( -1 )
 	{ }
 
-	VertexReference GetVertex( size_t a_Index ) const
+	Vertex GetVertex( size_t a_Index ) const
 	{
-		auto& Vertex = m_Vertices[ a_Index ];
-		return VertexReference(
-			m_Colours  [ Vertex[ 0 ] ],
-			m_Positions[ Vertex[ 1 ] ],
-			m_Normals  [ Vertex[ 2 ] ],
-			m_Texels   [ Vertex[ 3 ] ]
-		);
+		return Vertex();
 	}
 
-	TriangleReference GetTriangle( size_t a_Index ) const
+	Triangle GetTriangle( size_t a_Index ) const
 	{
-		auto& Triangle = m_Triangles[ a_Index ];
-		return TriangleReference(
-			{
-				GetVertex( Triangle[ 0 ] ),
-				GetVertex( Triangle[ 1 ] ),
-				GetVertex( Triangle[ 2 ] )
-			} );
+		return Triangle();
 	}
 
 	const Vector3& GetOutermostPosition() const

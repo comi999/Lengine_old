@@ -106,9 +106,6 @@
     <ClInclude Include="Name.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Transform.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>

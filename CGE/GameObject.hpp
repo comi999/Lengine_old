@@ -13,7 +13,7 @@ public:
 
 	inline bool IsValid() const
 	{
-		return m_ID == GameObjectID( -1 );
+		return m_ID == static_cast< GameObjectID >( -1 );
 	}
 
 	template < typename T >
@@ -77,6 +77,21 @@ public:
 	inline static GameObject Instantiate( const Name& a_Name, GameObject a_Parent )
 	{
 		return FindByID( ECS::Instantiate( a_Name, reinterpret_cast< GameObjectID&& >( a_Parent ) ) );
+	}
+
+	inline static GameObject Destroy( GameObject a_GameObject )
+	{
+		// implementation
+	}
+
+	operator GameObjectID()
+	{
+		return m_ID;
+	}
+
+	operator GameObjectID const() const
+	{
+		return m_ID;
 	}
 
 private:

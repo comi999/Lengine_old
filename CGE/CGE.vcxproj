@@ -199,7 +199,6 @@
     <ClInclude Include="MeshRenderer.hpp" />
     <ClInclude Include="MonoBehaviour.hpp" />
     <ClInclude Include="Name.hpp" />
-    <ClInclude Include="Object.hpp" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />

@@ -105,3 +105,21 @@ class IButton : public IInteractable< IButton< T > >
 };
 
 typedef IButton< void > Button;
+
+template < typename T >
+class IImage : public IGraphic< IImage< T > >
+{ };
+
+typedef IImage< void > Image;
+
+template < typename T >
+class ISprite : public IGraphic< ISprite< T > >
+{ };
+
+typedef ISprite< void > Sprite;
+
+template < typename T >
+class IAnimatedTile : public IGraphic< IAnimatedTile< T > >
+{ };
+
+typedef IAnimatedTile< void > AnimatedTile;

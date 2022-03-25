@@ -246,13 +246,16 @@ int main()
 
 		if ( Input::IsKeyDown( KeyCode::Shift ) )
 		{
-			movement = 4.0f;
+			movement = 10.0f;
 		}
 		else
 		{
-			movement = 1.0f;
+			movement = 4.0f;
 		}
 
+		Quaternion CubeRot = Quaternion::ToQuaternion( Math::Normalize( Vector3::One ), cubeRotation += Time::GetDeltaTime() );
+		CubeObject.GetTransform()->SetLocalRotation( CubeRot );
+		
 		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 		{
 			Vector2 MouseDelta = Input::GetMouseDelta();
@@ -263,7 +266,7 @@ int main()
 			CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
 		}
 
-		CameraObject.GetTransform()->SetLocalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetLocalPosition() ) );
+		CameraObject.GetTransform()->SetGlobalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetGlobalPosition() ) );
 	} );
 
 	

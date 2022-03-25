@@ -2747,19 +2747,19 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	}
 
 	template < typename T >
-	inline static Vector3 ExtractTranslationX( const Matrix< T, 4 >& a_Matrix )
+	inline static T ExtractTranslationX( const Matrix< T, 4 >& a_Matrix )
 	{
 		return a_Matrix.GetCol( 3 )[ 0 ];
 	}
 
 	template < typename T >
-	inline static Vector3 ExtractTranslationY( const Matrix< T, 4 >& a_Matrix )
+	inline static T ExtractTranslationY( const Matrix< T, 4 >& a_Matrix )
 	{
 		return a_Matrix.GetCol( 3 )[ 1 ];
 	}
 
 	template < typename T >
-	inline static Vector3 ExtractTranslationZ( const Matrix< T, 4 >& a_Matrix )
+	inline static T ExtractTranslationZ( const Matrix< T, 4 >& a_Matrix )
 	{
 		return a_Matrix.GetCol( 3 )[ 2 ];
 	}

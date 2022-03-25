@@ -82,14 +82,13 @@ public:
 	template < typename T >
 	static T* AddComponent( GameObjectID a_GameObjectID )
 	{
-		static bool Registered = 
-			s_TypeMap.RegisterTypes< typename T::InheritanceTrace >() || 
-			s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > ) ||
-			[]( entt::registry& a_Registry )
+		static bool RegisterTypes = s_TypeMap.RegisterTypes< typename T::InheritanceTrace >();
+		static bool RegisterFunction = s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > );
+		static bool RegisterOnConstruct = []()
 		{
-			a_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
+			s_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
 			return true;
-		}( s_Registry );
+		}( );
 
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
 		{
@@ -128,7 +127,7 @@ public:
 		{
 			size_t HashCode = Begin->hash_code();
 			T* Component = nullptr;
-			s_TypeMap.InvokeFunction< T* >( HashCode, "GetComponent"_H, Component, a_GameObjectID );
+			s_TypeMap.InvokeFunction( HashCode, "GetComponent"_H, Component, a_GameObjectID );
 
 			if ( Component )
 			{
