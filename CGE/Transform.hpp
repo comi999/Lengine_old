@@ -475,7 +475,16 @@ public:
 
 	void SetLocalForward( const Vector3& a_Forward )
 	{
+		Vector3 Forward = a_Forward;
+		Vector3 Up = Vector3::Up;
+		Vector3 Right = Math::Normalize( Math::Cross( Up, Forward ) );
+		Forward = Math::Cross( Right, Up );
+		//Up = Math::Normalize( Math::Cross( Right, Forward ) );
 
+		Matrix3 mat = Matrix3( Right, Up, Forward );
+		Quaternion quat = Quaternion::ToQuaternion( mat );
+		Matrix4::SetRotation( m_LocalMatrix, quat );
+		Matrix4::Decompose( m_LocalMatrix, m_LocalPosition, m_LocalRotation, m_LocalScale );
 	}
 
 	void SetLocalBackward( const Vector3& a_Backward )
