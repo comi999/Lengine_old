@@ -61,42 +61,35 @@ struct Axes
 
 int main()
 {
-	Vector3 p0 = Vector3::Forward;
-	Vector3 e0 = Vector3( Math::Radians( 45.0f ), Math::Radians( 45.0f ), 0.0f );
-	Quaternion q0 = Quaternion::ToQuaternion( e0, RotationOrder::YXZ );
-	Matrix4 m0 = Quaternion::ToMatrix4( q0 );
-	Vector3 p1 = Math::Multiply( m0, Vector4( p0 ) );
-
-
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
-	ScreenBuffer::BlendingEnabled = false;
+	ScreenBuffer::BlendingEnabled = true;
 	Cube  cube;
 	Plane plane;
 	Axes  axes;
 
-	GameObject& CubeObject  = GameObject::Instantiate( "Cube"_N );
-	CubeObject.GetTransform().SetGlobalScale( Vector3::One * 3.0f );
-	CubeObject.GetTransform().SetGlobalPosition( Vector3::Up );
+	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
+	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 3.0f );
+	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
 
-	GameObject& SubCubeObject = GameObject::Instantiate( "SubCube"_N );
-	SubCubeObject.GetTransform().SetParent( &CubeObject.GetTransform() );
-	SubCubeObject.GetTransform().SetLocalPosition( Vector3::Left );
-	SubCubeObject.GetTransform().SetLocalScale( Vector3::One * 1.0f );
+	GameObject SubCubeObject = GameObject::Instantiate( "SubCube"_N );
+	SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
+	SubCubeObject.GetTransform()->SetLocalPosition( Vector3::Left );
+	SubCubeObject.GetTransform()->SetLocalScale( Vector3::One * 0.5f );
 
-	GameObject& PlaneObject = GameObject::Instantiate( "Plane"_N );
-	PlaneObject.GetTransform().SetGlobalScale( Vector3::One * 10.0f );
+	GameObject PlaneObject = GameObject::Instantiate( "Plane"_N );
+	PlaneObject.GetTransform()->SetGlobalScale( Vector3::One * 10.0f );
 
-	GameObject& AxesObject  = GameObject::Instantiate( "Axes"_N );
-	AxesObject.GetTransform().SetGlobalScale( Vector3::One * 1.0f );
-	AxesObject.GetTransform().SetGlobalPosition( Vector3::Left * 5.0f );
+	GameObject AxesObject = GameObject::Instantiate( "Axes"_N );
+	AxesObject.GetTransform()->SetGlobalScale( Vector3::One * 1.0f );
+	AxesObject.GetTransform()->SetGlobalPosition( Vector3::Left * 5.0f );
 
-	GameObject& CameraObject = GameObject::Instantiate( "Camera"_N );
+	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
-	CameraObject.GetTransform().SetGlobalPosition( Vector3( 0.0f, 0.0f, -3.0f ) );
-	CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero ) );
+	CameraObject.GetTransform()->SetGlobalPosition( Vector3( 0.0f, 0.0f, -3.0f ) );
+	CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero ) );
 	CameraComponent->SetFOV( 60.0f );
 	CameraComponent->SetNearZ( 0.1f );
 	CameraComponent->SetFarZ( 1000.0f );
@@ -106,9 +99,9 @@ int main()
 	Vector3 right = Vector3::Right;
 	Vector3 up = Vector3::Up;
 
-	auto drawCube = [&]( Transform& transform )
+	auto drawCube = [&]( Transform* transform )
 	{
-		auto PVM = Math::Multiply( PVMatrix, transform.GetGlobalMatrix() );
+		auto PVM = Math::Multiply( PVMatrix, transform->GetGlobalMatrix() );
 		Vector4 Verts[ 8 ];
 
 		for ( int i = 0; i < 8; ++i )
@@ -148,7 +141,7 @@ int main()
 
 	auto drawPlane = [&]()
 	{
-		auto PVM = Math::Multiply( PVMatrix, PlaneObject.GetTransform().GetGlobalMatrix() );
+		auto PVM = Math::Multiply( PVMatrix, PlaneObject.GetTransform()->GetGlobalMatrix() );
 		Vector4 Verts[ 36 ];
 
 		for ( int i = 0; i < 36; ++i )
@@ -170,7 +163,7 @@ int main()
 
 	auto drawAxes = [&]()
 	{
-		auto PVM = Math::Multiply( PVMatrix, AxesObject.GetTransform().GetGlobalMatrix() );
+		auto PVM = Math::Multiply( PVMatrix, AxesObject.GetTransform()->GetGlobalMatrix() );
 		Vector4 Verts[ 4 ];
 
 		for ( int i = 0; i < 4; ++i )
@@ -190,12 +183,13 @@ int main()
 	float sensitivity = 0.0000001f;
 	float i = 0;
 	float cubeRotation = 0.0f;
+	bool isAttached = true;
 	CGE::Run( [&]()
 	{
-		CameraObject.GetTransform().UpdateTransform();
-		PlaneObject.GetTransform().UpdateTransform();
-		CubeObject.GetTransform().UpdateTransform();
-		AxesObject.GetTransform().UpdateTransform();
+		CameraObject.GetTransform()->UpdateTransform();
+		PlaneObject.GetTransform()->UpdateTransform();
+		CubeObject.GetTransform()->UpdateTransform();
+		AxesObject.GetTransform()->UpdateTransform();
 
 		PVMatrix = CameraComponent->GetProjectionViewMatrix();
 
@@ -205,44 +199,44 @@ int main()
 		drawCube( SubCubeObject.GetTransform() );
 		drawAxes();
 
-		right = CameraObject.GetTransform().GetGlobalRight();
-		up = CameraObject.GetTransform().GetGlobalUp();
-		forward = CameraObject.GetTransform().GetGlobalForward();
+		right = CameraObject.GetTransform()->GetGlobalRight();
+		up = CameraObject.GetTransform()->GetGlobalUp();
+		forward = CameraObject.GetTransform()->GetGlobalForward();
 
 		// Left
 		if ( Input::IsKeyDown( KeyCode::A ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * right * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() - movement * right * Time::GetDeltaTime() );
 		}
 
 		// Right
 		if ( Input::IsKeyDown( KeyCode::D ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * right * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() + movement * right * Time::GetDeltaTime() );
 		}
 
 		// Forward
 		if ( Input::IsKeyDown( KeyCode::W ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * forward * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() + movement * forward * Time::GetDeltaTime() );
 		}
 
 		// Back
 		if ( Input::IsKeyDown( KeyCode::S ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * forward * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() - movement * forward * Time::GetDeltaTime() );
 		}
 
 		// Up
 		if ( Input::IsKeyDown( KeyCode::E ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() + movement * up * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() + movement * up * Time::GetDeltaTime() );
 		}
 
 		// Down
 		if ( Input::IsKeyDown( KeyCode::Q ) )
 		{
-			CameraObject.GetTransform().SetGlobalPosition( CameraObject.GetTransform().GetGlobalPosition() - movement * up * Time::GetDeltaTime() );
+			CameraObject.GetTransform()->SetGlobalPosition( CameraObject.GetTransform()->GetGlobalPosition() - movement * up * Time::GetDeltaTime() );
 		}
 
 		if ( Input::IsKeyDown( KeyCode::Esc ) )
@@ -259,21 +253,17 @@ int main()
 			movement = 1.0f;
 		}
 
-		Quaternion CubeRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
-		CubeObject.GetTransform().SetGlobalRotation( CubeRotation );
-
-		//Quaternion PlaneRotation = Quaternion::ToQuaternion( Math::Normalize( Vector3( 1, 1, 1 ) ), cubeRotation += Time::GetDeltaTime() );
-		//PlaneObject.GetTransform().SetGlobalRotation( PlaneRotation );
-
 		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 		{
 			Vector2 MouseDelta = Input::GetMouseDelta();
-			Quaternion CameraRotation = CameraObject.GetTransform().GetGlobalRotation();
+			Quaternion CameraRotation = CameraObject.GetTransform()->GetGlobalRotation();
 			Vector3 CameraEuler = Quaternion::ToEulerAngles( CameraRotation );
 			CameraEuler.y -= Math::Radians( MouseDelta.x * 1.0f );
 			CameraEuler.x -= Math::Radians( MouseDelta.y * 1.0f );
-			CameraObject.GetTransform().SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
+			CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
 		}
+
+		CameraObject.GetTransform()->SetLocalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetLocalPosition() ) );
 	} );
 
 	

@@ -1,45 +1,19 @@
 #pragma once
 #include "ECS.hpp"
 
+typedef uint32_t GameObjectID;
 class GameObject;
 
 class ComponentBase
 {
-private:
-
-	bool m_StartRun : 1;
-	bool m_Ticking  : 1;
-
-public:
-
-	/*inline GameObject& GetGameObject()
-	{
-		return *GetGameObjectFromID( m_GameObject );
-	}
-
-	inline const GameObject& GetGameObject() const
-	{
-		return *GetGameObjectFromID( m_GameObject );
-	}*/
-
-	inline GameObject& GetGameObject()
-	{
-		return ECS::Get
-	}
-
-	inline const GameObject& GetGameObject() const
-	{
-
-	}
-
 protected:
 
 	friend class ECS;
 
-	GameObjectID m_GameObject;
+	GameObjectID m_GameObjectID;
+	bool         m_StartRun : 1;
+	bool         m_Ticking  : 1;
 };
-
-GameObject* GetGameObjectFromID( GameObjectID a_GameObjectID );
 
 template < typename T >
 class IComponent : public ComponentBase
@@ -86,6 +60,21 @@ private:
 	};
 
 public:
+
+	inline GameObjectID GetOwnerID() const
+	{
+		return m_GameObjectID;
+	}
+
+	inline GameObject& GetOwner()
+	{
+		return reinterpret_cast< GameObject& >( m_GameObjectID );
+	}
+
+	inline const GameObject& GetOwner() const
+	{
+		return reinterpret_cast< const GameObject& >( m_GameObjectID );
+	}
 
 	using InheritanceTrace = typename unwrap< IComponent< T > >::Tuple;
 	using LeadingType = std::tuple_element_t< std::tuple_size_v< InheritanceTrace > - 1, InheritanceTrace >;

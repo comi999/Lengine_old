@@ -1,129 +1,85 @@
 #pragma once
-//#include "Object.hpp"
-#include "Transform.hpp"
 #include "ECS.hpp"
-#include "Name.hpp"
+#include "Transform.hpp"
+#include "Alias.hpp"
 
-typedef entt::entity GameObjectID;
+typedef uint32_t GameObjectID;
+typedef uint32_t Hash;
+struct Name;
 
-class GameObject : public IComponent< GameObject >
+class GameObject
 {
-private:
-
 public:
 
+	inline bool IsValid() const
+	{
+		return m_ID == GameObjectID( -1 );
+	}
+
 	template < typename T >
-	T* AddComponent()
+	inline T* AddComponent()
 	{
 		return ECS::AddComponent< T >( m_ID );
 	}
 
 	template < typename T >
-	T* GetComponent()
+	inline T* GetComponent()
 	{
-		return ECS::GetComponent< T >( ComponentBase:: );
+		return ECS::GetComponent< T >( m_ID );
 	}
 
-	Transform* GetTransform()
+	inline Alias* GetAlias()
 	{
-		return ECS::GetComponent< Transform >( m_ID );
+		return ECS::GetExactComponent< Alias >( m_ID );
+	}
+
+	inline Transform* GetTransform()
+	{
+		return ECS::GetExactComponent< Transform >( m_ID );
+	}
+
+	template < typename T >
+	inline bool DestroyComponent()
+	{
+		return ECS::DestroyComponent< T >();
+	}
+
+	inline GameObjectID GetID() const
+	{
+		return m_ID;
+	}
+
+	inline static GameObject FindByID( GameObjectID a_GameObjectID )
+	{
+		return *reinterpret_cast< GameObject* >( &a_GameObjectID );
+	}
+
+	inline static GameObject FindByName( Hash a_Name )
+	{
+		return GameObject::FindByID( Alias::FindByName( a_Name ) );
+	}
+
+	inline static GameObject Instantiate()
+	{
+		return FindByID( ECS::Instantiate() );
+	}
+
+	inline static GameObject Instantiate( GameObject a_Parent )
+	{
+		return FindByID( ECS::Instantiate( reinterpret_cast< GameObjectID&& >( a_Parent ) ) );
+	}
+
+	inline static GameObject Instantiate( const Name& a_Name )
+	{
+		return FindByID( ECS::Instantiate( a_Name ) );
+	}
+
+	inline static GameObject Instantiate( const Name& a_Name, GameObject a_Parent )
+	{
+		return FindByID( ECS::Instantiate( a_Name, reinterpret_cast< GameObjectID&& >( a_Parent ) ) );
 	}
 
 private:
 
-	Name m_Name;
-
-	/*GameObject( const Name& a_Name, GameObjectID a_ObjectID )
-		: Object( a_Name, ObjectID( a_ObjectID ) )
-		, m_ToDestroy( false )
-	{
-		ECS::AddComponent< Transform >( *this, GameObjectID( a_ObjectID ) );
-	}
-
-public:
-
-	inline Transform& GetTransform()
-	{
-		return *ECS::GetComponent< Transform >( GameObjectID( GetObjectID() ) );
-	}
-
-	const Transform& GetTransform() const
-	{
-		return *ECS::GetComponent< Transform >( GameObjectID( GetObjectID() ) );
-	}
-
-	template < typename T >
-	T* AddComponent()
-	{
-		return ECS::AddComponent< T >( *this, GameObjectID( GetObjectID() ) );
-	}
-
-	template < typename T >
-	T* GetComponent()
-	{
-		return ECS::GetComponent< T >( GameObjectID( GetObjectID() ) );
-	}
-
-	template < typename _Component >
-	std::list< _Component* > GetComponents()
-	{
-		return std::list< _Component* >();
-	}
-
-	template < typename _Component >
-	_Component* GetComponentInChild()
-	{
-		return nullptr;
-	}
-
-	template < typename _Component >
-	std::list< _Component* > GetComponentsInChildren()
-	{
-		return std::list< _Component* >();
-	}
-
-	template < typename _Component >
-	bool DestroyComponent()
-	{
-		return false;
-	}
-
-	static GameObject& Instantiate()
-	{
-		static size_t Instantiated = 0;
-		return Instantiate( Name( "NewGameObject" + std::to_string( Instantiated++ ) ) );
-	}
-
-	static GameObject& Instantiate( const Name& a_Name )
-	{
-		auto Found = s_GameObjectLookup.find( a_Name.HashCode() );
-		
-		if ( Found != s_GameObjectLookup.end() )
-		{
-			Found->second.push_back( GameObject( a_Name, ECS::GenerateGameObjectID() ) );
-			return Found->second.back();
-		}
-		
-		auto& NewVector = s_GameObjectLookup.emplace( a_Name, std::vector< GameObject >() ).first->second;
-		NewVector.push_back( GameObject( a_Name, ECS::GenerateGameObjectID() ) );
-		return NewVector.back();
-	}
-
-	static GameObject* Find( const Name& a_Name )
-	{
-		if ( auto Found = s_GameObjectLookup.find( a_Name.HashCode() ); Found != s_GameObjectLookup.end() )
-		{
-			return &Found->second.front();
-		}
-
-		return nullptr;
-	}
-
-private:
-
-	template < class, class > class std::vector;
-
-	bool m_ToDestroy;
-	
-	static std::map< Hash, std::vector< GameObject > > s_GameObjectLookup;*/
+	GameObjectID m_ID;
 };

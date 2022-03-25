@@ -1,0 +1,43 @@
+{
+  "job_id": "623bf7e5d7447cfbd92f3427",
+  "replay_url": "https://replays.len.farag.premspec.wgsydney.com/replay/t1642765157.mhighrise.p7",
+  "replay_version": 2,
+  "player": "Bot 4",
+  "user_config": {
+    "full_video": "False",
+    "highlights": "True",
+    "resolution": [ 3840, 2160 ],
+    "player_camera": "True",
+    "third_person_camera": "False",
+    "top": "None",
+    "youtube_title": "PS Test Title",
+    "overlay_title": "",
+    "social_media": {
+      "discord": "",
+      "facebook": "",
+      "twitter": "",
+      "instagram": ""
+    }
+  },
+  "publish": {
+    "target": "youtube",
+    "youtube_publish_opts": {
+      "auth": {
+        "token_request_url": "https://wgie.wargaming.net/id/api/v2/account/credentials/create/external/google/",
+        "google_client_id": "c0YjRglLJIA0JIap1c3T378XU21yfCn1nd8j5wQS",
+        "google_client_secret": "Pql8fVZLm4M1c6WNLS4hOaHFjUy3jk7Xmv2gDwMtzRx6rrDC5M0qKyGrqCmrNiPy",
+        "game": "psdev",
+        "wgni_access_token": "WcNZE3swb6WDHnmEJd95JOzsGAvsEH",
+        "scopes": [ "openid", "https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.upload" ],
+        "account_id": 10004895373
+      },
+      "video_params": {
+        "title": "PS Test Title",
+        "keywords": "PS,Replay",
+        "description": "PS Test Description",
+        "category": 20,
+        "privacy_status": "unlisted"
+      }
+    }
+  }
+}

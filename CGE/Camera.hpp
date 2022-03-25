@@ -34,8 +34,8 @@ public:
 
 	inline Matrix4 GetViewMatrix()
 	{
-		Transform& OwnerTransform = ComponentBase::GetGameObject().GetTransform();
-		return Matrix4::CreateView( OwnerTransform.GetGlobalPosition(), OwnerTransform.GetGlobalRotation() );
+		Transform* OwnerTransform = this->GetOwner().GetTransform();
+		return Matrix4::CreateView( OwnerTransform->GetGlobalPosition(), OwnerTransform->GetGlobalRotation() );
 	}
 
 	inline Matrix4 GetProjectionViewMatrix()

@@ -2,7 +2,7 @@
 #include "Component.hpp"
 #include "Math.hpp"
 
-typedef ObjectID GameObjectID;
+typedef uint32_t GameObjectID;
 
 template < typename T > class ITransform;
 typedef ITransform< void > Transform;
@@ -28,17 +28,27 @@ public:
 
 	inline Transform* GetParent()
 	{
-		return m_Parent == GameObjectID( -1 ) ? nullptr : GetTransform( m_Parent );
+		return m_Parent == GameObjectID( -1 ) ? nullptr : reinterpret_cast< GameObject* >( &m_Parent )->GetTransform();
 	}
 
 	inline const Transform* GetParent() const
 	{
-		return m_Parent == GameObjectID( -1 ) ? nullptr : GetTransform( m_Parent );
+		return m_Parent == GameObjectID( -1 ) ? nullptr : reinterpret_cast< GameObject* >( &m_Parent )->GetTransform();
 	}
 
-	void SetParent( Transform* a_Parent, bool a_RetainGlobalTransform = true )
+	inline void SetParent( Transform* a_Parent, bool a_RetainGlobalTransform = true )
 	{
 		SetParentImpl( a_Parent, a_RetainGlobalTransform );
+	}
+
+	inline void SetParent( GameObjectID a_Parent, bool a_RetainGlobalTransform = true )
+	{
+		SetParentImpl( ECS::GetComponent< Transform >( a_Parent ), a_RetainGlobalTransform );
+	}
+
+	inline void DetachFromParent( bool a_RetainGlobalTransform = true )
+	{
+		SetParentImpl( nullptr, a_RetainGlobalTransform );
 	}
 
 	inline size_t GetChildCount() const
@@ -48,7 +58,7 @@ public:
 
 	inline Transform* GetChild( size_t a_Index )
 	{
-		return m_Children[ a_Index ];
+		return GameObject::FindByID( m_Children[ a_Index ] ).GetTransform();
 	}
 
 	inline void AttachChild( Transform* a_Transform, bool a_RetainGlobalTransform = true )
@@ -61,9 +71,14 @@ public:
 		a_Transform->SetParent( this, a_RetainGlobalTransform );
 	}
 
+	inline void AttachChild( GameObjectID a_Transform, bool a_RetainGlobalTransform = true )
+	{
+		//implementation
+	}
+
 	inline void DetachChild( size_t a_Index, bool a_RetainGlobalTransform = true )
 	{
-		m_Children[ a_Index ]->SetParentImpl( nullptr, a_RetainGlobalTransform, a_Index );
+		GameObject::FindByID( m_Children[ a_Index ] ).GetTransform()->SetParentImpl( nullptr, a_RetainGlobalTransform, a_Index );
 	}
 
 	inline void DetachChildren( bool a_RetainGlobalTransforms = true )
@@ -175,226 +190,226 @@ public:
 
 	inline Vector3 GetGlobalPosition()
 	{
-		return m_Parent ? Matrix4::ExtractTranslation( m_GlobalMatrix ) : m_LocalPosition;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslation( m_GlobalMatrix ) : m_LocalPosition;
 	}
 
 	inline float GetGlobalPositionX()
 	{
-		return m_Parent ? Matrix4::ExtractTranslationX( m_GlobalMatrix ) : m_LocalPosition.x;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationX( m_GlobalMatrix ) : m_LocalPosition.x;
 	}
 
 	inline float GetGlobalPositionY()
 	{
-		return m_Parent ? Matrix4::ExtractTranslationY( m_GlobalMatrix ) : m_LocalPosition.y;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationY( m_GlobalMatrix ) : m_LocalPosition.y;
 	}
 
 	inline float GetGlobalPositionZ()
 	{
-		return m_Parent ? Matrix4::ExtractTranslationZ( m_GlobalMatrix ) : m_LocalPosition.z;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationZ( m_GlobalMatrix ) : m_LocalPosition.z;
 	}
 
 	inline Quaternion GetGlobalRotation()
 	{
-		return m_Parent ? Matrix4::ExtractRotation( m_GlobalMatrix ) : m_LocalRotation;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractRotation( m_GlobalMatrix ) : m_LocalRotation;
 	}
 
 	inline Vector3 GetGlobalScale()
 	{
-		return m_Parent ? Matrix4::ExtractScale( m_GlobalMatrix ) : m_LocalScale;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScale( m_GlobalMatrix ) : m_LocalScale;
 	}
 
 	inline float GetGlobalScaleX()
 	{
-		return m_Parent ? Matrix4::ExtractScaleX( m_GlobalMatrix ) : m_LocalScale.x;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleX( m_GlobalMatrix ) : m_LocalScale.x;
 	}
 
 	inline float GetGlobalScaleY()
 	{
-		return m_Parent ? Matrix4::ExtractScaleY( m_GlobalMatrix ) : m_LocalScale.y;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleY( m_GlobalMatrix ) : m_LocalScale.y;
 	}
 
 	inline float GetGlobalScaleZ()
 	{
-		return m_Parent ? Matrix4::ExtractScaleZ( m_GlobalMatrix ) : m_LocalScale.z;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleZ( m_GlobalMatrix ) : m_LocalScale.z;
 	}
 
 	inline void SetGlobalPosition( const Vector3& a_Position )
 	{
-		Matrix4::SetTranslation( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Position );
+		Matrix4::SetTranslation( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Position );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalPosition = a_Position;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalPosition = Matrix4::ExtractTranslation( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalPositionX( float a_X )
 	{
-		Matrix4::SetTranslationX( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_X );
+		Matrix4::SetTranslationX( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_X );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalPosition.x = a_X;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalPosition = Matrix4::ExtractTranslation( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalPositionY( float a_Y )
 	{
-		Matrix4::SetTranslationY( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Y );
+		Matrix4::SetTranslationY( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Y );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalPosition.y = a_Y;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalPosition = Matrix4::ExtractTranslation( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalPositionZ( float a_Z )
 	{
-		Matrix4::SetTranslationX( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Z );
+		Matrix4::SetTranslationZ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Z );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalPosition.z = a_Z;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalPosition = Matrix4::ExtractTranslation( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalRotation( const Quaternion& a_Rotation )
 	{
-		Matrix4::SetRotation( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Rotation );
+		Matrix4::SetRotation( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Rotation );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalRotation = a_Rotation;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalRotation = Matrix4::ExtractRotation( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalScale( const Vector3& a_Scale )
 	{
-		Matrix4::SetScale( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Scale );
+		Matrix4::SetScale( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Scale );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalScale = a_Scale;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalScale = Matrix4::ExtractScale( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalScaleX( float a_X )
 	{
-		Matrix4::SetScaleX( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_X );
+		Matrix4::SetScaleX( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_X );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalScale.x = a_X;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalScale = Matrix4::ExtractScale( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalScaleY( float a_Y )
 	{
-		Matrix4::SetScaleY( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Y );
+		Matrix4::SetScaleY( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Y );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalScale.y = a_Y;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalScale = Matrix4::ExtractScale( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
 	inline void SetGlobalScaleZ( float a_Z )
 	{
-		Matrix4::SetScaleZ( m_Parent ? m_GlobalMatrix : m_LocalMatrix, a_Z );
+		Matrix4::SetScaleZ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix, a_Z );
 		
-		if ( !m_Parent )
+		if ( m_Parent == static_cast< GameObjectID >( -1 ) )
 		{
 			m_LocalScale.z = a_Z;
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( m_Parent->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalScale = Matrix4::ExtractScale( m_LocalMatrix );
 		}
 
-		for ( auto* Child : m_Children )
+		for ( auto Child : m_Children )
 		{
-			Child->m_IsDirty = true;
+			GameObject::FindByID( Child ).GetTransform()->m_IsDirty = true;
 		}
 	}
 
@@ -430,37 +445,46 @@ public:
 
 	inline Vector3 GetGlobalForward() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalBackward() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c2.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalRight() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalLeft() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c0.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalUp() const
 	{
-		return Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
+		return Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
 	}
 
 	inline Vector3 GetGlobalDown() const
 	{
-		return -Math::Normalize( ( m_Parent ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
+		return -Math::Normalize( ( m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix ).c1.ToVector3() );
 	}
 
 	void SetLocalForward( const Vector3& a_Forward )
 	{
+		Vector3 Forward = a_Forward;
+		Vector3 Up = Vector3::Up;
+		Vector3 Right = Math::Normalize( Math::Cross( Up, Forward ) );
+		Forward = Math::Cross( Right, Up );
+		//Up = Math::Normalize( Math::Cross( Right, Forward ) );
 
+		Matrix3 mat = Matrix3( Right, Up, Forward );
+		Quaternion quat = Quaternion::ToQuaternion( mat );
+		Matrix4::SetRotation( m_LocalMatrix, quat );
+		Matrix4::Decompose( m_LocalMatrix, m_LocalPosition, m_LocalRotation, m_LocalScale );
 	}
 
 	void SetLocalBackward( const Vector3& a_Backward )
@@ -610,7 +634,7 @@ public:
 
 	inline const Matrix4& GetGlobalMatrix() const
 	{
-		return m_Parent ? m_GlobalMatrix : m_LocalMatrix;
+		return m_Parent != static_cast< GameObjectID >( -1 ) ? m_GlobalMatrix : m_LocalMatrix;
 	}
 
 	inline const Matrix4& GetLocalMatrix() const
@@ -622,24 +646,39 @@ public:
 
 	inline void SetParentImpl( Transform* a_Transform, bool a_RetainGlobalTransform, size_t a_ChildIndex = -1 )
 	{
-		GameObjectID ThisID = ComponentBase::GetGameObject().GetObjectID();
+		GameObjectID ThisID = this->GetOwnerID();
 
 		// unset parent
-		if ( m_Parent != GameObjectID( -1 ) )
+		if ( m_Parent != static_cast< GameObjectID >( -1 ) )
 		{
-			m_LocalMatrix = m_GlobalMatrix;
-			auto Where = a_ChildIndex == -1 ? std::find( m_Parent->m_Children.begin(), m_Parent->m_Children.end(), ThisID ) : m_Parent->m_Children.begin() + a_ChildIndex;
-			m_Parent->m_Children.erase( Where );
+			Transform* ParentTransform = ECS::GetExactComponent< Transform >( m_Parent );
+
+			if ( a_RetainGlobalTransform )
+			{
+				m_LocalMatrix = m_GlobalMatrix;
+				Matrix4::Decompose( m_LocalMatrix, m_LocalPosition, m_LocalRotation, m_LocalScale );
+			}
+
+			auto Where = a_ChildIndex == -1 ? std::find( ParentTransform->m_Children.begin(), ParentTransform->m_Children.end(), ThisID ) : ParentTransform->m_Children.begin() + a_ChildIndex;
+			ParentTransform->m_Children.erase( Where );
 		}
 
 		// set parent
 		if ( a_Transform )
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( a_Transform->m_GlobalMatrix ), m_LocalMatrix );
-			a_Transform->m_Children.push_back( ThisID );
-		}
+			if ( a_RetainGlobalTransform )
+			{ 
+				m_LocalMatrix = Math::Multiply( Math::Inverse( a_Transform->GetGlobalMatrix() ), m_LocalMatrix );
+				Matrix4::Decompose( m_LocalMatrix, m_LocalPosition, m_LocalRotation, m_LocalScale );
+			}
 
-		m_Parent = a_Transform->GetGameObject().GetObjectID();
+			a_Transform->m_Children.push_back( ThisID );
+			m_Parent = a_Transform->GetOwnerID();
+		}
+		else
+		{
+			m_Parent = static_cast< GameObjectID >( -1 );
+		}
 	}
 
 	void UpdateTransform()
@@ -657,7 +696,7 @@ public:
 
 		for ( auto Begin = m_Children.begin(), End = m_Children.end(); Begin != End; ++Begin )
 		{
-			( *Begin )->UpdateTransform();
+			GameObject::FindByID( *Begin ).GetTransform()->UpdateTransform();
 		}
 	}
 
@@ -670,5 +709,3 @@ public:
 	GameObjectID m_Parent;
 	std::vector< GameObjectID > m_Children;
 };
-
-Transform* GetTransform( GameObjectID a_GameObjectID );
