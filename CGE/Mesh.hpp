@@ -3,34 +3,86 @@
 #include "Math.hpp"
 #include "Colour.h"
 
+constexpr auto GetLeading( unsigned int a_Value )
+{
+	for ( size_t i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
+	{
+		if ( ( 1u << i ) & a_Value )
+		{
+			return 1u << i;
+		}
+	}
+
+	return 0u;
+}
+
+constexpr auto RemoveLeading( unsigned int a_Value )
+{
+	for ( size_t i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
+	{
+		if ( ( 1u << i ) & a_Value )
+		{
+			return a_Value & ~( 1u << i );
+		}
+	}
+
+	return 0u;
+}
+
 enum class VertexIncludeFlags
 {
 	None     = 0x0,
 	Colour   = 0x1,
 	Position = 0x2,
 	Normal   = 0x4,
-	Texel    = 0x8,
+	Texel    = 0x8
 };
 
-//struct VertexColour   { Colour  Colour;   };
-//struct VertexPosition { Vector3 Position; };
-//struct VertexNormal   { Vector3 Normal;   };
-//struct VertexTexel    { Vector2 Texel;    };
-//
-//template < VertexIncludeFlags Flag > struct VertexTypeImpl        { using Type = void;           };
-//template <> struct VertexTypeImpl< VertexIncludeFlags::Colour   > { using Type = VertexColour;   };
-//template <> struct VertexTypeImpl< VertexIncludeFlags::Position > { using Type = VertexPosition; };
-//template <> struct VertexTypeImpl< VertexIncludeFlags::Normal   > { using Type = VertexNormal;   };
-//template <> struct VertexTypeImpl< VertexIncludeFlags::Texel    > { using Type = VertexTexel;    };
-//
-//template < VertexIncludeFlags Flags, VertexIncludeFlags Leading = Flags & VertexIncludeFlags::Colour >
-//struct VertexInterface
-//{
-//	
-//};
+constexpr VertexIncludeFlags operator |( VertexIncludeFlags a_Left, VertexIncludeFlags a_Right )
+{
+	return static_cast< VertexIncludeFlags >( static_cast< unsigned int >( a_Left ) | static_cast< unsigned int >( a_Right ) );
+}
 
-template < VertexIncludeFlags Flags >
-struct Vertex : public Vertex< Flags >> 1 >
+struct VertexColour   { Colour  Colour;   };
+struct VertexPosition { Vector3 Position; };
+struct VertexNormal   { Vector3 Normal;   };
+struct VertexTexel    { Vector2 Texel;    };
+
+template < VertexIncludeFlags Flag > struct VertexTypeImpl        { using Type = std::tuple<>;                  };
+template <> struct VertexTypeImpl< VertexIncludeFlags::Colour   > { using Type = std::tuple < VertexColour   >; };
+template <> struct VertexTypeImpl< VertexIncludeFlags::Position > { using Type = std::tuple < VertexPosition >; };
+template <> struct VertexTypeImpl< VertexIncludeFlags::Normal   > { using Type = std::tuple < VertexNormal   >; };
+template <> struct VertexTypeImpl< VertexIncludeFlags::Texel    > { using Type = std::tuple < VertexTexel    >; };
+
+template < unsigned int Flags >
+struct VertexInterfaceImpl
+{
+	static constexpr VertexIncludeFlags Leading = static_cast< VertexIncludeFlags >( GetLeading( Flags ) );
+	static constexpr unsigned int Rest = RemoveLeading( Flags );
+	using Type = typename VertexTypeImpl< Leading >::Type;
+	using Tuple = std::conditional_t< ( Rest > 0u ), typename std::_Tuple_cat1< Type, typename VertexInterfaceImpl< Rest >::Tuple >::type, Type >;
+};
+
+template < VertexIncludeFlags flags >
+using VertexInterface = VertexInterfaceImpl< static_cast< unsigned int >( flags ) >;
+
+template < typename Tuple >
+struct RecursiveInheritorImpl : protected RecursiveInheritorImpl< typename Tuple::_Mybase >, public Tuple::_This_type
+{ };
+
+template < typename... Bases >
+using RecursiveInheritor = RecursiveInheritorImpl< std::tuple< Bases... > >;
+
+template <>
+struct RecursiveInheritorImpl< std::tuple<> >
+{ };
+
+void foo()
+{
+	RecursiveInheritor< VertexColour, VertexNormal > a;
+}
+
+struct Vertex
 {
 private:
 
