@@ -212,9 +212,6 @@
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="TypeMap.hpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="something.json" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

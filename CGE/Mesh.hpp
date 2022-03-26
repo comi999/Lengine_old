@@ -3,95 +3,74 @@
 #include "Math.hpp"
 #include "Colour.h"
 
-constexpr auto GetLeading( unsigned int a_Value )
+enum class EVertexComponent : uint8_t
 {
-	for ( size_t i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
+	None,
+	Colour,
+	Position,
+	Normal,
+	Texel,
+};
+
+constexpr EVertexComponent operator |( EVertexComponent a_Left, EVertexComponent a_Right )
+{
+	return static_cast< EVertexComponent >( static_cast< unsigned int >( a_Left ) | static_cast< unsigned int >( a_Right ) );
+}
+
+namespace Implementation
+{
+	constexpr auto GetLeading( unsigned int a_Value )
 	{
-		if ( ( 1u << i ) & a_Value )
+		for ( int i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
 		{
-			return 1u << i;
+			if ( ( 1u << i ) & a_Value )
+			{
+				return 1u << i;
+			}
 		}
+	
+		return 0u;
 	}
 
-	return 0u;
-}
-
-constexpr auto RemoveLeading( unsigned int a_Value )
-{
-	for ( size_t i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
+	constexpr auto RemoveLeading( unsigned int a_Value )
 	{
-		if ( ( 1u << i ) & a_Value )
+		for ( int i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
 		{
-			return a_Value & ~( 1u << i );
+			if ( ( 1u << i ) & a_Value )
+			{
+				return a_Value & ~( 1u << i );
+			}
 		}
+	
+		return 0u;
 	}
+	
+	struct VertexColour   { Colour  Colour;   };
+	struct VertexPosition { Vector3 Position; };
+	struct VertexNormal   { Vector3 Normal;   };
+	struct VertexTexel    { Vector2 Texel;    };
+	
+	template < EVertexComponent Component > struct VertexComponentTypeImpl   { using Type = void          ; };
+	template <> struct VertexComponentTypeImpl< EVertexComponent::Colour   > { using Type = VertexColour  ; };
+	template <> struct VertexComponentTypeImpl< EVertexComponent::Position > { using Type = VertexPosition; };
+	template <> struct VertexComponentTypeImpl< EVertexComponent::Normal   > { using Type = VertexNormal  ; };
+	template <> struct VertexComponentTypeImpl< EVertexComponent::Texel    > { using Type = VertexTexel   ; };
 
-	return 0u;
-}
+	template < EVertexComponent Component >
+	using VertexComponentType = typename VertexComponentTypeImpl< Component >::Type;
 
-enum class VertexIncludeFlags
-{
-	None     = 0x0,
-	Colour   = 0x1,
-	Position = 0x2,
-	Normal   = 0x4,
-	Texel    = 0x8
+	template < typename... Bases >
+	struct Inheritor : public Bases...
+	{ };
+	
+	template < typename... Bases >
+	struct Inheritor< std::tuple< Bases... > > : public Inheritor< Bases >...
+	{ };
 };
 
-constexpr VertexIncludeFlags operator |( VertexIncludeFlags a_Left, VertexIncludeFlags a_Right )
-{
-	return static_cast< VertexIncludeFlags >( static_cast< unsigned int >( a_Left ) | static_cast< unsigned int >( a_Right ) );
-}
-
-struct VertexColour   { Colour  Colour;   };
-struct VertexPosition { Vector3 Position; };
-struct VertexNormal   { Vector3 Normal;   };
-struct VertexTexel    { Vector2 Texel;    };
-
-template < VertexIncludeFlags Flag > struct VertexTypeImpl        { using Type = std::tuple<>;                  };
-template <> struct VertexTypeImpl< VertexIncludeFlags::Colour   > { using Type = std::tuple < VertexColour   >; };
-template <> struct VertexTypeImpl< VertexIncludeFlags::Position > { using Type = std::tuple < VertexPosition >; };
-template <> struct VertexTypeImpl< VertexIncludeFlags::Normal   > { using Type = std::tuple < VertexNormal   >; };
-template <> struct VertexTypeImpl< VertexIncludeFlags::Texel    > { using Type = std::tuple < VertexTexel    >; };
-
-template < unsigned int Flags >
-struct VertexInterfaceImpl
-{
-	static constexpr VertexIncludeFlags Leading = static_cast< VertexIncludeFlags >( GetLeading( Flags ) );
-	static constexpr unsigned int Rest = RemoveLeading( Flags );
-	using Type = typename VertexTypeImpl< Leading >::Type;
-	using Tuple = std::conditional_t< ( Rest > 0u ), typename std::_Tuple_cat1< Type, typename VertexInterfaceImpl< Rest >::Tuple >::type, Type >;
-};
-
-template < VertexIncludeFlags flags >
-using VertexInterface = VertexInterfaceImpl< static_cast< unsigned int >( flags ) >;
-
-template < typename Tuple >
-struct RecursiveInheritorImpl : protected RecursiveInheritorImpl< typename Tuple::_Mybase >, public Tuple::_This_type
+template < EVertexComponent... Flags >
+struct Vertex : public Implementation::Inheritor< typename Implementation::VertexComponentType< Flags >... >
 { };
-
-template < typename... Bases >
-using RecursiveInheritor = RecursiveInheritorImpl< std::tuple< Bases... > >;
-
-template <>
-struct RecursiveInheritorImpl< std::tuple<> >
-{ };
-
-void foo()
-{
-	RecursiveInheritor< VertexColour, VertexNormal > a;
-}
-
-struct Vertex
-{
-private:
-
-
-};
-
-struct Triangle
-{
-};
 
 class Mesh
 {
@@ -101,15 +80,16 @@ public:
 		: m_Outermost( -1 )
 	{ }
 
-	/*Vertex GetVertex( size_t a_Index ) const
+	template < EVertexComponent... Flags >
+	void PopulateVertex( size_t a_Index, Vertex< Flags... > a_Vertex ) const
 	{
-		return Vertex();
-	}
+		auto& Vertex = m_Vertices[ a_Index ];
 
-	Triangle GetTriangle( size_t a_Index ) const
-	{
-		return Triangle();
-	}*/
+		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Colour >, Flags... >; )
+		{
+			a_Vertex.Color;
+		}
+	}
 
 	const Vector3& GetOutermostPosition() const
 	{
