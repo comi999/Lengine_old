@@ -199,6 +199,7 @@
     <ClInclude Include="MeshRenderer.hpp" />
     <ClInclude Include="MonoBehaviour.hpp" />
     <ClInclude Include="Name.hpp" />
+    <ClInclude Include="obj\OBJ_Loader.h" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
@@ -210,6 +211,9 @@
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="TypeMap.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="something.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
