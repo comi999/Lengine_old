@@ -5,15 +5,36 @@
 
 enum class VertexIncludeFlags
 {
+	None     = 0x0,
 	Colour   = 0x1,
 	Position = 0x2,
 	Normal   = 0x4,
 	Texel    = 0x8,
 };
 
-struct Vertex
+//struct VertexColour   { Colour  Colour;   };
+//struct VertexPosition { Vector3 Position; };
+//struct VertexNormal   { Vector3 Normal;   };
+//struct VertexTexel    { Vector2 Texel;    };
+//
+//template < VertexIncludeFlags Flag > struct VertexTypeImpl        { using Type = void;           };
+//template <> struct VertexTypeImpl< VertexIncludeFlags::Colour   > { using Type = VertexColour;   };
+//template <> struct VertexTypeImpl< VertexIncludeFlags::Position > { using Type = VertexPosition; };
+//template <> struct VertexTypeImpl< VertexIncludeFlags::Normal   > { using Type = VertexNormal;   };
+//template <> struct VertexTypeImpl< VertexIncludeFlags::Texel    > { using Type = VertexTexel;    };
+//
+//template < VertexIncludeFlags Flags, VertexIncludeFlags Leading = Flags & VertexIncludeFlags::Colour >
+//struct VertexInterface
+//{
+//	
+//};
+
+template < VertexIncludeFlags Flags >
+struct Vertex : public Vertex< Flags >> 1 >
 {
 private:
+
+
 };
 
 struct Triangle
@@ -28,7 +49,7 @@ public:
 		: m_Outermost( -1 )
 	{ }
 
-	Vertex GetVertex( size_t a_Index ) const
+	/*Vertex GetVertex( size_t a_Index ) const
 	{
 		return Vertex();
 	}
@@ -36,7 +57,7 @@ public:
 	Triangle GetTriangle( size_t a_Index ) const
 	{
 		return Triangle();
-	}
+	}*/
 
 	const Vector3& GetOutermostPosition() const
 	{
