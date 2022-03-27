@@ -284,7 +284,7 @@ public:
 		return CIterator( m_Buffer.data() + m_Buffer.size(), m_Stride );
 	}
 
-	void Reset( size_t a_Size, size_t a_Stride )
+	inline void Reset( size_t a_Size, size_t a_Stride )
 	{
 		m_Buffer.reserve( a_Size );
 		m_Buffer.clear();
