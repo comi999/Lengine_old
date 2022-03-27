@@ -58,18 +58,10 @@ namespace Implementation
 
 	template < EVertexComponent Component >
 	using VertexComponentType = typename VertexComponentTypeImpl< Component >::Type;
-
-	template < typename... Bases >
-	struct Inheritor : public Bases...
-	{ };
-	
-	template < typename... Bases >
-	struct Inheritor< std::tuple< Bases... > > : public Inheritor< Bases >...
-	{ };
 };
 
 template < EVertexComponent... Flags >
-struct Vertex : public Implementation::Inheritor< typename Implementation::VertexComponentType< Flags >... >
+struct Vertex : public Implementation::VertexComponentType< Flags >...
 { };
 
 class Mesh
@@ -85,9 +77,24 @@ public:
 	{
 		auto& Vertex = m_Vertices[ a_Index ];
 
-		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Colour >, Flags... >; )
+		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Colour >, Flags... > )
 		{
-			a_Vertex.Color;
+			a_Vertex.Colour = m_Colours[ Vertex[ 0 ] ];
+		}
+
+		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Position >, Flags... > )
+		{
+			a_Vertex.Position = m_Positions[ Vertex[ 1 ] ];
+		}
+
+		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Normal >, Flags... > )
+		{
+			a_Vertex.Normal = m_Normals[ Vertex[ 2 ] ];
+		}
+
+		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Texel >, Flags... > )
+		{
+			a_Vertex.Texel = m_Texels[ Vertex[ 3 ] ];
 		}
 	}
 

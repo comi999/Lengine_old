@@ -35,7 +35,7 @@
     <ClCompile Include="ECS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics.cpp">
+    <ClCompile Include="Rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
@@ -130,7 +130,7 @@
     <ClInclude Include="Mesh.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics.hpp">
+    <ClInclude Include="Rendering.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Shader.hpp">
@@ -146,6 +146,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="obj\OBJ_Loader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
