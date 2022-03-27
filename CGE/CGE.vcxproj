@@ -164,7 +164,7 @@
     <ClCompile Include="Colour.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="ECS.cpp" />
-    <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -189,11 +189,12 @@
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="Graphics.hpp" />
+    <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Invoker.hpp" />
     <ClInclude Include="Line.hpp" />
+    <ClInclude Include="Material.hpp" />
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="MeshRenderer.hpp" />
