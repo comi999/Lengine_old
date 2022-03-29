@@ -189,7 +189,7 @@
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="LinkedArray.hpp" />
+    <ClInclude Include="HeapList.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />

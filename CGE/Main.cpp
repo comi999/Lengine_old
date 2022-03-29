@@ -59,8 +59,56 @@ struct Axes
 #include "GameObject.hpp"
 #include "Camera.hpp"
 
+auto QSQRT = []( double a_Value )
+{
+	long i;
+	float x2, y;
+	const float threehalfs = 1.5;
+
+	x2 = a_Value * 0.5;
+	y = a_Value;
+	i = *( long* )&y;
+	i = 0x5f3759df - ( i >> 1 );
+	y = *( float* )&i;
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+	y = y * ( threehalfs - ( x2 * y * y ) );
+
+	return y;
+};
+
 int main()
 {
+	std::vector< size_t > squares;
+
+	for ( size_t i = 0; i < 3810778; ++i )
+	{
+		squares.push_back(i * i);
+	}
+
+	int prev = 0;
+
+	for ( int i = 1; i < 3810778; ++i )
+	{
+		int sqrt = 1.0 / QSQRT( squares[ i ] ) + 0.1;
+		
+		if ( sqrt - prev != 1 )
+		{
+			int a = 0;
+		}
+
+		prev = sqrt;
+	}
+	auto siz = static_cast< size_t >( -1 );
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
