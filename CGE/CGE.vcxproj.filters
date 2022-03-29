@@ -151,6 +151,12 @@
     <ClInclude Include="Material.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ResourceManager.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedArray.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

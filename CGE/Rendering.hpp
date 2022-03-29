@@ -286,13 +286,21 @@ public:
 
 	inline void Reset( size_t a_Size, size_t a_Stride )
 	{
-		m_Buffer.reserve( a_Size );
-		m_Buffer.clear();
+		m_Buffer.resize( a_Size );
+		m_Stride = a_Stride;
 	}
 
 private:
 
-	size_t m_Stride;
+	void Swap( RenderBuffer& a_RenderBuffer )
+	{
+		m_Buffer.swap( a_RenderBuffer.m_Buffer );
+		std::swap( a_RenderBuffer.m_Stride, m_Stride );
+	}
+
+	friend class Rendering;
+
+	size_t                 m_Stride;
 	std::vector< uint8_t > m_Buffer;
 };
 
@@ -330,24 +338,57 @@ class Rendering
 {
 private:
 
+	inline static bool IsRenderBufferHandleValid( RenderBufferHandle a_Handle )
+	{
+		return a_Handle < s_RenderBuffers.size();
+	}
+
 	static RenderBufferHandle CreateRenderBuffer()
 	{
-
+		s_RenderBuffers.emplace_back();
+		return s_RenderBuffers.size() - 1;
 	}
 
 	static bool DestroyRenderBuffer( RenderBufferHandle a_Handle )
 	{
+		if ( !SwapRenderBuffers( a_Handle, static_cast< RenderBufferHandle >( s_RenderBuffers.size() - 1 ) ) )
+		{
+			return false;
+		}
 
+		s_RenderBuffers.pop_back();
+		return true;
 	}
 
-	static RenderBuffer* GetRenderBuffer( RenderBufferHandle a_Handle )
+	static bool SetRenderBufferStride( RenderBufferHandle a_Handle, size_t a_Stride )
 	{
+		if ( !IsRenderBufferHandleValid( a_Handle ) )
+		{
+			return false;
+		}
 
+		s_RenderBuffers[ a_Handle ].m_Stride = a_Stride;
+		return true;
 	}
 
-	static bool SwitchRenderBuffers( RenderBufferHandle a_HandleA, RenderBufferHandle a_HandleB )
+	static size_t GetRenderBufferStride( RenderBufferHandle a_Handle )
 	{
-		return false;
+		if ( !IsRenderBufferHandleValid( a_Handle ) )
+		{
+			return 0;
+		}
+
+		return s_RenderBuffers[ a_Handle ].m_Stride;
+	}
+
+	static bool SwapRenderBuffers( RenderBufferHandle a_HandleA, RenderBufferHandle a_HandleB )
+	{
+		if ( !IsRenderBufferHandleValid( a_HandleA ) || !IsRenderBufferHandleValid( a_HandleB ) )
+		{
+			return false;
+		}
+
+		s_RenderBuffers[ a_HandleA ].Swap( s_RenderBuffers[ a_HandleB ] );
 	}
 
 	static std::vector< RenderBuffer > s_RenderBuffers;
