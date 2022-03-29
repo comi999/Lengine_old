@@ -154,7 +154,7 @@
     <ClInclude Include="ResourceManager.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedArray.hpp">
+    <ClInclude Include="HeapList.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
