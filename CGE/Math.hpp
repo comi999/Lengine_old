@@ -359,15 +359,14 @@ public:
 	inline static float InverseSqrt( T a_Scalar )
 	{
 		long I;
-		float X2, Y;
-		const float Threehalfs = 1.5f;
+		float X, Y;
 
-		X2 = a_Scalar * 0.5f;
+		X = a_Scalar * 0.5f;
 		Y = a_Scalar;
 		I = *( long* )&Y;
 		I = 0x5f3759df - ( I >> 1 );
 		Y = *( float* )&I;
-		Y = Y * ( Threehalfs - ( X2 * Y * Y ) );
+		Y = Y * ( 1.5f - ( X * Y * Y ) );
 
 		return Y;
 	}

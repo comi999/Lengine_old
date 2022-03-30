@@ -59,56 +59,44 @@ struct Axes
 #include "GameObject.hpp"
 #include "Camera.hpp"
 
-auto QSQRT = []( double a_Value )
+float InvSqrt( float a_Value )
 {
-	long i;
-	float x2, y;
-	const float threehalfs = 1.5;
+	long I;
+	float X, Y;
 
-	x2 = a_Value * 0.5;
-	y = a_Value;
-	i = *( long* )&y;
-	i = 0x5f3759df - ( i >> 1 );
-	y = *( float* )&i;
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
-	y = y * ( threehalfs - ( x2 * y * y ) );
+	X = a_Value * 0.5f;
+	Y = a_Value;
+	I = reinterpret_cast< long& >( Y );
+	I = 0x5f3759df - ( I >> 1 );
+	Y = reinterpret_cast< float& >( I );
+	Y = Y * ( 1.5f - ( X * Y * Y ) );
+	Y = Y * ( 1.5f - ( X * Y * Y ) );
+	Y = Y * ( 1.5f - ( X * Y * Y ) );
+	Y = Y * ( 1.5f - ( X * Y * Y ) );
 
-	return y;
+	return Y;
+	
 };
+
+// 120
+// 1111000
+// 1, 3, 7, 15, 31, 63, 127
+// index = 4
+// 
+static constexpr size_t val = sizeof( DWORD );
+typedef std::pair< size_t, size_t > Location;
+inline static Location FindLocation( size_t a_Index )
+{
+	DWORD HeapIndex;
+	HeapIndex = !!BitScanReverse64( &HeapIndex, a_Index );
+	HeapIndex *= HeapIndex;
+	return Location( HeapIndex, a_Index - HeapIndex * ( ( static_cast< size_t >( 1 ) << HeapIndex ) ) );
+}
 
 int main()
 {
-	std::vector< size_t > squares;
+	auto loc = FindLocation( 1 );
 
-	for ( size_t i = 0; i < 3810778; ++i )
-	{
-		squares.push_back(i * i);
-	}
-
-	int prev = 0;
-
-	for ( int i = 1; i < 3810778; ++i )
-	{
-		int sqrt = 1.0 / QSQRT( squares[ i ] ) + 0.1;
-		
-		if ( sqrt - prev != 1 )
-		{
-			int a = 0;
-		}
-
-		prev = sqrt;
-	}
-	auto siz = static_cast< size_t >( -1 );
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );

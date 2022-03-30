@@ -4,27 +4,13 @@
 template < typename T >
 class LinkedArray
 {
-private:
+//private:
+	typedef std::pair< size_t, size_t > Location;
 
-	//inline pair< size_t, size_t > GetLocation( size_t a_Index ) const
-	//{
-	//	auto QSQRT = []( float a_Value )
-	//	{
-	//		long i;
-	//		float x2, y;
-	//		const float threehalfs = 1.5F;
-
-	//		x2 = a_Value * 0.5F;
-	//		y = a_Value;
-	//		i = *( long* )&y;                       
-	//		i = 0x5f3759df - ( i >> 1 );               
-	//		y = *( float* )&i;
-	//		y = y * ( threehalfs - ( x2 * y * y ) );   
-	//		//	y  = y * ( threehalfs - ( x2 * y * y ) );   
-
-	//		return y;
-	//	};
-
-
-	//}
+	inline static Location FindLocation( size_t a_Index )
+	{
+		size_t HeapIndex;
+		HeapIndex = !!BitScanReverse64( &HeapIndex, a_Index + 1 ) * HeapIndex;
+		return Location( HeapIndex, a_Index + 1 - ( static_cast< size_t >( 1 ) << HeapIndex ) );
+	}
 };
