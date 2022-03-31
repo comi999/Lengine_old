@@ -59,44 +59,34 @@ struct Axes
 #include "GameObject.hpp"
 #include "Camera.hpp"
 
-float InvSqrt( float a_Value )
+struct LiteralIndexer
 {
-	long I;
-	float X, Y;
+	static size_t Next()
+	{
+		static size_t Index = 0;
+		return Index++;
+	}
 
-	X = a_Value * 0.5f;
-	Y = a_Value;
-	I = reinterpret_cast< long& >( Y );
-	I = 0x5f3759df - ( I >> 1 );
-	Y = reinterpret_cast< float& >( I );
-	Y = Y * ( 1.5f - ( X * Y * Y ) );
-	Y = Y * ( 1.5f - ( X * Y * Y ) );
-	Y = Y * ( 1.5f - ( X * Y * Y ) );
-	Y = Y * ( 1.5f - ( X * Y * Y ) );
-
-	return Y;
-	
+	template < char... C >
+	static size_t GetLiteralIndex()
+	{
+		static size_t Index = Next();
+		return Index;
+	}
 };
 
-// 120
-// 1111000
-// 1, 3, 7, 15, 31, 63, 127
-// index = 4
-// 
-static constexpr size_t val = sizeof( DWORD );
-typedef std::pair< size_t, size_t > Location;
-inline static Location FindLocation( size_t a_Index )
+
+
+template < auto val >
+struct str
 {
-	DWORD HeapIndex;
-	HeapIndex = !!BitScanReverse64( &HeapIndex, a_Index );
-	HeapIndex *= HeapIndex;
-	return Location( HeapIndex, a_Index - HeapIndex * ( ( static_cast< size_t >( 1 ) << HeapIndex ) ) );
-}
+
+};
+
+str<"something"_H> a;
 
 int main()
 {
-	auto loc = FindLocation( 1 );
-
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );

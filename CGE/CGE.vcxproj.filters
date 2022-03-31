@@ -41,6 +41,9 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TypeIndexer.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pixel.hpp">
@@ -151,10 +154,7 @@
     <ClInclude Include="Material.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeapList.hpp">
+    <ClInclude Include="Resource.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
