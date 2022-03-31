@@ -5,6 +5,65 @@
 #include "TypeIndexer.hpp"
 
 class Resource;
+class ResourcePool;
+
+template < typename T >
+struct ResourceRef
+{
+private:
+
+	ResourceRef( T* a_Resource )
+		: m_Resource( a_Resource )
+	{ }
+
+public:
+
+	inline T* Get()
+	{
+		return m_Resource;
+	}
+
+	inline const T* Get() const
+	{
+		return m_Resource;
+	}
+
+	inline T& GetRef()
+	{
+		return *m_Resource;
+	}
+
+	inline const T& GetRef() const
+	{
+		return *m_Resource;
+	}
+
+	inline operator T*()
+	{
+		return m_Resource;
+	}
+
+	inline operator T* const() const
+	{
+		return m_Resource;
+	}
+
+	inline operator T&()
+	{
+		return *m_Resource;
+	}
+
+	inline operator T& const() const
+	{
+		return *m_Resource;
+	}
+
+private:
+
+	friend class ResourcePool;
+
+	T* m_Resource;
+};
 
 struct ResourcePool
 {
@@ -28,6 +87,13 @@ public:
 		}
 
 		m_Resources.clear();
+	}
+
+	template < typename T, typename... Args >
+	ResourceRef< T > Construct( Args&&... a_Args )
+	{
+		m_Resources.push_back( new T( std::forward( a_Args )... ) );
+		return ResourceRef< T >( reinterpret_cast< T* >( m_Resources.back() ) );
 	}
 
 private:

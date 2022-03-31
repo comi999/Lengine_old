@@ -59,32 +59,6 @@ struct Axes
 #include "GameObject.hpp"
 #include "Camera.hpp"
 
-struct LiteralIndexer
-{
-	static size_t Next()
-	{
-		static size_t Index = 0;
-		return Index++;
-	}
-
-	template < char... C >
-	static size_t GetLiteralIndex()
-	{
-		static size_t Index = Next();
-		return Index;
-	}
-};
-
-
-
-template < auto val >
-struct str
-{
-
-};
-
-str<"something"_H> a;
-
 int main()
 {
 	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
