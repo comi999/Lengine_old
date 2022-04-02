@@ -1,11 +1,12 @@
 #pragma once
 #include "Hash.hpp"
 
-template < typename Friend, Hash Instance >
+template < auto H > struct HashType {};
+
+template < Hash Instance >
 class Indexer
 {
-	friend typename Friend;
-	template < Hash H > struct HashType { };
+public:
 
 	template < typename T >
 	struct Instance
@@ -36,8 +37,4 @@ class Indexer
 			return Index;
 		}
 	};
-
-	template < Hash H >
-	struct Instance : public Instance < HashType< H > >
-	{ };
 };
