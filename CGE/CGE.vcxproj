@@ -174,7 +174,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Time.cpp" />
-    <ClCompile Include="TypeIndexer.hpp" />
+    <ClCompile Include="Indexer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />
@@ -214,6 +214,7 @@
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="TypeMap.hpp" />
+    <ClInclude Include="TypeMapNew.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

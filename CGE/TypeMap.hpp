@@ -9,6 +9,7 @@
 #include "Invoker.hpp"
 
 typedef std::type_info TypeInfo;
+// UPDATE THIS WITH TYPE INDEXER AND HASHINDEXER
 
 class TypeMap
 {
@@ -385,3 +386,4 @@ private:
 
 	std::map< size_t, Node > m_Nodes;
 };
+

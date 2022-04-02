@@ -41,7 +41,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TypeIndexer.hpp">
+    <ClCompile Include="Indexer.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -155,6 +155,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeMapNew.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

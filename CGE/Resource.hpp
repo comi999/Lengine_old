@@ -112,7 +112,7 @@ class Resource
 {
 private:
 
-	typedef TypeIndexer< crc32_cpt(__FILE__) > TypeIndexer;
+	typedef TypeIndexer< "Resource"_H > TypeIndexer;
 
 public:
 
