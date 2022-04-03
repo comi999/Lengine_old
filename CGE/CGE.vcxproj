@@ -174,7 +174,6 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Time.cpp" />
-    <ClCompile Include="Indexer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />
