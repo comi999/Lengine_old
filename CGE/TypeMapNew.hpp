@@ -55,7 +55,7 @@ class TypeMap
 		BreadthFirst,
 		DepthFirst,
 	};
-
+	
 	template < SearchType S >
 	class Iterator
 	{

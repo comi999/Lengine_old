@@ -58,10 +58,19 @@ struct Axes
 #include "Transform.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
+#include <iostream>
+
+struct Node
+{
+	
+};
 
 int main()
 {
-	CGE::Initialize( "Some window!", { 128, 128 }, { 1, 1 } );
+	void* l = static_cast< void* >( &lam );
+	auto res = static_cast< 
+
+	CGE::Initialize( "Some title", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
