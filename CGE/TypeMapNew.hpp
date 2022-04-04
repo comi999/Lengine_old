@@ -4,7 +4,9 @@
 #include <queue>
 #include <stack>
 #include "Hash.hpp"
+#include "entt/entt.hpp"
 
+entt::registry a;
 class TypeMap
 {
 	typedef std::type_info TypeInfo;

@@ -4,6 +4,15 @@
 #include "Input.hpp"
 #include "Component.hpp"
 
+
+void Next()
+{
+	static size_t Index = 0;
+	return Index++;
+}
+
+
+
 struct Cube
 {
 	Vector4 Corners[ 8 ]
@@ -58,18 +67,9 @@ struct Axes
 #include "Transform.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
-#include <iostream>
-
-struct Node
-{
-	
-};
 
 int main()
 {
-	void* l = static_cast< void* >( &lam );
-	auto res = static_cast< 
-
 	CGE::Initialize( "Some title", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );

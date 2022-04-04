@@ -212,6 +212,7 @@
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Tree.hpp" />
     <ClInclude Include="TypeMap.hpp" />
     <ClInclude Include="TypeMapNew.hpp" />
   </ItemGroup>

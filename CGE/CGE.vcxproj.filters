@@ -157,6 +157,9 @@
     <ClInclude Include="TypeMapNew.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Tree.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
