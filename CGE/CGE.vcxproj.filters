@@ -41,6 +41,9 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pixel.hpp">
@@ -58,7 +61,7 @@
     <ClInclude Include="ScreenBuffer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="CGE.h">
+    <ClInclude Include="CGE.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleWindow.hpp">
@@ -67,7 +70,7 @@
     <ClInclude Include="Line.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Colour.h">
+    <ClInclude Include="Colour.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="entt\entt.hpp">
@@ -155,6 +158,13 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="TypeMapNew.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Any.hpp" />
+    <ClInclude Include="Light.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include "ScreenBuffer.hpp"
 #include "Pixel.hpp"
-#include "Colour.h"
+#include "Colour.hpp"
 #include "Math.hpp"
 #include "PixelColourMap.hpp"
 

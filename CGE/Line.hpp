@@ -1,5 +1,5 @@
 #pragma once
-#include "Math.h"
+#include "Math.hpp"
 #include "Rect.hpp"
 
 struct Line

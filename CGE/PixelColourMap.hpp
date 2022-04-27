@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <fstream>
-#include "Colour.h"
+#include "Colour.hpp"
 #include "Pixel.hpp"
 #include "Math.hpp"
 

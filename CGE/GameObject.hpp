@@ -28,14 +28,30 @@ public:
 		return ECS::GetComponent< T >( m_ID );
 	}
 
+	template < typename T >
+	inline const T* GetComponent() const
+	{
+		return ECS::GetComponentConst< T >( m_ID );
+	}
+
 	inline Alias* GetAlias()
 	{
 		return ECS::GetExactComponent< Alias >( m_ID );
 	}
 
+	inline const Alias* GetAlias() const
+	{
+		return ECS::GetExactComponentConst< Alias >( m_ID );
+	}
+
 	inline Transform* GetTransform()
 	{
 		return ECS::GetExactComponent< Transform >( m_ID );
+	}
+
+	inline const Transform* GetTransform() const
+	{
+		return ECS::GetExactComponentConst< Transform >( m_ID );
 	}
 
 	template < typename T >

@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <vector>
 #include <typeinfo>
-#include "TypeIndexer.hpp"
 
 class Resource;
 class ResourcePool;
@@ -112,7 +111,7 @@ class Resource
 {
 private:
 
-	typedef TypeIndexer< "Resource"_H > TypeIndexer;
+	//typedef TypeIndexer< "Resource"_H > TypeIndexer;
 
 public:
 

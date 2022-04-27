@@ -1247,13 +1247,13 @@ struct Vector< T, 2 > : public IVector< T, 2 >
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
 		}
 
-		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		if constexpr ( S0 < 2 && ( std::tuple_size_v< decltype( Trailing ) > ) > 0 )
 		{
 			++i;
 			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		if constexpr ( S0 < 1 && ( std::tuple_size_v< decltype( Trailing ) > ) > 1 )
 		{
 			++i;
 			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
@@ -1359,19 +1359,19 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
 		}
 
-		if constexpr ( S0 < 3 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		if constexpr ( S0 < 3 && ( std::tuple_size_v< decltype( Trailing ) > ) > 0 )
 		{
 			++i;
 			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		if constexpr ( S0 < 2 && ( std::tuple_size_v< decltype( Trailing ) > ) > 1 )
 		{
 			++i;
 			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 2 )
+		if constexpr ( S0 < 1 && ( std::tuple_size_v< decltype( Trailing ) > ) > 2 )
 		{
 			++i;
 			this->operator[]( S0 + 2 ) = static_cast< T >( std::get< 2 >( Trailing ) );
@@ -1783,25 +1783,25 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 			this->operator[]( i ) = static_cast< T >( a_Vector[ i ] );
 		}
 
-		if constexpr ( S0 < 4 && std::tuple_size_v< decltype( Trailing ) > > 0 )
+		if constexpr ( S0 < 4 && ( std::tuple_size_v< decltype( Trailing ) > ) > 0 )
 		{
 			++i;
 			this->operator[]( S0 ) = static_cast< T >( std::get< 0 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 3 && std::tuple_size_v< decltype( Trailing ) > > 1 )
+		if constexpr ( S0 < 3 && ( std::tuple_size_v< decltype( Trailing ) > ) > 1 )
 		{
 			++i;
 			this->operator[]( S0 + 1 ) = static_cast< T >( std::get< 1 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 2 && std::tuple_size_v< decltype( Trailing ) > > 2 )
+		if constexpr ( S0 < 2 && ( std::tuple_size_v< decltype( Trailing ) > ) > 2 )
 		{
 			++i;
 			this->operator[]( S0 + 2 ) = static_cast< T >( std::get< 2 >( Trailing ) );
 		}
 
-		if constexpr ( S0 < 1 && std::tuple_size_v< decltype( Trailing ) > > 3 )
+		if constexpr ( S0 < 1 && ( std::tuple_size_v< decltype( Trailing ) > ) > 3 )
 		{
 			++i;
 			this->operator[]( S0 + 3 ) = static_cast< T >( std::get< 3 >( Trailing ) );

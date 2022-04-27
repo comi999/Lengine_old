@@ -20,25 +20,25 @@ class ICamera : public IComponent< ICamera< T > >
 {
 public:
 
-	inline Matrix4 GetProjectionMatrix()
+	inline Matrix4 GetProjectionMatrix() const
 	{
 		if ( m_Dirty )
 		{
 			float AspectRatio = static_cast< float >( ScreenBuffer::GetBufferWidth() ) / ScreenBuffer::GetBufferHeight();
-			m_Projection = Matrix4::CreateProjection( m_FOV, AspectRatio, m_NearZ, m_FarZ );
-			m_Dirty = false;
+			const_cast< Camera* >( this )->m_Projection = Matrix4::CreateProjection( m_FOV, AspectRatio, m_NearZ, m_FarZ );
+			const_cast< Camera* >( this )->m_Dirty = false;
 		}
 
 		return m_Projection;
 	}
 
-	inline Matrix4 GetViewMatrix()
+	inline Matrix4 GetViewMatrix() const
 	{
-		Transform* OwnerTransform = this->GetOwner().GetTransform();
+		const Transform* OwnerTransform = this->GetOwner().GetTransform();
 		return Matrix4::CreateView( OwnerTransform->GetGlobalPosition(), OwnerTransform->GetGlobalRotation() );
 	}
 
-	inline Matrix4 GetProjectionViewMatrix()
+	inline Matrix4 GetProjectionViewMatrix() const
 	{
 		return Math::Multiply( GetProjectionMatrix(), GetViewMatrix() );
 	}
@@ -76,6 +76,16 @@ public:
 		m_Dirty;
 	}
 
+	inline static void SetMainCamera( const Camera* a_Camera )
+	{
+		s_MainCamera = a_Camera;
+	}
+
+	inline static const Camera* GetMainCamera()
+	{
+		return s_MainCamera;
+	}
+
 private:
 
 	Matrix4 m_Projection;
@@ -83,4 +93,6 @@ private:
 	float   m_NearZ;
 	float   m_FarZ;
 	bool    m_Dirty;
+
+	static const Camera* s_MainCamera;
 };

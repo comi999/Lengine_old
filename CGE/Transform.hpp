@@ -188,47 +188,47 @@ public:
 		m_IsDirty = true;
 	}
 
-	inline Vector3 GetGlobalPosition()
+	inline Vector3 GetGlobalPosition() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslation( m_GlobalMatrix ) : m_LocalPosition;
 	}
 
-	inline float GetGlobalPositionX()
+	inline float GetGlobalPositionX() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationX( m_GlobalMatrix ) : m_LocalPosition.x;
 	}
 
-	inline float GetGlobalPositionY()
+	inline float GetGlobalPositionY() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationY( m_GlobalMatrix ) : m_LocalPosition.y;
 	}
 
-	inline float GetGlobalPositionZ()
+	inline float GetGlobalPositionZ() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractTranslationZ( m_GlobalMatrix ) : m_LocalPosition.z;
 	}
 
-	inline Quaternion GetGlobalRotation()
+	inline Quaternion GetGlobalRotation() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractRotation( m_GlobalMatrix ) : m_LocalRotation;
 	}
 
-	inline Vector3 GetGlobalScale()
+	inline Vector3 GetGlobalScale() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScale( m_GlobalMatrix ) : m_LocalScale;
 	}
 
-	inline float GetGlobalScaleX()
+	inline float GetGlobalScaleX() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleX( m_GlobalMatrix ) : m_LocalScale.x;
 	}
 
-	inline float GetGlobalScaleY()
+	inline float GetGlobalScaleY() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleY( m_GlobalMatrix ) : m_LocalScale.y;
 	}
 
-	inline float GetGlobalScaleZ()
+	inline float GetGlobalScaleZ() const
 	{
 		return m_Parent != static_cast< GameObjectID >( -1 ) ? Matrix4::ExtractScaleZ( m_GlobalMatrix ) : m_LocalScale.z;
 	}

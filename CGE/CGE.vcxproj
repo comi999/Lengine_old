@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
@@ -177,9 +178,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />
+    <ClInclude Include="Any.hpp" />
     <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="CGE.h" />
-    <ClInclude Include="Colour.h" />
+    <ClInclude Include="CGE.hpp" />
+    <ClInclude Include="Colour.hpp" />
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="ConsoleColour.hpp" />
     <ClInclude Include="ConsoleWindow.hpp" />
@@ -189,6 +191,7 @@
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="Light.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -212,6 +215,7 @@
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Tree.hpp" />
     <ClInclude Include="TypeMap.hpp" />
     <ClInclude Include="TypeMapNew.hpp" />
   </ItemGroup>

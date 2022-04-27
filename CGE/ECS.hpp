@@ -139,6 +139,12 @@ public:
 	}
 
 	template < typename T >
+	inline static const T* GetComponentConst( GameObjectID a_GameObjectID )
+	{
+		return GetComponent< T >( a_GameObjectID );
+	}
+
+	template < typename T >
 	static T* GetExactComponent( GameObjectID a_GameObjectID )
 	{
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
@@ -150,6 +156,12 @@ public:
 	}
 
 	template < typename T >
+	inline static const T* GetExactComponentConst( GameObjectID a_GameObjectID )
+	{
+		return GetComponent< T >( a_GameObjectID );
+	}
+
+	template < typename T >
 	static bool DestroyComponent( GameObjectID a_GameObjectID )
 	{
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
@@ -158,6 +170,12 @@ public:
 		}
 
 		return false;//return s_Registry.remove_if_exists< T >( a_GameObjectID );
+	}
+
+	template < typename T >
+	static auto GetAll()
+	{
+		return s_Registry.view< T >();
 	}
 
 private:

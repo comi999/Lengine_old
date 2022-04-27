@@ -42,20 +42,41 @@ class TypeMap
 		}
 	};
 
+	enum class SearchType
+	{
+		BreadthFirst,
+		DepthFirst,
+	};
+
 	struct Node
 	{
+	public:
+
+		template < Hash H, typename Return, typename... Args >
+		Return Invoke( Args&&... a_Args )
+		{
+			typedef Return( *Function )( Args... );
+			static size_t FunctionIndex = LiteralSequencer< HashType< "Function"_H > >::Index< H >();
+			_STL_ASSERT( FunctionIndex < Functions.size() && Functions[ FunctionIndex ], "No function of that name exists." );
+			return reinterpret_cast< Function >( Functions[ FunctionIndex ] )( std::forward< Args >( a_Args )... );
+		}
+
+		const TypeInfo& GetTypeInfo() const
+		{
+			return *TypeInfo;
+		}
+
+	private:
+
+		template < SearchType > friend class Iterator;
+		friend class TypeMap;
+
 		const TypeInfo*      TypeInfo;
 		Node*                Parent;
 		std::vector< Node* > Children;
 		std::vector< void* > Functions;
 	};
 
-	enum class SearchType
-	{
-		BreadthFirst,
-		DepthFirst,
-	};
-	
 	template < SearchType S >
 	class Iterator
 	{
@@ -64,6 +85,14 @@ class TypeMap
 		Iterator( const Node* a_Node )
 		{
 			Push( a_Node );
+		}
+
+		Iterator( const std::vector< const Node* >& a_Nodes )
+		{
+			for ( const Node* Orphan : a_Nodes )
+			{
+				Push( Orphan );
+			}
 		}
 
 		const Node* Pop()
@@ -83,6 +112,19 @@ class TypeMap
 			}
 		}
 
+		const Node* Peek() const
+		{
+			if constexpr ( S == SearchType::BreadthFirst )
+			{
+				return m_Trace.front();
+			}
+
+			if constexpr ( S == SearchType::DepthFirst )
+			{
+				return m_Trace.top();
+			}
+		}
+
 		void Push( const Node* a_Node )
 		{
 			m_Trace.push( a_Node );
@@ -95,7 +137,6 @@ class TypeMap
 		using difference_type = std::ptrdiff_t;
 		using pointer = value_type*;
 		using reference = value_type&;
-
 
 		Iterator() = default;
 
@@ -126,28 +167,26 @@ class TypeMap
 			return Temp;
 		}
 
-		inline const TypeInfo& operator*() const
+		inline const Node& operator*() const
 		{
-			_STL_VERIFY( !m_Trace.empty(), "Cannot dereference end iterator." );
-
-			return m_Trace.front()->m_TypeInfo;
+			_STL_VERIFY( !m_Trace.empty(), "Cannot dereference end." );
+			return *Peek();
 		}
 
 		inline const TypeInfo* operator->() const
 		{
-			_STL_VERIFY( !m_Trace.empty(), "Cannot dereference end iterator." );
-
-			return &m_Trace.front()->m_TypeInfo;
+			_STL_VERIFY( !m_Trace.empty(), "Cannot dereference end." );
+			return Peek();
 		}
 
-		inline bool operator==( const BFIterator & a_Iterator ) const
+		inline bool operator==( const Iterator< S > & a_Iterator ) const
 		{
 			if ( m_Trace.empty() || a_Iterator.m_Trace.empty() )
 			{
 				return m_Trace.empty() && a_Iterator.m_Trace.empty();
 			}
 
-			return m_Trace.front() == a_Iterator.m_Trace.front();
+			return Peek() == a_Iterator.Peek();
 		}
 
 		inline bool operator!=( const BFIterator & a_Iterator ) const
@@ -158,8 +197,6 @@ class TypeMap
 	private:
 
 		friend class TypeMap;
-
-	private:
 
 		std::conditional_t< S == SearchType::BreadthFirst, std::queue< Node* >, std::stack< Node* > > m_Trace;
 	};
@@ -183,7 +220,7 @@ class TypeMap
 	template < typename T, Hash H >
 	void*& AssureFunction()
 	{
-		static size_t Index = LiteralSequencer< HashType< "Function"_H >, T >::Index< H >();
+		static size_t Index = LiteralSequencer< HashType< "Function"_H > >::Index< H >();
 		Node* _Node = AssureNode< T >();
 
 		if ( !( Index < _Node->Functions.size() ) )
@@ -253,7 +290,20 @@ public:
 		return _Function( std::forward< Args >( a_Args )... );
 	}
 
+	template < SearchType S >
+	Iterator< S > Begin() const
+	{
+		return Iterator< S >( m_Orphans );
+	}
+
+	template < SearchType S >
+	Iterator< S > End() const
+	{
+		return Iterator< S >();
+	}
+
 private:
 
-	std::vector< Node > m_Nodes;
+	std::vector< Node >        m_Nodes;
+	std::vector< const Node* > m_Orphans;
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
-#include "Math.h"
-#include "Colour.h"
+#include "Math.hpp"
+#include "Colour.hpp"
 #include "ScreenBuffer.hpp"
 #include "PixelColourMap.hpp"
 

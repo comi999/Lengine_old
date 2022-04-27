@@ -1,7 +1,7 @@
 #pragma once
-#include "Colour.h"
-#include "Math.h"
-#include "CGE.h"
+#include "Colour.hpp"
+#include "Math.hpp"
+#include "CGE.hpp"
 #include "Line.hpp"
 
 struct Point

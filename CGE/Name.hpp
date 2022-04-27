@@ -1,9 +1,8 @@
 #pragma once
 #include <string>
 #include <list>
-#include "Hash.hpp"
 
-using namespace std;
+#include "Hash.hpp"
 
 #ifdef _DEBUG
 // Force name strings to stick around for human-friendly debugging purposes.
@@ -58,7 +57,7 @@ public:
 #endif
     }
 
-    Name( const string& a_String )
+    Name( const std::string& a_String )
         : m_String( a_String.c_str() ), m_Length( int32_t( a_String.length() ) ),
         m_Hash( crc32_impl< sizeof( const char* ) >( m_String ) )
     {
@@ -68,7 +67,7 @@ public:
 #endif
     }
 
-    operator string() const { return string( m_String, m_Length ); }
+    operator std::string() const { return std::string( m_String, m_Length ); }
     operator Hash() const { return m_Hash; }
     operator const char*() const { return m_String; }
     constexpr char operator []( size_t a_Pos ) { return m_String[ a_Pos ]; }
@@ -100,7 +99,7 @@ public:
 private:
 
 #ifdef ENABLE_NAME_STORAGE
-    static list< string > s_NameStorage;
+    static std::list< std::string > s_NameStorage;
 #endif
 
     const char* m_String;

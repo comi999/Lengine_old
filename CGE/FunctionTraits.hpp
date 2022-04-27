@@ -1,8 +1,6 @@
 #pragma once
 #include <tuple>
 
-using namespace std;
-
 //==========================================================================
 // Utilities for determining traits of function types.
 //==========================================================================
@@ -18,7 +16,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = true;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = false;
@@ -30,7 +28,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = false;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = true;
@@ -42,7 +40,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = false;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = true;
@@ -54,7 +52,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = false;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = true;
@@ -66,7 +64,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >; 
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = false;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = true;
@@ -78,7 +76,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = true;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = false;
@@ -90,7 +88,7 @@ namespace FunctionTraits
 		{
 			using Signature = R( A... );
 			using Return    = R;
-			using Arguments = tuple< A... >;
+			using Arguments = std::tuple< A... >;
 			static constexpr bool IsStatic   = true;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = false;
@@ -102,7 +100,7 @@ namespace FunctionTraits
 		{
 			using Signature = void;
 			using Return = void;
-			using Arguments = tuple<>;
+			using Arguments = std::tuple<>;
 			static constexpr bool IsStatic   = false;
 			static constexpr bool IsLambda   = false;
 			static constexpr bool IsMember   = false;
@@ -120,7 +118,7 @@ namespace FunctionTraits
 		template < typename T >
 		struct LambdaInfoImpl
 		{
-			using Signature = decltype( &remove_reference< T >::type::operator() );
+			using Signature = decltype( &std::remove_reference< T >::type::operator() );
 			using Return    = typename InfoImpl< Signature >::Return;
 			using Arguments = typename InfoImpl< Signature >::Arguments;
 			static constexpr bool IsStatic   = false;
@@ -131,35 +129,35 @@ namespace FunctionTraits
 	}
 
 	template < typename T >
-	struct Info : public conditional_t< HasInvocationOperator< T >::Value, LambdaInfoImpl< T >, InfoImpl< T > >
+	struct Info : public std::conditional_t< HasInvocationOperator< T >::Value, LambdaInfoImpl< T >, InfoImpl< T > >
 	{ };
 
 	template < typename T, typename O >
-	using EnableIfFunction = enable_if_t< Info< T >::IsFunction, O >;
+	using EnableIfFunction = std::enable_if_t< Info< T >::IsFunction, O >;
 
 	template < typename T, typename O >
-	using DisableIfFunction = enable_if_t< !Info< T >::IsFunction, O >;
+	using DisableIfFunction = std::enable_if_t< !Info< T >::IsFunction, O >;
 
 	template < typename T, typename O >
-	using EnableIfStatic = enable_if_t< Info< T >::IsStatic, O >;
+	using EnableIfStatic = std::enable_if_t< Info< T >::IsStatic, O >;
 
 	template < typename T, typename O >
-	using DisableIfStatic = enable_if_t< !Info< T >::IsStatic, O >;
+	using DisableIfStatic = std::enable_if_t< !Info< T >::IsStatic, O >;
 
 	template < typename T, typename O >
-	using EnableIfMember = enable_if_t< Info< T >::IsMember, O >;
+	using EnableIfMember = std::enable_if_t< Info< T >::IsMember, O >;
 
 	template < typename T, typename O >
-	using DisableIfMember = enable_if_t< !Info< T >::IsMember, O >;
+	using DisableIfMember = std::enable_if_t< !Info< T >::IsMember, O >;
 
 	template < typename T, typename O >
-	using EnableIfLambda = enable_if_t< Info< T >::IsLambda, O >;
+	using EnableIfLambda = std::enable_if_t< Info< T >::IsLambda, O >;
 
 	template < typename T, typename O >
-	using DisableIfLambda = enable_if_t< !Info< T >::IsLambda, O >;
+	using DisableIfLambda = std::enable_if_t< !Info< T >::IsLambda, O >;
 
 	template < typename T, size_t INDEX >
-	using GetArgument = tuple_element_t< INDEX, typename Info< T >::Arguments >;
+	using GetArgument = std::tuple_element_t< INDEX, typename Info< T >::Arguments >;
 
 	template < typename T >
 	using GetArguments = typename Info< T >::Arguments;
@@ -171,7 +169,7 @@ namespace FunctionTraits
 	using GetSignature = typename Info< T >::Signature;
 
 	template < typename T >
-	static constexpr size_t GetArgumentCount = tuple_size_v< Info< T >::Arguments >;
+	static constexpr size_t GetArgumentCount = std::tuple_size_v< Info< T >::Arguments >;
 
 	template < typename T >
 	static constexpr bool IsFunction = Info< T >::IsFunction;

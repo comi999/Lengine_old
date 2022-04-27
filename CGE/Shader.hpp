@@ -1,7 +1,7 @@
 #pragma once
 #include "Mesh.hpp"
 #include "Texture.hpp"
-#include "Colour.h"
+#include "Colour.hpp"
 
 class Uniform
 {

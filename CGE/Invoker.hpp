@@ -4,9 +4,6 @@
 #include "FunctionTraits.hpp"
 
 //==========================================================================
-using namespace std;
-
-//==========================================================================
 // Stores an invocable object or function. This includes static lambdas,
 // capture lambdas, static functions and member functions with object
 // instances.
@@ -31,7 +28,7 @@ private:
 	};
 
 	template < typename R, typename... A >
-	struct AsInvokerImpl< R, tuple< A... > >
+	struct AsInvokerImpl< R, std::tuple< A... > >
 	{
 		using Type = Invoker< R, A... >;
 	};
@@ -40,10 +37,10 @@ private:
 	using AsInvoker = typename AsInvokerImpl< FunctionTraits::GetReturn< T >, FunctionTraits::GetArguments< T > >::Type;
 
 	template < typename T >
-	using EnableIfInvoker = enable_if_t< is_same_v< Invoker< Return, Args... >, T >, void >;
+	using EnableIfInvoker = std::enable_if_t< std::is_same_v< Invoker< Return, Args... >, T >, void >;
 
 	template < typename T >
-	using DisableIfInvoker = enable_if_t< !is_same_v< Invoker< Return, Args... >, T >, void >;
+	using DisableIfInvoker = std::enable_if_t< !std::is_same_v< Invoker< Return, Args... >, T >, void >;
 
 public:
 

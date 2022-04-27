@@ -1,4 +1,4 @@
-#include "CGE.h"
+#include "CGE.hpp"
 
 bool  CGE::s_Running = false;
 bool  CGE::s_ShowFPS = false;

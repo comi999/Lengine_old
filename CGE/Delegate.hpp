@@ -16,8 +16,8 @@ class Delegate
 {
 public:
 
-	using iterator = typename list< Invoker< Return, Args... > >::iterator;
-	using const_iterator = typename list< Invoker< Return, Args... > >::const_iterator;
+	using iterator = typename std::list< Invoker< Return, Args... > >::iterator;
+	using const_iterator = typename std::list< Invoker< Return, Args... > >::const_iterator;
 	using InvokerType = typename Invoker< Return, Args... >;
 	using DelegateType = typename Delegate< Return, Args... >;
 
@@ -35,7 +35,7 @@ private:
 	};
 
 	template < typename R, typename... A >
-	struct AsDelegateImpl< R, tuple< A... > >
+	struct AsDelegateImpl< R, std::tuple< A... > >
 	{
 		using Type = Delegate< R, A... >;
 	};
@@ -81,7 +81,7 @@ public:
 	/// <summary>
 	/// Get the underlying list of invokers.
 	/// </summary>
-	inline const list< InvokerType >& GetInvocationList() const
+	inline const std::list< InvokerType >& GetInvocationList() const
 	{
 		return m_Invokers;
 	}
@@ -131,7 +131,7 @@ public:
 	/// <summary>
 	/// Invoke all stored invokers and store their returns in a given vector.
 	/// </summary>
-	void InvokeAll( vector< Return >& o_Output, Args... a_Args )
+	void InvokeAll( std::vector< Return >& o_Output, Args... a_Args )
 	{
 		o_Output.reserve( m_Invokers.size() + o_Output.size() );
 
@@ -1034,9 +1034,9 @@ private:
 	template < class T          > friend auto MakeDelegate( T&&   );
 
 	//==========================================================================
-	list< InvokerType > m_Invokers;
-	list< iterator >    m_ToRemove;
-	bool                m_IsInvoking;
+	std::list< InvokerType > m_Invokers;
+	std::list< iterator >    m_ToRemove;
+	bool                     m_IsInvoking;
 
 };
 

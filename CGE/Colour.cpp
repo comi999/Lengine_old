@@ -1,4 +1,4 @@
-﻿#include "Colour.h"
+﻿#include "Colour.hpp"
 
 const Colour Colour::WHITE( 255, 255, 255 );
 const Colour Colour::BLACK( 0, 0, 0 );

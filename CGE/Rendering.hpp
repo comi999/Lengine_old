@@ -286,8 +286,23 @@ public:
 
 	inline void Reset( size_t a_Size, size_t a_Stride )
 	{
-		m_Buffer.resize( a_Size );
+		m_Buffer.resize( a_Size * a_Stride );
 		m_Stride = a_Stride;
+	}
+
+	inline size_t Size() const
+	{
+		return m_Buffer.size() / m_Stride;
+	}
+
+	inline size_t RawSize() const
+	{
+		return m_Buffer.size();
+	}
+
+	inline uint8_t* operator[]( size_t a_Index )
+	{
+		return &m_Buffer[ a_Index * m_Stride ];
 	}
 
 private:
@@ -336,16 +351,17 @@ struct RenderInstruction
 
 class Rendering
 {
-private:
+public:
 
 	inline static bool IsRenderBufferHandleValid( RenderBufferHandle a_Handle )
 	{
 		return a_Handle < s_RenderBuffers.size();
 	}
 
-	static RenderBufferHandle CreateRenderBuffer()
+	static RenderBufferHandle CreateRenderBuffer( size_t a_Size, size_t a_Stride )
 	{
 		s_RenderBuffers.emplace_back();
+		s_RenderBuffers.back().Reset( a_Size, a_Stride );
 		return s_RenderBuffers.size() - 1;
 	}
 
@@ -390,6 +406,13 @@ private:
 
 		s_RenderBuffers[ a_HandleA ].Swap( s_RenderBuffers[ a_HandleB ] );
 	}
+
+	static RenderBuffer& GetRenderBuffer( RenderBufferHandle a_Handle )
+	{
+		return s_RenderBuffers[ a_Handle ];
+	}
+
+private:
 
 	static std::vector< RenderBuffer > s_RenderBuffers;
 };
