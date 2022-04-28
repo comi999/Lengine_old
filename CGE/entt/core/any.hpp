@@ -26,7 +26,7 @@ namespace entt {
 template<std::size_t Len, std::size_t Align>
 class basic_any {
     enum class operation: std::uint8_t { COPY, MOVE, DTOR, COMP, ADDR, CADDR, REF, CREF, TYPE };
-
+    
     using storage_type = std::aligned_storage_t<Len + !Len, Align>;
     using vtable_type = const void *(const operation, const basic_any &, void *);
 

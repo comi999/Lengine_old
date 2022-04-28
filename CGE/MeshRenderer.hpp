@@ -25,16 +25,22 @@ public:
 		}
 
 		auto VertexCount = m_Mesh->m_Triangles.size() * 3;
-		auto Handle = Rendering::CreateRenderBuffer( VertexCount, sizeof( Vertex< EVertexComponent::Position > ) );
+		auto Handle = Rendering::CreateRenderBuffer( VertexCount, sizeof( Vertex< EVertexComponent::Position, EVertexComponent::Colour > ) );
+		auto NormalsHandle = Rendering::CreateRenderBuffer( m_Mesh->m_Triangles.size(), sizeof( Vector3 ) );
 		auto Buffer = Rendering::GetRenderBuffer( Handle );
 		auto Begin  = Buffer.Begin();
-		Matrix4 PV = Camera::GetMainCamera()->GetProjectionViewMatrix();
-		Matrix4 PVM = Math::Multiply( PV, this->GetOwner().GetTransform()->GetGlobalMatrix() );
+		auto NormalsBegin = Rendering::GetRenderBuffer( NormalsHandle ).Begin();
+		Matrix4 PVM = Math::Multiply( Camera::GetMainCamera()->GetProjectionViewMatrix(), this->GetOwner().GetTransform()->GetGlobalMatrix() );
 
 		for ( size_t i = 0; i < m_Mesh->m_Triangles.size(); ++i )
 		{
 			auto& Triangle = m_Mesh->m_Triangles[ i ];
-			Vertex< EVertexComponent::Position > Vert;
+			Vertex< EVertexComponent::Position, EVertexComponent::Colour > Vert;
+
+			auto TriangleNormal = m_Mesh->m_Normals[ m_Mesh->m_Vertices[ Triangle[ 0 ] ][ 2 ] ];
+			TriangleNormal = Math::Normalize( Math::Multiply( this->GetOwner().GetTransform()->GetGlobalMatrix(), Vector4( TriangleNormal, 0.0f ) ) );
+			NormalsBegin.Write( TriangleNormal, 0 );
+			++NormalsBegin;
 
 			for ( size_t j = 0; j < 3; ++j )
 			{
@@ -45,11 +51,13 @@ public:
 				P *= Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 1.0f, 1.0f );
 				P += Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 0.0f, 0.0f );
 				Begin.Write( P, 0 );
+				Begin.Write( Vert.Colour, sizeof( Vector4 ) );
 				++Begin;
 			}
 		}
 
 		Begin = Buffer.Begin();
+		NormalsBegin = Rendering::GetRenderBuffer( NormalsHandle ).Begin();
 		auto End = Buffer.End();
 
 		auto AllLights = ECS::GetAll< Light >();
@@ -58,6 +66,7 @@ public:
 
 		for ( ; Begin != End; )
 		{
+			Colour c = *Begin.Read< Colour >( sizeof( Vector4 ) );
 			auto v0 = Begin.Read< Vector4 >( 0 )->ToVector2();
 			++Begin;
 			auto v1 = Begin.Read< Vector4 >( 0 )->ToVector2();
@@ -66,16 +75,23 @@ public:
 			++Begin;
 
 			auto SurfaceNormal = Math::Normalize( Math::Cross( Vector3( v0 - v2 ), Vector3( v0 - v1 ) ) );
-			auto Intensity = Math::Dot( SurfaceNormal, -LightDirection );
+			auto TriangleNormal = *NormalsBegin.Read< Vector3 >( 0 );
+			++NormalsBegin;
+			auto Intensity = Math::Dot( TriangleNormal, -LightDirection );
 			Intensity = Math::Max( 0.0f, Intensity );
 
-			if ( SurfaceNormal.z < 0.0f && Intensity > 0.0f )
+			c.R *= Intensity;
+			c.G *= Intensity;
+			c.B *= Intensity;
+
+			if ( SurfaceNormal.z < 0.0f )
 			{
 				Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
 			}
 		}
 
 		Rendering::DestroyRenderBuffer( Handle );
+		Rendering::DestroyRenderBuffer( NormalsHandle );
 	}
 
 	void SetMesh( const Mesh* a_Mesh )

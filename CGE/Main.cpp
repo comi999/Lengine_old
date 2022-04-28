@@ -1,68 +1,60 @@
-#include "CGE.h"
 #include "Primitive.hpp"
 #include "entt/entt.hpp"
 #include "Input.hpp"
 #include "Component.hpp"
+#include "Light.hpp"
+#include "MeshRenderer.hpp"
 
-
-void Next()
-{
-	static size_t Index = 0;
-	return Index++;
-}
-
-
-
-struct Cube
-{
-	Vector4 Corners[ 8 ]
-	{
-		Vector4( 0.5f,  0.5f, -0.5f, 1.0f ),
-		Vector4( -0.5f,  0.5f, -0.5f, 1.0f ),
-		Vector4( -0.5f, -0.5f, -0.5f, 1.0f ),
-		Vector4( 0.5f, -0.5f, -0.5f, 1.0f ),
-		Vector4( 0.5f,  0.5f,  0.5f, 1.0f ),
-		Vector4( -0.5f,  0.5f,  0.5f, 1.0f ),
-		Vector4( -0.5f, -0.5f,  0.5f, 1.0f ),
-		Vector4( 0.5f, -0.5f,  0.5f, 1.0f ),
-	};
-};
-
-struct Plane
-{
-	Vector4 Corners[ 36 ]
-	{
-		Vector4( -0.500f, 0.000f, -0.500f, 1.000f ), Vector4( -0.500f, 0.000f,  0.500f, 1.000f ),
-		Vector4( -0.375f, 0.000f, -0.500f, 1.000f ), Vector4( -0.375f, 0.000f,  0.500f, 1.000f ),
-		Vector4( -0.250f, 0.000f, -0.500f, 1.000f ), Vector4( -0.250f, 0.000f,  0.500f, 1.000f ),
-		Vector4( -0.125f, 0.000f, -0.500f, 1.000f ), Vector4( -0.125f, 0.000f,  0.500f, 1.000f ),
-		Vector4(  0.000f, 0.000f, -0.500f, 1.000f ), Vector4(  0.000f, 0.000f,  0.500f, 1.000f ),
-		Vector4(  0.125f, 0.000f, -0.500f, 1.000f ), Vector4(  0.125f, 0.000f,  0.500f, 1.000f ),
-		Vector4(  0.250f, 0.000f, -0.500f, 1.000f ), Vector4(  0.250f, 0.000f,  0.500f, 1.000f ),
-		Vector4(  0.375f, 0.000f, -0.500f, 1.000f ), Vector4(  0.375f, 0.000f,  0.500f, 1.000f ),
-		Vector4(  0.500f, 0.000f, -0.500f, 1.000f ), Vector4(  0.500f, 0.000f,  0.500f, 1.000f ),
-		Vector4( -0.500f, 0.000f,-0.500f, 1.000f ), Vector4( 0.500f, 0.000f,-0.500f, 1.000f ),
-		Vector4( -0.500f, 0.000f,-0.375f, 1.000f ), Vector4( 0.500f, 0.000f,-0.375f, 1.000f ),
-		Vector4( -0.500f, 0.000f,-0.250f, 1.000f ), Vector4( 0.500f, 0.000f,-0.250f, 1.000f ),
-		Vector4( -0.500f, 0.000f,-0.125f, 1.000f ), Vector4( 0.500f, 0.000f,-0.125f, 1.000f ),
-		Vector4( -0.500f, 0.000f, 0.000f, 1.000f ), Vector4( 0.500f, 0.000f, 0.000f, 1.000f ),
-		Vector4( -0.500f, 0.000f, 0.125f, 1.000f ), Vector4( 0.500f, 0.000f, 0.125f, 1.000f ),
-		Vector4( -0.500f, 0.000f, 0.250f, 1.000f ), Vector4( 0.500f, 0.000f, 0.250f, 1.000f ),
-		Vector4( -0.500f, 0.000f, 0.375f, 1.000f ), Vector4( 0.500f, 0.000f, 0.375f, 1.000f ),
-		Vector4( -0.500f, 0.000f, 0.500f, 1.000f ), Vector4( 0.500f, 0.000f, 0.500f, 1.000f ),
-	};
-};
-
-struct Axes
-{
-	Vector4 Corners[ 4 ]
-	{
-		Vector4( Vector3::Zero, 1.0f ),
-		Vector4( Vector3::Right, 1.0f ),
-		Vector4( Vector3::Up, 1.0f ),
-		Vector4( Vector3::Forward, 1.0f )
-	};
-};
+//struct Cube
+//{
+//	Vector4 Corners[ 8 ]
+//	{
+//		Vector4( 0.5f,  0.5f, -0.5f, 1.0f ),
+//		Vector4( -0.5f,  0.5f, -0.5f, 1.0f ),
+//		Vector4( -0.5f, -0.5f, -0.5f, 1.0f ),
+//		Vector4( 0.5f, -0.5f, -0.5f, 1.0f ),
+//		Vector4( 0.5f,  0.5f,  0.5f, 1.0f ),
+//		Vector4( -0.5f,  0.5f,  0.5f, 1.0f ),
+//		Vector4( -0.5f, -0.5f,  0.5f, 1.0f ),
+//		Vector4( 0.5f, -0.5f,  0.5f, 1.0f ),
+//	};
+//};
+//
+//struct Plane
+//{
+//	Vector4 Corners[ 36 ]
+//	{
+//		Vector4( -0.500f, 0.000f, -0.500f, 1.000f ), Vector4( -0.500f, 0.000f,  0.500f, 1.000f ),
+//		Vector4( -0.375f, 0.000f, -0.500f, 1.000f ), Vector4( -0.375f, 0.000f,  0.500f, 1.000f ),
+//		Vector4( -0.250f, 0.000f, -0.500f, 1.000f ), Vector4( -0.250f, 0.000f,  0.500f, 1.000f ),
+//		Vector4( -0.125f, 0.000f, -0.500f, 1.000f ), Vector4( -0.125f, 0.000f,  0.500f, 1.000f ),
+//		Vector4(  0.000f, 0.000f, -0.500f, 1.000f ), Vector4(  0.000f, 0.000f,  0.500f, 1.000f ),
+//		Vector4(  0.125f, 0.000f, -0.500f, 1.000f ), Vector4(  0.125f, 0.000f,  0.500f, 1.000f ),
+//		Vector4(  0.250f, 0.000f, -0.500f, 1.000f ), Vector4(  0.250f, 0.000f,  0.500f, 1.000f ),
+//		Vector4(  0.375f, 0.000f, -0.500f, 1.000f ), Vector4(  0.375f, 0.000f,  0.500f, 1.000f ),
+//		Vector4(  0.500f, 0.000f, -0.500f, 1.000f ), Vector4(  0.500f, 0.000f,  0.500f, 1.000f ),
+//		Vector4( -0.500f, 0.000f,-0.500f, 1.000f ), Vector4( 0.500f, 0.000f,-0.500f, 1.000f ),
+//		Vector4( -0.500f, 0.000f,-0.375f, 1.000f ), Vector4( 0.500f, 0.000f,-0.375f, 1.000f ),
+//		Vector4( -0.500f, 0.000f,-0.250f, 1.000f ), Vector4( 0.500f, 0.000f,-0.250f, 1.000f ),
+//		Vector4( -0.500f, 0.000f,-0.125f, 1.000f ), Vector4( 0.500f, 0.000f,-0.125f, 1.000f ),
+//		Vector4( -0.500f, 0.000f, 0.000f, 1.000f ), Vector4( 0.500f, 0.000f, 0.000f, 1.000f ),
+//		Vector4( -0.500f, 0.000f, 0.125f, 1.000f ), Vector4( 0.500f, 0.000f, 0.125f, 1.000f ),
+//		Vector4( -0.500f, 0.000f, 0.250f, 1.000f ), Vector4( 0.500f, 0.000f, 0.250f, 1.000f ),
+//		Vector4( -0.500f, 0.000f, 0.375f, 1.000f ), Vector4( 0.500f, 0.000f, 0.375f, 1.000f ),
+//		Vector4( -0.500f, 0.000f, 0.500f, 1.000f ), Vector4( 0.500f, 0.000f, 0.500f, 1.000f ),
+//	};
+//};
+//
+//struct Axes
+//{
+//	Vector4 Corners[ 4 ]
+//	{
+//		Vector4( Vector3::Zero, 1.0f ),
+//		Vector4( Vector3::Right, 1.0f ),
+//		Vector4( Vector3::Up, 1.0f ),
+//		Vector4( Vector3::Forward, 1.0f )
+//	};
+//};
 
 #include "Transform.hpp"
 #include "GameObject.hpp"
@@ -75,13 +67,14 @@ int main()
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
 	ScreenBuffer::BlendingEnabled = true;
-	Cube  cube;
+	/*Cube  cube;
 	Plane plane;
-	Axes  axes;
+	Axes  axes;*/
 
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
 	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 3.0f );
 	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
+	CubeObject.AddComponent< MeshRenderer >()->SetMesh( &Mesh::Cube );
 
 	GameObject SubCubeObject = GameObject::Instantiate( "SubCube"_N );
 	SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
@@ -90,6 +83,7 @@ int main()
 
 	GameObject PlaneObject = GameObject::Instantiate( "Plane"_N );
 	PlaneObject.GetTransform()->SetGlobalScale( Vector3::One * 10.0f );
+	PlaneObject.AddComponent< MeshRenderer >()->SetMesh( &Mesh::Plane );
 
 	GameObject AxesObject = GameObject::Instantiate( "Axes"_N );
 	AxesObject.GetTransform()->SetGlobalScale( Vector3::One * 1.0f );
@@ -102,13 +96,18 @@ int main()
 	CameraComponent->SetFOV( 60.0f );
 	CameraComponent->SetNearZ( 0.1f );
 	CameraComponent->SetFarZ( 1000.0f );
+	Camera::SetMainCamera( CameraComponent );
+
+	GameObject LightObject = GameObject::Instantiate( "Light"_N );
+	Light* LightComponent = LightObject.AddComponent< Light >();
+	LightComponent->SetDirection( Vector3( -1.0f, -1.0f, 1.0f ) );
 
 	auto PVMatrix = Matrix4();
 	Vector3 forward = Vector3::Forward;
 	Vector3 right = Vector3::Right;
 	Vector3 up = Vector3::Up;
 
-	auto drawCube = [&]( Transform* transform )
+	/*auto drawCube = [&]( Transform* transform )
 	{
 		auto PVM = Math::Multiply( PVMatrix, transform->GetGlobalMatrix() );
 		Vector4 Verts[ 8 ];
@@ -186,7 +185,7 @@ int main()
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::RED );
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
-	};
+	};*/
 
 	float movement = 1.0f;
 	float sensitivity = 0.0000001f;
@@ -203,10 +202,13 @@ int main()
 		PVMatrix = CameraComponent->GetProjectionViewMatrix();
 
 		ScreenBuffer::SetBuffer( Colour::BLACK );
-		drawPlane();
+		/*drawPlane();
 		drawCube( CubeObject.GetTransform() );
 		drawCube( SubCubeObject.GetTransform() );
-		drawAxes();
+		drawAxes();*/
+		
+		PlaneObject.GetComponent< MeshRenderer >()->Draw();
+		CubeObject.GetComponent< MeshRenderer >()->Draw();
 
 		right = CameraObject.GetTransform()->GetGlobalRight();
 		up = CameraObject.GetTransform()->GetGlobalUp();
