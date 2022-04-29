@@ -2,62 +2,8 @@
 #include <vector>
 #include "Math.hpp"
 #include "Colour.hpp"
-
-enum class EVertexComponent : uint8_t
-{
-	None,
-	Colour,
-	Position,
-	Normal,
-	Texel,
-};
-
-namespace Implementation
-{
-	constexpr auto GetLeading( unsigned int a_Value )
-	{
-		for ( int i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
-		{
-			if ( ( 1u << i ) & a_Value )
-			{
-				return 1u << i;
-			}
-		}
-	
-		return 0u;
-	}
-
-	constexpr auto RemoveLeading( unsigned int a_Value )
-	{
-		for ( int i = sizeof( unsigned int ) * 8 - 1; i >= 0; --i )
-		{
-			if ( ( 1u << i ) & a_Value )
-			{
-				return a_Value & ~( 1u << i );
-			}
-		}
-	
-		return 0u;
-	}
-	
-	struct VertexColour   { Colour  Colour;   };
-	struct VertexPosition { Vector4 Position; };
-	struct VertexNormal   { Vector3 Normal;   };
-	struct VertexTexel    { Vector2 Texel;    };
-	
-	template < EVertexComponent Component > struct VertexComponentTypeImpl   { using Type = void          ; };
-	template <> struct VertexComponentTypeImpl< EVertexComponent::Colour   > { using Type = VertexColour  ; };
-	template <> struct VertexComponentTypeImpl< EVertexComponent::Position > { using Type = VertexPosition; };
-	template <> struct VertexComponentTypeImpl< EVertexComponent::Normal   > { using Type = VertexNormal  ; };
-	template <> struct VertexComponentTypeImpl< EVertexComponent::Texel    > { using Type = VertexTexel   ; };
-
-	template < EVertexComponent Component >
-	using VertexComponentType = typename VertexComponentTypeImpl< Component >::Type;
-};
-
-template < EVertexComponent... Flags >
-struct Vertex : public Implementation::VertexComponentType< Flags >...
-{ };
+#include "Vertex.hpp"
+#include "Material.hpp"
 
 class Mesh
 {
@@ -85,30 +31,13 @@ public:
 		FindOutermost();
 	}
 
-	template < EVertexComponent... Flags >
-	void PopulateVertex( size_t a_Index, Vertex< Flags... >& a_Vertex ) const
+	void PopulateVertex( size_t a_Index, Vertex& a_Vertex ) const
 	{
-		auto& Vertex = m_Vertices[ a_Index ];
-
-		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Colour >, Implementation::VertexComponentType< Flags >... > )
-		{
-			a_Vertex.Colour = m_Colours[ Vertex[ 0 ] ];
-		}
-
-		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Position >, Implementation::VertexComponentType< Flags >... > )
-		{
-			a_Vertex.Position = Vector4( m_Positions[ Vertex[ 1 ] ], 1.0f );
-		}
-
-		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Normal >, Implementation::VertexComponentType< Flags >... > )
-		{
-			a_Vertex.Normal = m_Normals[ Vertex[ 2 ] ];
-		}
-
-		if constexpr ( std::_Is_any_of_v< Implementation::VertexComponentType< EVertexComponent::Texel >, Implementation::VertexComponentType< Flags >... > )
-		{
-			a_Vertex.Texel = m_Texels[ Vertex[ 3 ] ];
-		}
+		auto& Vertex      = m_Vertices [ a_Index ];
+		a_Vertex.Colour   = m_Colours  [ Vertex[ 0 ] ];
+		a_Vertex.Position = m_Positions[ Vertex[ 1 ] ];
+		a_Vertex.Normal   = m_Normals  [ Vertex[ 2 ] ];
+		a_Vertex.Texel    = m_Texels   [ Vertex[ 3 ] ];
 	}
 
 	const Vector3& GetOutermostPosition() const
@@ -126,8 +55,6 @@ public:
 		return Math::Length( GetOutermostPosition() );
 	}
 
-
-
 	void FindOutermost()
 	{
 		float GreatestDistanceSqrd = 0.0f;
@@ -144,10 +71,6 @@ public:
 		}
 	}
 
-	friend class Graphics;
-
-
-
 	std::vector< Vector< size_t, 3 > > m_Triangles;
 	std::vector< Vector< size_t, 4 > > m_Vertices;
 	std::vector< Colour  >             m_Colours;
@@ -160,4 +83,30 @@ public:
 
 	static Mesh Cube;
 	static Mesh Plane;
+};
+
+struct Mesh
+{
+	// Default Constructor
+	Mesh()
+	{
+
+	}
+
+	// Variable Set Constructor
+	Mesh(std::vector<Vertex>& _Vertices, std::vector<unsigned int>& _Indices)
+	{
+		Vertices = _Vertices;
+		Indices = _Indices;
+	}
+
+	// Mesh Name
+	std::string MeshName;
+	// Vertex List
+	std::vector<Vertex> Vertices;
+	// Index List
+	std::vector<unsigned int> Indices;
+
+	// Material
+	Material MeshMaterial;
 };

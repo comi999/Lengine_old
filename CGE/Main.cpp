@@ -194,6 +194,7 @@ int main()
 	bool isAttached = true;
 	CGE::Run( [&]()
 	{
+		LightObject.GetComponent< Light >()->SetDirection( Vector3( Math::Cos( cubeRotation ), -0.1f, Math::Sin( cubeRotation ) ) );
 		CameraObject.GetTransform()->UpdateTransform();
 		PlaneObject.GetTransform()->UpdateTransform();
 		CubeObject.GetTransform()->UpdateTransform();
@@ -265,7 +266,7 @@ int main()
 		}
 
 		Quaternion CubeRot = Quaternion::ToQuaternion( Math::Normalize( Vector3::One ), cubeRotation += Time::GetDeltaTime() );
-		CubeObject.GetTransform()->SetLocalRotation( CubeRot );
+		//CubeObject.GetTransform()->SetLocalRotation( CubeRot );
 		
 		if ( Input::IsMouseDown( MouseCode::RightMouse ) )
 		{

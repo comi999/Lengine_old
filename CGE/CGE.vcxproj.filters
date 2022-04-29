@@ -142,9 +142,6 @@
     <ClInclude Include="Alias.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="obj\OBJ_Loader.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Material.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -165,6 +162,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Colour.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJ_Loader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

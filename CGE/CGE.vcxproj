@@ -192,6 +192,7 @@
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="Light.hpp" />
+    <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -203,7 +204,6 @@
     <ClInclude Include="MeshRenderer.hpp" />
     <ClInclude Include="MonoBehaviour.hpp" />
     <ClInclude Include="Name.hpp" />
-    <ClInclude Include="obj\OBJ_Loader.h" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
@@ -218,6 +218,7 @@
     <ClInclude Include="Tree.hpp" />
     <ClInclude Include="TypeMap.hpp" />
     <ClInclude Include="TypeMapNew.hpp" />
+    <ClInclude Include="Vertex.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
