@@ -62,7 +62,7 @@
 
 int main()
 {
-	CGE::Initialize( "Some title", { 128, 128 }, { 1, 1 } );
+	CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
