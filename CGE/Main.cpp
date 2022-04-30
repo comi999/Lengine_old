@@ -68,11 +68,11 @@
 int main()
 {
 	objl::Loader loader;
-	loader.LoadFile("./TestFiles/standford.obj");
+	loader.LoadFile("./TestFiles/monkl.obj");
 	Mesh& standford = loader.LoadedMeshes.front();
 	
 
-	CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
+	CGE::Initialize( "Some title", { 128, 128 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
@@ -82,7 +82,7 @@ int main()
 	Axes  axes;*/
 
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
-	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 3.0f );
+	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 7.0f );
 	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
 	CubeObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
 
@@ -93,7 +93,7 @@ int main()
 
 	GameObject PlaneObject = GameObject::Instantiate( "Plane"_N );
 	PlaneObject.GetTransform()->SetGlobalScale( Vector3::One * 10.0f );
-	PlaneObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
+	PlaneObject.AddComponent< MeshRenderer >()->SetMesh( nullptr );
 
 	GameObject AxesObject = GameObject::Instantiate( "Axes"_N );
 	AxesObject.GetTransform()->SetGlobalScale( Vector3::One * 1.0f );
@@ -291,7 +291,7 @@ int main()
 			CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( CameraEuler ) );
 		}
 
-		CameraObject.GetTransform()->SetGlobalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetGlobalPosition() ) );
+		//CameraObject.GetTransform()->SetGlobalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetGlobalPosition() ) );
 	} );
 
 	

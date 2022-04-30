@@ -20,7 +20,7 @@ public:
 
 	void Draw()
 	{
-		if ( !Camera::GetMainCamera() )
+		if ( !Camera::GetMainCamera() || !m_Mesh )
 		{
 			return;
 		}
@@ -68,7 +68,7 @@ public:
 
 		for ( ; Begin != End; )
 		{
-			Colour c = *Begin.Read< Colour >( sizeof( Vector4 ) );
+			//Colour c = *Begin.Read< Colour >( sizeof( Vector4 ) );
 			auto v0 = Begin.Read< Vector4 >( 0 )->ToVector2();
 			++Begin;
 			auto v1 = Begin.Read< Vector4 >( 0 )->ToVector2();
@@ -82,13 +82,18 @@ public:
 			auto Intensity = Math::Dot( TriangleNormal, -LightDirection );
 			Intensity = Math::Max( 0.0f, Intensity );
 
+			TriangleNormal += Vector3::One;
+			TriangleNormal *= 0.5f;
+			Colour c( 255 * TriangleNormal.x, 255 * TriangleNormal.y, 255 * TriangleNormal.z, 255 );
+
 			c.R *= Intensity;
 			c.G *= Intensity;
 			c.B *= Intensity;
 
 			if ( SurfaceNormal.z < 0.0f )
 			{
-				Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
+				//Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
+				Primitive::DrawTriangle( v0, v1, v2, c );
 			}
 		}
 
