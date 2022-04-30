@@ -5,6 +5,8 @@
 #include "Light.hpp"
 #include "MeshRenderer.hpp"
 
+#pragma region Old
+
 //struct Cube
 //{
 //	Vector4 Corners[ 8 ]
@@ -56,12 +58,20 @@
 //	};
 //};
 
+#pragma endregion
+
 #include "Transform.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
+#include "File.hpp"
 
 int main()
 {
+	objl::Loader loader;
+	loader.LoadFile("./TestFiles/standford.obj");
+	Mesh& standford = loader.LoadedMeshes.front();
+	
+
 	CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
@@ -74,7 +84,7 @@ int main()
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
 	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 3.0f );
 	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
-	CubeObject.AddComponent< MeshRenderer >()->SetMesh( &Mesh::Cube );
+	CubeObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
 
 	GameObject SubCubeObject = GameObject::Instantiate( "SubCube"_N );
 	SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
@@ -83,7 +93,7 @@ int main()
 
 	GameObject PlaneObject = GameObject::Instantiate( "Plane"_N );
 	PlaneObject.GetTransform()->SetGlobalScale( Vector3::One * 10.0f );
-	PlaneObject.AddComponent< MeshRenderer >()->SetMesh( &Mesh::Plane );
+	PlaneObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
 
 	GameObject AxesObject = GameObject::Instantiate( "Axes"_N );
 	AxesObject.GetTransform()->SetGlobalScale( Vector3::One * 1.0f );
@@ -107,6 +117,7 @@ int main()
 	Vector3 right = Vector3::Right;
 	Vector3 up = Vector3::Up;
 
+	#pragma region Old
 	/*auto drawCube = [&]( Transform* transform )
 	{
 		auto PVM = Math::Multiply( PVMatrix, transform->GetGlobalMatrix() );
@@ -186,6 +197,8 @@ int main()
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
 		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
 	};*/
+
+	#pragma endregion
 
 	float movement = 1.0f;
 	float sensitivity = 0.0000001f;

@@ -192,7 +192,7 @@
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="Light.hpp" />
-    <ClInclude Include="OBJ_Loader.h" />
+    <ClInclude Include="File.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />

@@ -97,6 +97,12 @@ public:
 		return Transpose( Cofactor( a_Matrix ) );
 	}
 
+	template < typename T, typename U, size_t M >
+	inline static float Angle( const Vector< T, M >& a_VectorA, const Vector< U, M >& a_VectorB )
+	{
+		return ACos( Dot( a_VectorA, a_VectorB ) / ( Length( a_VectorA ) * Length( a_VectorB ) ) );
+	}
+
 	template < typename T >
 	inline static T Ceil( T a_Scalar )
 	{
@@ -568,6 +574,13 @@ public:
 	inline static float Pow( T a_Base, T a_Pow )
 	{
 		return pow( a_Base, a_Pow );
+	}
+
+	template < typename T, typename U, size_t M >
+	inline static Vector< T, M > Project( const Vector< T, M >& a_VectorA, const Vector< U, M >& a_VectorB )
+	{
+		Vector< U, M > BNormal = Normalize( a_VectorB );
+		return BNormal * Dot( a_VectorA, BNormal );
 	}
 
 	template < typename T >

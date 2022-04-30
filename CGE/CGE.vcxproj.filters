@@ -164,7 +164,7 @@
     <ClInclude Include="Colour.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="OBJ_Loader.h">
+    <ClInclude Include="File.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.hpp">
