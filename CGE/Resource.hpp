@@ -1,123 +1,67 @@
 #pragma once
-#include <cstdint>
 #include <vector>
-#include <typeinfo>
 
-class Resource;
-class ResourcePool;
+#include "entt/resource/loader.hpp"
+#include "entt/resource/cache.hpp"
+#include "entt/resource/handle.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "STBI.hpp"
 
-template < typename T >
-struct ResourceRef
-{
-private:
-
-	ResourceRef( T* a_Resource )
-		: m_Resource( a_Resource )
-	{ }
-
-public:
-
-	inline T* Get()
-	{
-		return m_Resource;
-	}
-
-	inline const T* Get() const
-	{
-		return m_Resource;
-	}
-
-	inline T& GetRef()
-	{
-		return *m_Resource;
-	}
-
-	inline const T& GetRef() const
-	{
-		return *m_Resource;
-	}
-
-	inline operator T*()
-	{
-		return m_Resource;
-	}
-
-	inline operator T* const() const
-	{
-		return m_Resource;
-	}
-
-	inline operator T&()
-	{
-		return *m_Resource;
-	}
-
-	inline operator T& const() const
-	{
-		return *m_Resource;
-	}
-
-private:
-
-	friend class ResourcePool;
-
-	T* m_Resource;
-};
-
-struct ResourcePool
-{
-public:
-
-	ResourcePool()
-		: m_Destructor( nullptr )
-	{ }
-
-	template < typename T >
-	void Initialize()
-	{
-		m_Destructor = Destructor< T >;
-	}
-
-	void Reset()
-	{
-		for ( void* Resource : m_Resources )
-		{
-			m_Destructor( Resource );
-		}
-
-		m_Resources.clear();
-	}
-
-	template < typename T, typename... Args >
-	ResourceRef< T > Construct( Args&&... a_Args )
-	{
-		m_Resources.push_back( new T( std::forward( a_Args )... ) );
-		return ResourceRef< T >( reinterpret_cast< T* >( m_Resources.back() ) );
-	}
-
-private:
-
-	template < typename T >
-	static void Destructor( void* a_Instance )
-	{
-		delete reinterpret_cast< T* >( a_Instance );
-	}
-	
-	void( *m_Destructor )( void* );
-	std::vector< void* > m_Resources;
-};
+#include "Texture.hpp"
 
 class Resource
 {
 private:
 
-	//typedef TypeIndexer< "Resource"_H > TypeIndexer;
+	template < typename T >
+	using Cache = entt::resource_cache< T >;
+
+	template < typename T >
+	inline static Cache< T > GetCache()
+	{
+		static Cache< T > Cache;
+		return Cache;
+	}
+	
+	static void Initialize()
+	{
+		// Search for all resources, and compile into a 
+	}
 
 public:
 
+	
+};
 
+class Texture
+{
+public:
 
-private:
+	Texture( const char* file )
+	{
+		data = stbi_load( file, &width, &height, &channels, 3 );
+	}
 
-	static std::vector< ResourcePool > s_ResourcePools;
+	~Texture()
+	{
+		stbi_image_free( data );
+	}
+
+	int width, height, channels;
+	stbi_uc* data;
+};
+
+class TextureLoader : public entt::resource_loader< TextureLoader, Texture >
+{
+public:
+
+	entt::resource_handle< Texture > load( const char* file ) const
+	{
+		return std::make_shared< Texture >( file );
+	}
+};
+
+class TextureCache : public entt::resource_cache< Texture >
+{
+
 };
