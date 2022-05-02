@@ -65,14 +65,109 @@
 #include "Camera.hpp"
 #include "File.hpp"
 
+#include "Resource.hpp"
+#include "FileSerializer.hpp"
+
+class SomeClass : public ISerializable, public IDeserializable
+{
+public:
+
+	void Serialize( SerializationStream& stream ) const override
+	{
+		stream << a;
+	}
+
+	void Deserialize( const DeserializationStream& stream ) override
+	{
+		stream >> a;
+	}
+
+public:
+
+	int a = 100;
+};
+
+class StreamableObject : public ISerializable, IDeserializable, IStreamSizeable
+{
+public:
+
+	void SizeOf( StreamSizer& sizer ) const override
+	{
+		sizer += b;
+		sizer += someclass;
+	}
+
+	void Serialize( SerializationStream& stream ) const override
+	{
+
+		stream << b << someclass;
+	}
+
+	void Deserialize( const DeserializationStream& stream ) override
+	{
+		stream >> b >> someclass;
+	}
+
+public:
+
+	int b = 50;
+	SomeClass someclass;
+};
+
+class TestTexture : ISerializable, IDeserializable, IStreamSizeable
+{
+public:
+
+	void load( const char* path )
+	{
+		auto d = stbi_load( path, &w, &h, &c, 4 );
+		data.resize( w * h );
+		memcpy( data.data(), d, sizeof( Colour ) * w * h );
+		stbi_image_free( d );
+	}
+
+	void SizeOf( StreamSizer& a_Sizer ) const override
+	{
+		a_Sizer.ExplicitAdd( sizeof( int ) * 2 );
+		a_Sizer.ExplicitAdd( data.size() * sizeof( Colour ) );
+	}
+
+	void Serialize( SerializationStream& stream ) const override
+	{
+		stream << w << h;
+
+		for ( size_t i = 0; i < data.size(); ++i )
+		{
+			stream << data[ i ];
+		}
+	}
+
+	void Deserialize( const DeserializationStream& stream ) override
+	{
+		stream >> w >> h;
+		data.resize( w * h );
+
+		for ( size_t i = 0; i < data.size(); ++i )
+		{
+			stream >> data[ i ];
+		}
+	}
+
+	int w, h, c;
+	std::vector< Colour > data;
+};
+
 int main()
 {
 	objl::Loader loader;
-	loader.LoadFile("./TestFiles/monkl.obj");
+	loader.LoadFile("./TestFiles/stanford_downscaled.obj");
 	Mesh& standford = loader.LoadedMeshes.front();
-	
 
-	CGE::Initialize( "Some title", { 128, 128 }, { 1, 1 } );
+	TextureCache cache;
+	auto handle = cache.load< TextureLoader >( 0, "./TestFiles/landscape.bmp" );
+	auto pixelData = handle->data;
+
+	CGE::Initialize( "Some title", { 32, 32 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
@@ -216,6 +311,25 @@ int main()
 		PVMatrix = CameraComponent->GetProjectionViewMatrix();
 
 		ScreenBuffer::SetBuffer( Colour::BLACK );
+
+		for ( int y = 0; y < ScreenBuffer::GetBufferHeight(); ++y )
+		{
+			for ( int x = 0; x < ScreenBuffer::GetBufferWidth(); ++x )
+			{
+				int X = handle->width  * ( float )x / ( ScreenBuffer::GetBufferWidth() );
+				int Y = handle->height * ( float )y / ( ScreenBuffer::GetBufferHeight() );
+
+				size_t index = Y * handle->width + X;
+
+				int r = pixelData[ 3 * index ];
+				int g = pixelData[ 3 * index + 1 ];
+				int b = pixelData[ 3 * index + 2 ];
+
+				Colour col( r, g, b, 255 );
+				ScreenBuffer::SetColour( { x, y }, col );
+			}
+		}
+
 		/*drawPlane();
 		drawCube( CubeObject.GetTransform() );
 		drawCube( SubCubeObject.GetTransform() );

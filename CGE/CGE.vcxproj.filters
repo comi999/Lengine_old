@@ -170,6 +170,18 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="STBI.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSerializer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcePackager.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

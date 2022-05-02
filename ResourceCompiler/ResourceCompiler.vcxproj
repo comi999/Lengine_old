@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,11 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{AC5593EB-FCAC-443D-8C13-FBF06C326FF6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Assessment4DoubleLinkedList</RootNamespace>
+    <ProjectGuid>{cae50e04-6689-4295-8813-7b44d3e04865}</ProjectGuid>
+    <RootNamespace>ResourceCompiler</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>CGE</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -74,21 +73,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)/CGE/entt/;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)/CGE/entt/;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -99,36 +94,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/ENTRY:"mainCRTStartup" %(AdditionalOptions)</AdditionalOptions>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,20 +110,26 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,69 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CGE.cpp" />
-    <ClCompile Include="Colour.cpp" />
-    <ClCompile Include="ConsoleWindow.cpp" />
-    <ClCompile Include="ECS.cpp" />
-    <ClCompile Include="Rendering.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Name.cpp" />
-    <ClCompile Include="PixelColourMap.cpp" />
-    <ClCompile Include="Rect.hpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="ScreenBuffer.cpp" />
-    <ClCompile Include="Time.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Alias.hpp" />
-    <ClInclude Include="Any.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="CGE.hpp" />
-    <ClInclude Include="Colour.hpp" />
-    <ClInclude Include="Component.hpp" />
-    <ClInclude Include="ConsoleColour.hpp" />
-    <ClInclude Include="ConsoleWindow.hpp" />
-    <ClInclude Include="Delegate.hpp" />
-    <ClInclude Include="ECS.hpp" />
-    <ClInclude Include="entt\entt.hpp" />
-    <ClInclude Include="entt\fwd.hpp" />
-    <ClInclude Include="FileSerializer.hpp" />
-    <ClInclude Include="FunctionTraits.hpp" />
-    <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="Light.hpp" />
-    <ClInclude Include="File.hpp" />
-    <ClInclude Include="Rendering.hpp" />
-    <ClInclude Include="Hash.hpp" />
-    <ClInclude Include="Input.hpp" />
-    <ClInclude Include="Invoker.hpp" />
-    <ClInclude Include="Line.hpp" />
-    <ClInclude Include="Material.hpp" />
-    <ClInclude Include="Math.hpp" />
-    <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MeshRenderer.hpp" />
-    <ClInclude Include="MonoBehaviour.hpp" />
-    <ClInclude Include="Name.hpp" />
-    <ClInclude Include="PixelColourMap.hpp" />
-    <ClInclude Include="Pixel.hpp" />
-    <ClInclude Include="Primitive.hpp" />
-    <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="Resource.hpp" />
-    <ClInclude Include="ResourcePackager.hpp" />
-    <ClInclude Include="Scene.hpp" />
-    <ClInclude Include="ScreenBuffer.hpp" />
-    <ClInclude Include="Serialization.hpp" />
-    <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="STBI.hpp" />
-    <ClInclude Include="Texture.hpp" />
-    <ClInclude Include="Time.hpp" />
-    <ClInclude Include="Transform.hpp" />
-    <ClInclude Include="Tree.hpp" />
-    <ClInclude Include="TypeMap.hpp" />
-    <ClInclude Include="TypeMapNew.hpp" />
-    <ClInclude Include="Vertex.hpp" />
+    <ClCompile Include="ResourceCompiler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
