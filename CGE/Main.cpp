@@ -296,8 +296,8 @@ int main()
 		drawCube( SubCubeObject.GetTransform() );
 		drawAxes();*/
 		
-		//PlaneObject.GetComponent< MeshRenderer >()->Draw();
-		//CubeObject.GetComponent< MeshRenderer >()->Draw();
+		PlaneObject.GetComponent< MeshRenderer >()->Draw();
+		CubeObject.GetComponent< MeshRenderer >()->Draw();
 
 		right = CameraObject.GetTransform()->GetGlobalRight();
 		up = CameraObject.GetTransform()->GetGlobalUp();

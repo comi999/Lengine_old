@@ -90,7 +90,7 @@ public:
 			c.G *= Intensity;
 			c.B *= Intensity;
 
-			if ( SurfaceNormal.z < 0.0f )
+			if ( SurfaceNormal.z > 0.0f )
 			{
 				//Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
 				Primitive::DrawTriangle( v0, v1, v2, c );
