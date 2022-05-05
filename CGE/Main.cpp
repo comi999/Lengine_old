@@ -126,7 +126,7 @@ int main()
 	auto handle = cache.load< TextureLoader >( 0, "./TestFiles/landscape.bmp" );
 	auto pixelData = testText.data.data();
 
-	CGE::Initialize( "Some title", { 32, 32 }, { 1, 1 } );
+	CGE::Initialize( "Some title", { 64,64 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
@@ -296,8 +296,8 @@ int main()
 		drawCube( SubCubeObject.GetTransform() );
 		drawAxes();*/
 		
-		PlaneObject.GetComponent< MeshRenderer >()->Draw();
-		CubeObject.GetComponent< MeshRenderer >()->Draw();
+		//PlaneObject.GetComponent< MeshRenderer >()->Draw();
+		//CubeObject.GetComponent< MeshRenderer >()->Draw();
 
 		right = CameraObject.GetTransform()->GetGlobalRight();
 		up = CameraObject.GetTransform()->GetGlobalUp();
