@@ -66,57 +66,13 @@
 #include "File.hpp"
 
 #include "Resource.hpp"
-#include "FileSerializer.hpp"
+#include "Serialization.hpp"
 
-class SomeClass : public ISerializable, public IDeserializable
+class TestTexture
 {
 public:
-
-	void Serialize( SerializationStream& stream ) const override
-	{
-		stream << a;
-	}
-
-	void Deserialize( const DeserializationStream& stream ) override
-	{
-		stream >> a;
-	}
-
-public:
-
-	int a = 100;
-};
-
-class StreamableObject : public ISerializable, IDeserializable, IStreamSizeable
-{
-public:
-
-	void SizeOf( StreamSizer& sizer ) const override
-	{
-		sizer += b;
-		sizer += someclass;
-	}
-
-	void Serialize( SerializationStream& stream ) const override
-	{
-
-		stream << b << someclass;
-	}
-
-	void Deserialize( const DeserializationStream& stream ) override
-	{
-		stream >> b >> someclass;
-	}
-
-public:
-
-	int b = 50;
-	SomeClass someclass;
-};
-
-class TestTexture : ISerializable, IDeserializable, IStreamSizeable
-{
-public:
+	
+	friend class Serialization;
 
 	void load( const char* path )
 	{
@@ -126,31 +82,22 @@ public:
 		stbi_image_free( d );
 	}
 
-	void SizeOf( StreamSizer& a_Sizer ) const override
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
 	{
-		a_Sizer.ExplicitAdd( sizeof( int ) * 2 );
-		a_Sizer.ExplicitAdd( data.size() * sizeof( Colour ) );
+		a_Sizer & w & h & c & data;
 	}
 
-	void Serialize( SerializationStream& stream ) const override
+	template < typename T >
+	void Serialize( T& stream ) const
 	{
-		stream << w << h;
-
-		for ( size_t i = 0; i < data.size(); ++i )
-		{
-			stream << data[ i ];
-		}
+		stream << w << h << c << data;
 	}
 
-	void Deserialize( const DeserializationStream& stream ) override
+	template < typename T >
+	void Deserialize( T& stream )
 	{
-		stream >> w >> h;
-		data.resize( w * h );
-
-		for ( size_t i = 0; i < data.size(); ++i )
-		{
-			stream >> data[ i ];
-		}
+		stream >> w >> h >> c >> data;
 	}
 
 	int w, h, c;
@@ -163,9 +110,21 @@ int main()
 	loader.LoadFile("./TestFiles/stanford_downscaled.obj");
 	Mesh& standford = loader.LoadedMeshes.front();
 
+	TestTexture t;
+	t.load( "./TestFiles/landscape.bmp" );
+
+	FileSerializer fil( "./TestFiles/somefile.txt" );
+	fil << t;
+	fil.Close();
+
+	FileDeserializer filout( "./TestFiles/somefile.txt" );
+	
+	TestTexture testText;
+	filout >> testText;
+
 	TextureCache cache;
 	auto handle = cache.load< TextureLoader >( 0, "./TestFiles/landscape.bmp" );
-	auto pixelData = handle->data;
+	auto pixelData = testText.data.data();
 
 	CGE::Initialize( "Some title", { 32, 32 }, { 1, 1 } );
 	Input::Initialize();
@@ -321,12 +280,14 @@ int main()
 
 				size_t index = Y * handle->width + X;
 
-				int r = pixelData[ 3 * index ];
+				/*int r = pixelData[ 3 * index ];
 				int g = pixelData[ 3 * index + 1 ];
-				int b = pixelData[ 3 * index + 2 ];
+				int b = pixelData[ 3 * index + 2 ];*/
 
-				Colour col( r, g, b, 255 );
-				ScreenBuffer::SetColour( { x, y }, col );
+				Colour c = pixelData[ index ];
+
+				//Colour col( r, g, b, 255 );
+				ScreenBuffer::SetColour( { x, y }, c );
 			}
 		}
 
