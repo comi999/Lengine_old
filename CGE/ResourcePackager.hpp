@@ -9,7 +9,10 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 
-
+// Place executable in the same directory as a manifest.json
+// Run executable.
+// It will create a folder of choice with all assets named
+// 
 
 class ResourcePackager
 {
@@ -84,7 +87,8 @@ private:
 
 	bool LoadTexture( Texture& o_Texture, File& a_File ) const
 	{
-		o_Texture.m_Data = ( Colour* )stbi_load( std::string( a_File.GetPath() ).c_str(), &o_Texture.m_Size.x, &o_Texture.m_Size.y, nullptr, 4 );
-		return o_Texture.m_Data;
+		return true;
+		/*o_Texture.m_Data = ( Colour* )stbi_load( std::string( a_File.GetPath() ).c_str(), &o_Texture.m_Size.x, &o_Texture.m_Size.y, nullptr, 4 );
+		return o_Texture.m_Data;*/
 	}
 };

@@ -19,7 +19,7 @@ int main()
 	CGE::SetTargetFPS( 0.0f );
 	ScreenBuffer::BlendingEnabled = true;
 
-	auto landscape = Resource::GetResourceByPath< Texture >( "./Resources/SomeFolder/landscape.bmp" );
+	//auto landscape = Resource::GetResourceByPath< Texture >( "./Resources/SomeFolder/landscape.bmp" );
 
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
 	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 7.0f );
@@ -82,7 +82,7 @@ int main()
 			{
 				float U = float( x ) / ( ScreenBuffer::GetBufferWidth() - 1 );
 				float V = float( y ) / ( ScreenBuffer::GetBufferHeight() - 1 );
-				ScreenBuffer::SetColour( { x, y }, landscape->Sample( { U, V } ) );
+				//ScreenBuffer::SetColour( { x, y }, landscape->Sample( { U, V } ) );
 			}
 		}
 		

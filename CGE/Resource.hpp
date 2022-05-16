@@ -82,7 +82,7 @@ private:
 	
 	static void Initialize()
 	{
-		FileRecursiveIterator Begin( GetRootDirectory() );
+		/*FileRecursiveIterator Begin( GetRootDirectory() );
 
 		while ( Begin )
 		{
@@ -97,7 +97,7 @@ private:
 			}
 
 			++Begin;
-		}
+		}*/
 	}
 
 public:
@@ -105,34 +105,34 @@ public:
 	template < typename T >
 	static auto GetResourceByPath( const std::string& a_Path )
 	{
-		// Look up in cache to see if already loaded.
-		auto& ResourceCache = GetResourceCache< T >();
-		Hash Hashed = CRC32_RT( a_Path.c_str() );
-		
-		if ( ResourceCache.contains( Hashed ) )
-		{
-			return ResourceCache.handle( Hashed );
-		}
+		//// Look up in cache to see if already loaded.
+		//auto& ResourceCache = GetResourceCache< T >();
+		//Hash Hashed = CRC32_RT( a_Path.c_str() );
+		//
+		//if ( ResourceCache.contains( Hashed ) )
+		//{
+		//	return ResourceCache.handle( Hashed );
+		//}
 
-		// If not loaded, look in Resources folder.
-		static size_t Index = GetResourceTypeIndex< T >();
+		//// If not loaded, look in Resources folder.
+		//static size_t Index = GetResourceTypeIndex< T >();
 
-		// If no type was found in Resources matching T, abort.
-		if ( !( Index < s_ResourceFileLookup.size() ) )
-		{
-			return entt::resource_handle< T >();
-		}
+		//// If no type was found in Resources matching T, abort.
+		//if ( !( Index < s_ResourceFileLookup.size() ) )
+		//{
+		//	return entt::resource_handle< T >();
+		//}
 
-		auto& Lookup = s_ResourceFileLookup[ Index ];
-		auto FileIt = Lookup.find( Path( a_Path ) );
-		
-		// If no file found, return nullptr.
-		if ( FileIt == Lookup.end() )
-		{
-			return entt::resource_handle< T >();
-		}
+		//auto& Lookup = s_ResourceFileLookup[ Index ];
+		//auto FileIt = Lookup.find( Path( a_Path ) );
+		//
+		//// If no file found, return nullptr.
+		//if ( FileIt == Lookup.end() )
+		//{
+		//	return entt::resource_handle< T >();
+		//}
 
-		return ResourceCache.load< ResourceLoader< T > >( Hashed, FileIt->second );
+		//return ResourceCache.load< ResourceLoader< T > >( Hashed, FileIt->second );
 	}
 
 	static const Directory& GetRootDirectory()

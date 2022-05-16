@@ -6,6 +6,12 @@ Path::Path()
 	: m_Path( new std::filesystem::path( "." ) )
 {}
 
+Path::Path( const char* a_Path )
+	: m_Path( new std::filesystem::path( a_Path ) )
+{
+	m_Path->make_preferred();
+}
+
 Path::Path( const std::filesystem::path& a_Path )
 	: m_Path( new std::filesystem::path( a_Path ) )
 {
@@ -133,6 +139,12 @@ inline Path Path::operator--( int )
 Directory::Directory()
 	: Path()
 { }
+
+Directory::Directory( const char* a_Path )
+	: Path( a_Path )
+{
+	_ASSERT_EXPR( IsDirectory(), "Path is not a directory." );
+}
 
 Directory::Directory( const std::filesystem::path& a_Path )
 	: Path( a_Path )
@@ -302,6 +314,13 @@ inline Directory  Directory::operator --( int )
 }
 
 // File...
+File::File( const char* a_Path )
+	: Path( a_Path )
+	, m_File( nullptr )
+{
+	_ASSERT_EXPR( IsFile(), "Path is not a file." );
+}
+
 File::File( const std::filesystem::path& a_Path )
 	: Path( a_Path )
 	, m_File( nullptr )
@@ -315,6 +334,11 @@ File::File( const Path& a_Path )
 {
 	_ASSERT_EXPR( IsFile(), "Path is not a file." );
 }
+
+File::File( const File& a_File )
+	: Path( a_File )
+	, m_File( a_File.m_File )
+{ }
 
 File::File( Path&& a_Path )
 	: Path( a_Path )
@@ -379,28 +403,12 @@ inline void File::Read( void* a_To, size_t a_Size )
 	fread( a_To, 1, a_Size, m_File );
 }
 
-inline void File::Seek( size_t a_Position );
-inline bool File::AtEnd() const;
-inline size_t File::Size() const;
-inline File::operator const Path& ( ) const;
-inline File::operator Path& ( );
-inline File::operator Directory () const;
-inline File::operator std::ifstream();
-inline File::operator std::ofstream();
-inline File::operator std::fstream();
-inline File::operator FILE* ( );
-
-inline void File::Read( void* a_To, size_t a_Size )
-{
-	
-}
-
 inline void File::Seek( size_t a_Position )
 {
 	fseek( m_File, a_Position, SEEK_SET );
 }
 
-inline bool File::End() const
+inline bool File::AtEnd() const
 {
 	return feof( m_File );
 }
@@ -412,35 +420,180 @@ inline size_t File::Size() const
 		return 0;
 	}
 
-	return std::filesystem::file_size( m_Path.m_Path );
+	return std::filesystem::file_size( *m_Path );
 }
 
-std::ifstream File::AsIFStream()
+inline File::operator Directory () const
+{
+	return *m_Path;
+}
+
+inline File::operator std::ifstream()
 {
 	return std::ifstream( m_File );
 }
 
-std::ofstream File::AsOFStream()
+inline File::operator std::ofstream()
 {
 	return std::ofstream( m_File );
 }
 
-std::fstream File::AsFStream()
+inline File::operator std::fstream()
 {
 	return std::fstream( m_File );
 }
 
-File::operator FILE* ( )
+inline File::operator FILE* ( )
 {
 	return m_File;
 }
 
-File::operator Path () const
+// Directory Iterator...
+DirectoryIterator::DirectoryIterator( const Directory& a_Directory )
+	: m_Underlying( new std::filesystem::directory_iterator( a_Directory ) )
+	, m_End( new std::filesystem::directory_iterator( std::filesystem::end( *m_Underlying ) ) )
+{ }
+
+DirectoryIterator::DirectoryIterator( const DirectoryIterator& a_Iterator )
+	: m_Underlying( new std::filesystem::directory_iterator( *a_Iterator.m_Underlying ) )
+	, m_End( new std::filesystem::directory_iterator( *a_Iterator.m_End ) )
+{ }
+
+DirectoryIterator::DirectoryIterator( DirectoryIterator&& a_Iterator )
+	: m_Underlying( a_Iterator.m_Underlying )
+	, m_End( a_Iterator.m_End )
+{ }
+
+DirectoryIterator::~DirectoryIterator()
 {
-	return m_Path;
+	delete m_Underlying;
+	delete m_End;
 }
 
-File::operator std::string() const
+inline DirectoryIterator& DirectoryIterator::operator++()
 {
-	return m_Path.m_Path.string();
+	++*m_Underlying;
+	return *this;
+}
+
+inline DirectoryIterator DirectoryIterator::operator++( int )
+{
+	DirectoryIterator Temp( *this );
+	++*this;
+	return Temp;
+}
+
+inline DirectoryIterator::reference DirectoryIterator::operator*()
+{
+	return **m_Underlying;
+}
+
+inline DirectoryIterator::pointer DirectoryIterator::operator->()
+{
+	return &**m_Underlying;
+}
+
+inline bool DirectoryIterator::operator==( const DirectoryIterator& a_Iterator ) const
+{
+	return *m_Underlying == *a_Iterator.m_Underlying;
+}
+
+inline bool DirectoryIterator::operator!=( const DirectoryIterator& a_Iterator ) const
+{
+	return *m_Underlying != *a_Iterator.m_Underlying;
+}
+
+inline DirectoryIterator::operator bool () const
+{
+	return *m_Underlying == *m_End;
+}
+
+inline DirectoryIterator::operator Path () const
+{
+	return ( *m_Underlying )->path();
+}
+
+inline DirectoryIterator::operator Directory () const
+{
+	return ( *m_Underlying )->path();
+}
+
+inline DirectoryIterator::operator File () const
+{
+	return ( *m_Underlying )->path();
+}
+
+// Recursive Directory Iterator...
+RecursiveDirectoryIterator::RecursiveDirectoryIterator( const Directory& a_Directory )
+	: m_Underlying( new std::filesystem::recursive_directory_iterator( a_Directory ) )
+	, m_End( new std::filesystem::recursive_directory_iterator( std::filesystem::end( *m_Underlying ) ) )
+{ }
+
+RecursiveDirectoryIterator::RecursiveDirectoryIterator( const RecursiveDirectoryIterator& a_Iterator )
+	: m_Underlying( new std::filesystem::recursive_directory_iterator( *a_Iterator.m_Underlying ) )
+	, m_End( new std::filesystem::recursive_directory_iterator( *a_Iterator.m_End ) )
+{ }
+
+RecursiveDirectoryIterator::RecursiveDirectoryIterator( RecursiveDirectoryIterator&& a_Iterator )
+	: m_Underlying( a_Iterator.m_Underlying )
+	, m_End( a_Iterator.m_End )
+{ }
+
+RecursiveDirectoryIterator::~RecursiveDirectoryIterator()
+{
+	delete m_Underlying;
+	delete m_End;
+}
+
+inline RecursiveDirectoryIterator& RecursiveDirectoryIterator::operator++()
+{
+	++*m_Underlying;
+	return *this;
+}
+
+inline RecursiveDirectoryIterator RecursiveDirectoryIterator::operator++( int )
+{
+	RecursiveDirectoryIterator Temp( *this );
+	++*this;
+	return Temp;
+}
+
+inline RecursiveDirectoryIterator::reference RecursiveDirectoryIterator::operator*()
+{
+	return **m_Underlying;
+}
+
+inline RecursiveDirectoryIterator::pointer RecursiveDirectoryIterator::operator->()
+{
+	return &**m_Underlying;
+}
+
+inline bool RecursiveDirectoryIterator::operator==( const RecursiveDirectoryIterator& a_Iterator ) const
+{
+	return *m_Underlying == *a_Iterator.m_Underlying;
+}
+
+inline bool RecursiveDirectoryIterator::operator!=( const RecursiveDirectoryIterator& a_Iterator ) const
+{
+	return *m_Underlying != *a_Iterator.m_Underlying;
+}
+
+inline RecursiveDirectoryIterator::operator bool () const
+{
+	return *m_Underlying == *m_End;
+}
+
+inline RecursiveDirectoryIterator::operator Path () const
+{
+	return ( *m_Underlying )->path();
+}
+
+inline RecursiveDirectoryIterator::operator Directory () const
+{
+	return ( *m_Underlying )->path();
+}
+
+inline RecursiveDirectoryIterator::operator File () const
+{
+	return ( *m_Underlying )->path();
 }

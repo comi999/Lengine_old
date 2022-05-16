@@ -29,13 +29,12 @@ public:
 
 	Texture( const File& a_Path )
 	{
-		m_Data = reinterpret_cast< Colour* >( stbi_load( std::string( a_Path.GetPath() ).c_str(), &m_Size.x, &m_Size.y, nullptr, 4 ) );
-		_ASSERT_EXPR( m_Data, "Texture unable to load from file." );
+		// Need to load a .texture file
 	}
 
 	~Texture()
 	{
-		stbi_image_free( m_Data );
+		
 	}
 
 	inline Vector2Int GetDimensions() const
