@@ -5,6 +5,7 @@
 #include "Delegate.hpp"
 #include "Input.hpp"
 #include "Time.hpp"
+#include "Resource.hpp"
 
 class CGE
 {
@@ -13,13 +14,25 @@ public:
     // Create a console window.
     static bool Initialize( const char* a_Title, Vector< short, 2 > a_WindowSize, Vector< short, 2 > a_PixelSize )
     {
-        return ConsoleWindow::Initialize( a_Title, a_WindowSize, a_PixelSize );
+        if ( !ConsoleWindow::Initialize( a_Title, a_WindowSize, a_PixelSize ) )
+        {
+            return false;
+        }
+
+        Resource::Initialize();
+        return true;
     }
 
     // Create a console window with largest possible size.
     static bool Initialize( const char* a_Title, Vector< short, 2 > a_PixelSize )
     {
-        return ConsoleWindow::Initialize( a_Title, a_PixelSize );
+        if ( !ConsoleWindow::Initialize( a_Title, a_PixelSize ) )
+        {
+            return false;
+        }
+
+        Resource::Initialize();
+        return true;
     }
 
     // Begin ticking.

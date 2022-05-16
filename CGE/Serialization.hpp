@@ -225,21 +225,9 @@ class StreamSerializer
 
 public:
 
-	template < typename... Args >
-	StreamSerializer( Args&&... a_Args )
-		: m_Stream( std::forward< Args >( a_Args )... )
+	StreamSerializer( _Stream& a_Stream )
+		: m_Stream( a_Stream )
 	{ }
-
-	template < typename... Args >
-	inline void Open( Args&&... a_Args )
-	{
-		m_Stream.Open( std::forward< Args >( a_Args )... );
-	}
-
-	inline void Close()
-	{
-		m_Stream.Close();
-	}
 
 	template < typename T >
 	_This& operator << ( const T& a_Serializable )
@@ -248,13 +236,23 @@ public:
 		return *this;
 	}
 
+	_Stream& Stream()
+	{
+		return m_Stream;
+	}
+
+	const _Stream& Stream() const
+	{
+		return m_Stream;
+	}
+
 private:
 
 	template < typename > friend class Serializer;
 
 	StreamSerializer( StreamSerializer&& ) = delete;
 
-	_Stream m_Stream;
+	_Stream& m_Stream;
 };
 
 template < typename _Stream >
@@ -265,21 +263,9 @@ class StreamDeserializer
 
 public:
 
-	template < typename... Args >
-	StreamDeserializer( Args&&... a_Args )
-		: m_Stream( std::forward< Args >( a_Args )... )
+	StreamDeserializer( _Stream& a_Stream )
+		: m_Stream( a_Stream )
 	{ }
-
-	template < typename... Args >
-	inline void Open( Args&&... a_Args )
-	{
-		m_Stream.Open( std::forward< Args >( a_Args )... );
-	}
-
-	inline void Close()
-	{
-		m_Stream.Close();
-	}
 
 	template < typename T >
 	_This& operator >> ( T& a_Deserializable )
@@ -288,13 +274,23 @@ public:
 		return *this;
 	}
 
+	_Stream& Stream()
+	{
+		return m_Stream;
+	}
+
+	const _Stream& Stream() const
+	{
+		return m_Stream;
+	}
+
 private:
 
 	template < typename > friend class Deserializer;
 
 	StreamDeserializer( StreamDeserializer&& ) = delete;
 
-	_Stream m_Stream;
+	_Stream& m_Stream;
 };
 
 class StreamSizer
@@ -390,88 +386,6 @@ private:
 	Type* m_Deserializable;
 };
 
-class FileStream
-{
-public:
-
-	FileStream()
-		: m_File( nullptr )
-	{ }
-
-	FileStream( const char* a_Path )
-	{
-		Open( a_Path );
-	}
-
-	~FileStream()
-	{
-		Close();
-	}
-
-	inline void Open( const char* a_Path )
-	{
-		if ( m_File )
-		{
-			Close();
-		}
-
-		fopen_s( &m_File, a_Path, "rb+" );
-		_ASSERT_EXPR( m_File, "File does not exist." );
-	}
-
-	inline void Close()
-	{
-		if ( !m_File )
-		{
-			return;
-		}
-
-		fclose( m_File );
-		m_File = nullptr;
-	}
-
-	inline void Write( const void* a_From, size_t a_Size )
-	{
-		fwrite( a_From, 1, a_Size, m_File );
-	}
-
-	inline void Read( void* a_To, size_t a_Size )
-	{
-		fread( a_To, 1, a_Size, m_File );
-	}
-
-	inline void Seek( size_t a_Position )
-	{
-		fseek( m_File, a_Position, SEEK_SET );
-	}
-
-	inline bool End() const
-	{
-		return feof( m_File );
-	}
-
-	inline size_t Size() const
-	{
-		if ( !m_File )
-		{
-			return 0;
-		}
-
-		size_t Position = ftell( m_File );
-		fseek( m_File, 0, SEEK_END );
-		size_t Size = ftell( m_File );
-		fseek( m_File, Position, SEEK_SET );
-		return Size;
-	}
-
-private:
-
-	template < typename > friend class Serializer;
-	template < typename > friend class Deserializer;
-
-	FILE* m_File;
-};
-
 class BufferStream
 {
 public:
@@ -547,8 +461,6 @@ private:
 	size_t   m_Size;
 };
 
-typedef StreamSerializer  < FileStream   > FileSerializer;
-typedef StreamDeserializer< FileStream   > FileDeserializer;
 typedef StreamSerializer  < BufferStream > BufferSerializer;
 typedef StreamDeserializer< BufferStream > BufferDeserializer;
 

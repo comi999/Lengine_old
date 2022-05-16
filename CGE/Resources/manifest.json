@@ -1,0 +1,33 @@
+{
+  "Resources": 
+  {
+    "len": {
+      "Path": "./SomeFolder/len.jfif",
+      "Type": "Texture"
+    },
+    "landscape": {
+      "Path": "./SomeFolder/landscape.bmp",
+      "Type": "Texture"
+    },
+    "wierd": {
+      "Path": "./SomeFolder/wierd.jpg",
+      "Type": "Texture"
+    },
+    "stanford": {
+      "Path": "./SomeFolder/stanford_downscaled.obj",
+      "Type": "Mesh"
+    },
+    "grass": {
+      "Path": "./SomeFolder/grass.obj",
+      "Type": "Mesh"
+    },
+    "grass_material": {
+      "Path": "./SomeFolder/grass.mtl",
+      "Type": "Material"
+    },
+    "grass_diffuse": {
+      "Path": "./SomeFolder/grass.png",
+      "Type": "Texture"
+    }
+  }
+}

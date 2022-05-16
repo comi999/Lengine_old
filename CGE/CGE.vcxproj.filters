@@ -44,6 +44,18 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="File.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Miniz.cpp">
+      <Filter>Source Files\Resource\FileHandlers\OFBX</Filter>
+    </ClCompile>
+    <ClCompile Include="OFBX.cpp">
+      <Filter>Source Files\Resource\FileHandlers\OFBX</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Source Files\Resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pixel.hpp">
@@ -145,9 +157,6 @@
     <ClInclude Include="Material.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="TypeMapNew.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -170,18 +179,21 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="STBI.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Serialization.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileSerializer.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Miniz.hpp">
+      <Filter>Source Files\Resource\FileHandlers\OFBX</Filter>
     </ClInclude>
-    <ClInclude Include="ResourcePackager.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="OFBX.hpp">
+      <Filter>Source Files\Resource\FileHandlers\OFBX</Filter>
     </ClInclude>
+    <ClInclude Include="Resource.hpp">
+      <Filter>Source Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="JSON.hpp" />
+    <ClInclude Include="TOBJ.hpp" />
+    <ClInclude Include="STBI.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -190,6 +202,21 @@
     </Filter>
     <Filter Include="Entt">
       <UniqueIdentifier>{f0195290-6c7d-4958-a6da-e7f7c69af474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource">
+      <UniqueIdentifier>{740a2b67-41af-4394-b2a9-8a85b0727d99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource\FileHandlers">
+      <UniqueIdentifier>{387771f3-cf6e-4778-b9ac-f691f0d5f857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource\FileHandlers\OFBX">
+      <UniqueIdentifier>{de909c5f-ea54-48d0-ba3f-9c714b484950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource\FileHandlers\STB">
+      <UniqueIdentifier>{a0bf347d-6ce3-42bf-af03-a5618802d68d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource\FileHandlers\TinyOBJ">
+      <UniqueIdentifier>{88bea638-1b75-40d9-b6e1-137ad76790d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,1239 +1,247 @@
-// OBJ_Loader.h - A Single Header OBJ Model Loader
-
 #pragma once
-
-// Iostream - STD I/O Library
-#include <iostream>
-
-// Vector - STD Vector/Array Library
-#include <vector>
-
-// String - STD String Library
-#include <string>
-
-// fStream - STD File I/O Library
 #include <fstream>
+#include "Serialization.hpp"
 
-// Math.h - STD math Library
-#include <math.h>
+namespace std {
+namespace filesystem{
+class path; } }
 
-#include "Math.hpp"
-#include "Vertex.hpp"
-#include "Material.hpp"
-#include "Mesh.hpp"
+class File;
+class FileIterator;
 
-// Print progress to console while loading (large models)
-#define OBJL_CONSOLE_OUTPUT
-
-// Namespace: OBJL
-//
-// Description: The namespace that holds eveyrthing that
-//	is needed and used for the OBJ Model Loader
-namespace objl
+class Path
 {
-	namespace algorithm
+public:
+
+	Path();
+	Path( const std::filesystem::path& a_Path );
+	Path( const Path& a_Path );
+	Path( Path&& a_Path );
+	~Path();
+	inline Path GetAbsolute() const;
+	inline Path GetRelative() const;
+	inline Path GetParent() const;
+	inline Path GetRoot() const;
+	inline bool IsDirectory() const;
+	inline bool IsFile() const;
+	inline operator const char* () const;
+	inline operator std::string () const;
+	inline operator const std::filesystem::path& () const;
+	inline Path& operator =( const std::filesystem::path& a_Path );
+	inline Path& operator =( const Path& a_Path );
+	inline bool operator ==( const std::filesystem::path& a_Path ) const;
+	inline bool operator ==( const Path& a_Path ) const;
+	inline bool operator !=( const std::filesystem::path& a_Path ) const;
+	inline bool operator !=( const Path& a_Path ) const;
+	inline Path& operator /=( const char* a_Append );
+	inline Path  operator /( const char* a_Append ) const;
+	inline Path& operator --();
+	inline Path  operator --( int );
+
+private:
+
+	friend class Directory;
+	friend class DirectoryIterator;
+	friend class File;
+	friend class FileIterator;
+	friend class FileRecursiveIterator;
+
+	std::filesystem::path* m_Path;
+};
+
+class Directory : public Path
+{
+public:
+
+	Directory();
+	Directory( const std::filesystem::path& a_Path );
+	Directory( const Path& a_Path );
+	Directory( Path&& a_Path );
+	Directory( const Directory& a_Directory );
+	Directory( Directory&& a_Directory );
+	inline Directory GetAbsolute() const;
+	inline Directory GetRelative() const;
+	inline Directory GetParent() const;
+	inline Directory GetRoot() const;
+	bool Contains( const char* a_FileOrFolder ) const;
+	bool ContainsFile( const char* a_File ) const;
+	File CreateFile( const char* a_File, size_t a_Size ) const;
+	File GetFile( const char* a_File ) const;
+	bool ContainsDirectory( const char* a_Directory ) const;
+	Directory CreateDirectory( const char* a_Directory ) const;
+	Directory GetDirectory( const char* a_Directory );
+	static void SetWorkingDirectory( const Directory& a_Directory );
+	inline operator const Path& () const;
+	inline operator Path& ();
+	inline Directory& operator =( const std::filesystem::path& a_Path );
+	inline Directory& operator =( const Path& a_Path );
+	inline Directory& operator =( const Directory& a_Path );
+	inline Directory& operator /=( const char* a_Append );
+	inline Directory  operator /( const char* a_Append ) const;
+	inline Directory& operator --();
+	inline Directory  operator --( int );
+};
+
+class File : public Path
+{
+public:
+
+	File( const std::filesystem::path& a_Path );
+	File( const Path& a_Path );
+	File( Path&& a_Path );
+	File( const File& ) = delete;
+	File( File&& a_File );
+	std::string GetName() const;
+	std::string GetExtension() const;
+	std::string GetStem() const;
+	bool Open();
+	bool Close();
+	inline bool IsOpen() const;
+	inline void Write( const void* a_From, size_t a_Size );
+	inline void Read( void* a_To, size_t a_Size );
+	inline void Seek( size_t a_Position );
+	inline bool AtEnd() const;
+	inline size_t Size() const;
+	inline operator const Path& () const;
+	inline operator Path& ();
+	inline operator Directory () const;
+	inline operator std::ifstream ();
+	inline operator std::ofstream ();
+	inline operator std::fstream (); 
+	inline operator FILE* ();
+
+private:
+
+	friend class FileIterator;
+	template < typename > friend class Serializer;
+	template < typename > friend class Deserializer;
+
+	FILE* m_File;
+};
+
+class FileIterator
+{
+private:
+
+	FileIterator( std::filesystem::directory_iterator a_DirectoryIterator )
+		: m_Underlying( a_DirectoryIterator )
+	{ }
+
+public:
+
+	FileIterator( const Directory& a_Directory )
+		: m_Underlying( a_Directory.GetPath().m_Path )
+		, m_End( std::filesystem::end( std::filesystem::directory_iterator( a_Directory.GetPath().m_Path ) ) )
 	{
-		// A test to see if P1 is on the same side as P2 of a line segment ab
-		bool SameSide( Vector3 p1, Vector3 p2, Vector3 a, Vector3 b )
+		while ( m_Underlying != m_End && !std::filesystem::is_regular_file( *m_Underlying ) )
 		{
-			Vector3 cp1 = Math::Cross( b - a, p1 - a );
-			Vector3 cp2 = Math::Cross( b - a, p2 - a );
-
-			return Math::Dot( cp1, cp2 ) >= 0;
-		}
-
-		// Generate a cross produect normal for a triangle
-		Vector3 GenTriNormal( Vector3 t1, Vector3 t2, Vector3 t3 )
-		{
-			Vector3 u = t2 - t1;
-			Vector3 v = t3 - t1;
-
-			Vector3 normal = Math::Cross( u, v );
-
-			return normal;
-		}
-
-		// Check to see if a Vector3 Point is within a 3 Vector3 Triangle
-		bool inTriangle( Vector3 point, Vector3 tri1, Vector3 tri2, Vector3 tri3 )
-		{
-			// Test to see if it is within an infinite prism that the triangle outlines.
-			bool within_tri_prisim = SameSide( point, tri1, tri2, tri3 ) && SameSide( point, tri2, tri1, tri3 )
-				&& SameSide( point, tri3, tri1, tri2 );
-
-			// If it isn't it will never be on the triangle
-			if ( !within_tri_prisim )
-				return false;
-
-			// Calulate Triangle's Normal
-			Vector3 n = GenTriNormal( tri1, tri2, tri3 );
-
-			// Project the point onto this normal
-			Vector3 proj = Math::Project( point, n );
-
-			// If the distance from the triangle to the point is 0
-			//	it lies on the triangle
-			return Math::Length( proj ) == 0;
-		}
-
-		// Split a String into a string array at a given token
-		inline void split( const std::string& in,
-						   std::vector<std::string>& out,
-						   std::string token )
-		{
-			out.clear();
-
-			std::string temp;
-
-			for ( int i = 0; i < int( in.size() ); i++ )
-			{
-				std::string test = in.substr( i, token.size() );
-
-				if ( test == token )
-				{
-					if ( !temp.empty() )
-					{
-						out.push_back( temp );
-						temp.clear();
-						i += ( int )token.size() - 1;
-					}
-					else
-					{
-						out.push_back( "" );
-					}
-				}
-				else if ( i + token.size() >= in.size() )
-				{
-					temp += in.substr( i, token.size() );
-					out.push_back( temp );
-					break;
-				}
-				else
-				{
-					temp += in[ i ];
-				}
-			}
-		}
-
-		// Get tail of string after first token and possibly following spaces
-		inline std::string tail( const std::string& in )
-		{
-			size_t token_start = in.find_first_not_of( " \t" );
-			size_t space_start = in.find_first_of( " \t", token_start );
-			size_t tail_start = in.find_first_not_of( " \t", space_start );
-			size_t tail_end = in.find_last_not_of( " \t" );
-			if ( tail_start != std::string::npos && tail_end != std::string::npos )
-			{
-				return in.substr( tail_start, tail_end - tail_start + 1 );
-			}
-			else if ( tail_start != std::string::npos )
-			{
-				return in.substr( tail_start );
-			}
-			return "";
-		}
-
-		// Get first token of string
-		inline std::string firstToken( const std::string& in )
-		{
-			if ( !in.empty() )
-			{
-				size_t token_start = in.find_first_not_of( " \t" );
-				size_t token_end = in.find_first_of( " \t", token_start );
-				if ( token_start != std::string::npos && token_end != std::string::npos )
-				{
-					return in.substr( token_start, token_end - token_start );
-				}
-				else if ( token_start != std::string::npos )
-				{
-					return in.substr( token_start );
-				}
-			}
-			return "";
-		}
-
-		// Get element at given index position
-		template <class T>
-		inline const T& getElement( const std::vector<T>& elements, std::string& index )
-		{
-			int idx = std::stoi( index );
-			if ( idx < 0 )
-				idx = int( elements.size() ) + idx;
-			else
-				idx--;
-			return elements[ idx ];
+			++m_Underlying;
 		}
 	}
 
-	// Class: Loader
-	//
-	// Description: The OBJ Model Loader
-	class Loader
+	inline FileIterator& operator++()
 	{
-	public:
-		// Default Constructor
-		Loader()
-		{
-
-		}
-		~Loader()
-		{
-			LoadedMeshes.clear();
-		}
-
-		// Load a file into the loader
-		//
-		// If file is loaded return true
-		//
-		// If the file is unable to be found
-		// or unable to be loaded return false
-		bool LoadFile( std::string Path )
-		{
-			// If the file is not an .obj file return false
-			if ( Path.substr( Path.size() - 4, 4 ) != ".obj" )
-				return false;
-
-
-			std::ifstream file( Path );
-
-			if ( !file.is_open() )
-				return false;
-
-			LoadedMeshes.clear();
-			LoadedVertices.clear();
-			LoadedIndices.clear();
-
-			std::vector<Vector3> Positions;
-			std::vector<Vector2> TCoords;
-			std::vector<Vector3> Normals;
-
-			std::vector<Vertex> Vertices;
-			std::vector<unsigned int> Indices;
-
-			std::vector<std::string> MeshMatNames;
-
-			bool listening = false;
-			std::string meshname;
-
-			Mesh tempMesh;
-
-			#ifdef OBJL_CONSOLE_OUTPUT
-			const unsigned int outputEveryNth = 1000;
-			unsigned int outputIndicator = outputEveryNth;
-			#endif
-
-			std::string curline;
-			while ( std::getline( file, curline ) )
-			{
-				#ifdef OBJL_CONSOLE_OUTPUT
-				if ( ( outputIndicator = ( ( outputIndicator + 1 ) % outputEveryNth ) ) == 1 )
-				{
-					if ( !meshname.empty() )
-					{
-						std::cout
-							<< "\r- " << meshname
-							<< "\t| vertices > " << Positions.size()
-							<< "\t| texcoords > " << TCoords.size()
-							<< "\t| normals > " << Normals.size()
-							<< "\t| triangles > " << ( Vertices.size() / 3 )
-							<< ( !MeshMatNames.empty() ? "\t| material: " + MeshMatNames.back() : "" );
-					}
-				}
-				#endif
-
-				// Generate a Mesh Object or Prepare for an object to be created
-				if ( algorithm::firstToken( curline ) == "o" || algorithm::firstToken( curline ) == "g" || curline[ 0 ] == 'g' )
-				{
-					if ( !listening )
-					{
-						listening = true;
-
-						if ( algorithm::firstToken( curline ) == "o" || algorithm::firstToken( curline ) == "g" )
-						{
-							meshname = algorithm::tail( curline );
-						}
-						else
-						{
-							meshname = "unnamed";
-						}
-					}
-					else
-					{
-						// Generate the mesh to put into the array
-
-						if ( !Indices.empty() && !Vertices.empty() )
-						{
-							// Create Mesh
-							tempMesh = Mesh( Vertices, Indices );
-							tempMesh.MeshName = meshname;
-
-							// Insert Mesh
-							LoadedMeshes.push_back( tempMesh );
-
-							// Cleanup
-							Vertices.clear();
-							Indices.clear();
-							meshname.clear();
-
-							meshname = algorithm::tail( curline );
-						}
-						else
-						{
-							if ( algorithm::firstToken( curline ) == "o" || algorithm::firstToken( curline ) == "g" )
-							{
-								meshname = algorithm::tail( curline );
-							}
-							else
-							{
-								meshname = "unnamed";
-							}
-						}
-					}
-					#ifdef OBJL_CONSOLE_OUTPUT
-					std::cout << std::endl;
-					outputIndicator = 0;
-					#endif
-				}
-				// Generate a Vertex Position
-				if ( algorithm::firstToken( curline ) == "v" )
-				{
-					std::vector<std::string> spos;
-					Vector3 vpos;
-					algorithm::split( algorithm::tail( curline ), spos, " " );
-
-					vpos.x = std::stof( spos[ 0 ] );
-					vpos.y = std::stof( spos[ 1 ] );
-					vpos.z = std::stof( spos[ 2 ] );
-
-					Positions.push_back( vpos );
-				}
-				// Generate a Vertex Texture Coordinate
-				if ( algorithm::firstToken( curline ) == "vt" )
-				{
-					std::vector<std::string> stex;
-					Vector2 vtex;
-					algorithm::split( algorithm::tail( curline ), stex, " " );
-
-					vtex.x = std::stof( stex[ 0 ] );
-					vtex.y = std::stof( stex[ 1 ] );
-
-					TCoords.push_back( vtex );
-				}
-				// Generate a Vertex Normal;
-				if ( algorithm::firstToken( curline ) == "vn" )
-				{
-					std::vector<std::string> snor;
-					Vector3 vnor;
-					algorithm::split( algorithm::tail( curline ), snor, " " );
-
-					vnor.x = std::stof( snor[ 0 ] );
-					vnor.y = std::stof( snor[ 1 ] );
-					vnor.z = std::stof( snor[ 2 ] );
-
-					Normals.push_back( vnor );
-				}
-				// Generate a Face (vertices & indices)
-				if ( algorithm::firstToken( curline ) == "f" )
-				{
-					// Generate the vertices
-					std::vector<Vertex> vVerts;
-					GenVerticesFromRawOBJ( vVerts, Positions, TCoords, Normals, curline );
-
-					// Add Vertices
-					for ( int i = 0; i < int( vVerts.size() ); i++ )
-					{
-						Vertices.push_back( vVerts[ i ] );
-
-						LoadedVertices.push_back( vVerts[ i ] );
-					}
-
-					std::vector<unsigned int> iIndices;
-
-					VertexTriangluation( iIndices, vVerts );
-
-					// Add Indices
-					for ( int i = 0; i < int( iIndices.size() ); i++ )
-					{
-						unsigned int indnum = ( unsigned int )( ( Vertices.size() ) - vVerts.size() ) + iIndices[ i ];
-						Indices.push_back( indnum );
-
-						indnum = ( unsigned int )( ( LoadedVertices.size() ) - vVerts.size() ) + iIndices[ i ];
-						LoadedIndices.push_back( indnum );
-
-					}
-				}
-				// Get Mesh Material Name
-				if ( algorithm::firstToken( curline ) == "usemtl" )
-				{
-					MeshMatNames.push_back( algorithm::tail( curline ) );
-
-					// Create new Mesh, if Material changes within a group
-					if ( !Indices.empty() && !Vertices.empty() )
-					{
-						// Create Mesh
-						tempMesh = Mesh( Vertices, Indices );
-						tempMesh.MeshName = meshname;
-						int i = 2;
-						while ( 1 )
-						{
-							tempMesh.MeshName = meshname + "_" + std::to_string( i );
-
-							for ( auto& m : LoadedMeshes )
-								if ( m.MeshName == tempMesh.MeshName )
-									continue;
-							break;
-						}
-
-						// Insert Mesh
-						LoadedMeshes.push_back( tempMesh );
-
-						// Cleanup
-						Vertices.clear();
-						Indices.clear();
-					}
-
-					#ifdef OBJL_CONSOLE_OUTPUT
-					outputIndicator = 0;
-					#endif
-				}
-				// Load Materials
-				if ( algorithm::firstToken( curline ) == "mtllib" )
-				{
-					// Generate LoadedMaterial
-
-					// Generate a path to the material file
-					std::vector<std::string> temp;
-					algorithm::split( Path, temp, "/" );
-
-					std::string pathtomat = "";
-
-					if ( temp.size() != 1 )
-					{
-						for ( int i = 0; i < temp.size() - 1; i++ )
-						{
-							pathtomat += temp[ i ] + "/";
-						}
-					}
-
-
-					pathtomat += algorithm::tail( curline );
-
-					#ifdef OBJL_CONSOLE_OUTPUT
-					std::cout << std::endl << "- find materials in: " << pathtomat << std::endl;
-					#endif
-
-					// Load Materials
-					LoadMaterials( pathtomat );
-				}
-			}
-
-			#ifdef OBJL_CONSOLE_OUTPUT
-			std::cout << std::endl;
-			#endif
-
-			// Deal with last mesh
-
-			if ( !Indices.empty() && !Vertices.empty() )
-			{
-				// Create Mesh
-				tempMesh = Mesh( Vertices, Indices );
-				tempMesh.MeshName = meshname;
-
-				// Insert Mesh
-				LoadedMeshes.push_back( tempMesh );
-			}
-
-			file.close();
-
-			// Set Materials for each Mesh
-			for ( int i = 0; i < MeshMatNames.size(); i++ )
-			{
-				std::string matname = MeshMatNames[ i ];
-
-				// Find corresponding material name in loaded materials
-				// when found copy material variables into mesh material
-				for ( int j = 0; j < LoadedMaterials.size(); j++ )
-				{
-					if ( LoadedMaterials[ j ].name == matname )
-					{
-						LoadedMeshes[ i ].MeshMaterial = LoadedMaterials[ j ];
-						break;
-					}
-				}
-			}
-
-			if ( LoadedMeshes.empty() && LoadedVertices.empty() && LoadedIndices.empty() )
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
-		}
-
-		// Loaded Mesh Objects
-		std::vector<Mesh> LoadedMeshes;
-		// Loaded Vertex Objects
-		std::vector<Vertex> LoadedVertices;
-		// Loaded Index Positions
-		std::vector<unsigned int> LoadedIndices;
-		// Loaded Material Objects
-		std::vector<Material> LoadedMaterials;
-
-	private:
-		// Generate vertices from a list of positions, 
-		//	tcoords, normals and a face line
-		void GenVerticesFromRawOBJ( std::vector<Vertex>& oVerts,
-									const std::vector<Vector3>& iPositions,
-									const std::vector<Vector2>& iTCoords,
-									const std::vector<Vector3>& iNormals,
-									std::string icurline )
-		{
-			std::vector<std::string> sface, svert;
-			Vertex vVert;
-			algorithm::split( algorithm::tail( icurline ), sface, " " );
-
-			bool noNormal = false;
-
-			// For every given vertex do this
-			for ( int i = 0; i < int( sface.size() ); i++ )
-			{
-				// See What type the vertex is.
-				int vtype;
-
-				algorithm::split( sface[ i ], svert, "/" );
-
-				// Check for just position - v1
-				if ( svert.size() == 1 )
-				{
-					// Only position
-					vtype = 1;
-				}
-
-				// Check for position & texture - v1/vt1
-				if ( svert.size() == 2 )
-				{
-					// Position & Texture
-					vtype = 2;
-				}
-
-				// Check for Position, Texture and Normal - v1/vt1/vn1
-				// or if Position and Normal - v1//vn1
-				if ( svert.size() == 3 )
-				{
-					if ( svert[ 1 ] != "" )
-					{
-						// Position, Texture, and Normal
-						vtype = 4;
-					}
-					else
-					{
-						// Position & Normal
-						vtype = 3;
-					}
-				}
-
-				// Calculate and store the vertex
-				switch ( vtype )
-				{
-					case 1: // P
-					{
-						vVert.Position = algorithm::getElement( iPositions, svert[ 0 ] );
-						vVert.Texel = Vector2( 0, 0 );
-						noNormal = true;
-						oVerts.push_back( vVert );
-						break;
-					}
-					case 2: // P/T
-					{
-						vVert.Position = algorithm::getElement( iPositions, svert[ 0 ] );
-						vVert.Texel = algorithm::getElement( iTCoords, svert[ 1 ] );
-						noNormal = true;
-						oVerts.push_back( vVert );
-						break;
-					}
-					case 3: // P//N
-					{
-						vVert.Position = algorithm::getElement( iPositions, svert[ 0 ] );
-						vVert.Texel = Vector2( 0, 0 );
-						vVert.Normal = algorithm::getElement( iNormals, svert[ 2 ] );
-						oVerts.push_back( vVert );
-						break;
-					}
-					case 4: // P/T/N
-					{
-						vVert.Position = algorithm::getElement( iPositions, svert[ 0 ] );
-						vVert.Texel = algorithm::getElement( iTCoords, svert[ 1 ] );
-						vVert.Normal = algorithm::getElement( iNormals, svert[ 2 ] );
-						oVerts.push_back( vVert );
-						break;
-					}
-					default:
-					{
-						break;
-					}
-				}
-			}
-
-			// take care of missing normals
-			// these may not be truly acurate but it is the 
-			// best they get for not compiling a mesh with normals	
-			if ( noNormal )
-			{
-				Vector3 A = oVerts[ 0 ].Position - oVerts[ 1 ].Position;
-				Vector3 B = oVerts[ 2 ].Position - oVerts[ 1 ].Position;
-
-				Vector3 normal = Math::Cross( A, B );
-
-				for ( int i = 0; i < int( oVerts.size() ); i++ )
-				{
-					oVerts[ i ].Normal = normal;
-				}
-			}
-		}
-
-		// Triangulate a list of vertices into a face by printing
-		//	inducies corresponding with triangles within it
-		void VertexTriangluation( std::vector<unsigned int>& oIndices,
-								  const std::vector<Vertex>& iVerts )
-		{
-			// If there are 2 or less verts,
-			// no triangle can be created,
-			// so exit
-			if ( iVerts.size() < 3 )
-			{
-				return;
-			}
-			// If it is a triangle no need to calculate it
-			if ( iVerts.size() == 3 )
-			{
-				oIndices.push_back( 0 );
-				oIndices.push_back( 1 );
-				oIndices.push_back( 2 );
-				return;
-			}
-
-			// Create a list of vertices
-			std::vector<Vertex> tVerts = iVerts;
-
-			while ( true )
-			{
-				// For every vertex
-				for ( int i = 0; i < int( tVerts.size() ); i++ )
-				{
-					// pPrev = the previous vertex in the list
-					Vertex pPrev;
-					if ( i == 0 )
-					{
-						pPrev = tVerts[ tVerts.size() - 1 ];
-					}
-					else
-					{
-						pPrev = tVerts[ i - 1 ];
-					}
-
-					// pCur = the current vertex;
-					Vertex pCur = tVerts[ i ];
-
-					// pNext = the next vertex in the list
-					Vertex pNext;
-					if ( i == tVerts.size() - 1 )
-					{
-						pNext = tVerts[ 0 ];
-					}
-					else
-					{
-						pNext = tVerts[ i + 1 ];
-					}
-
-					// Check to see if there are only 3 verts left
-					// if so this is the last triangle
-					if ( tVerts.size() == 3 )
-					{
-						// Create a triangle from pCur, pPrev, pNext
-						for ( int j = 0; j < int( tVerts.size() ); j++ )
-						{
-							if ( iVerts[ j ].Position == pCur.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == pPrev.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == pNext.Position )
-								oIndices.push_back( j );
-						}
-
-						tVerts.clear();
-						break;
-					}
-					if ( tVerts.size() == 4 )
-					{
-						// Create a triangle from pCur, pPrev, pNext
-						for ( int j = 0; j < int( iVerts.size() ); j++ )
-						{
-							if ( iVerts[ j ].Position == pCur.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == pPrev.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == pNext.Position )
-								oIndices.push_back( j );
-						}
-
-						Vector3 tempVec;
-						for ( int j = 0; j < int( tVerts.size() ); j++ )
-						{
-							if ( tVerts[ j ].Position != pCur.Position
-								 && tVerts[ j ].Position != pPrev.Position
-								 && tVerts[ j ].Position != pNext.Position )
-							{
-								tempVec = tVerts[ j ].Position;
-								break;
-							}
-						}
-
-						// Create a triangle from pCur, pPrev, pNext
-						for ( int j = 0; j < int( iVerts.size() ); j++ )
-						{
-							if ( iVerts[ j ].Position == pPrev.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == pNext.Position )
-								oIndices.push_back( j );
-							if ( iVerts[ j ].Position == tempVec )
-								oIndices.push_back( j );
-						}
-
-						tVerts.clear();
-						break;
-					}
-
-					// If Vertex is not an interior vertex
-					float angle = Math::Angle( pPrev.Position - pCur.Position, pNext.Position - pCur.Position ) * ( 180 / 3.14159265359 );
-					if ( angle <= 0 && angle >= 180 )
-						continue;
-
-					// If any vertices are within this triangle
-					bool inTri = false;
-					for ( int j = 0; j < int( iVerts.size() ); j++ )
-					{
-						if ( algorithm::inTriangle( iVerts[ j ].Position, pPrev.Position, pCur.Position, pNext.Position )
-							 && iVerts[ j ].Position != pPrev.Position
-							 && iVerts[ j ].Position != pCur.Position
-							 && iVerts[ j ].Position != pNext.Position )
-						{
-							inTri = true;
-							break;
-						}
-					}
-					if ( inTri )
-						continue;
-
-					// Create a triangle from pCur, pPrev, pNext
-					for ( int j = 0; j < int( iVerts.size() ); j++ )
-					{
-						if ( iVerts[ j ].Position == pCur.Position )
-							oIndices.push_back( j );
-						if ( iVerts[ j ].Position == pPrev.Position )
-							oIndices.push_back( j );
-						if ( iVerts[ j ].Position == pNext.Position )
-							oIndices.push_back( j );
-					}
-
-					// Delete pCur from the list
-					for ( int j = 0; j < int( tVerts.size() ); j++ )
-					{
-						if ( tVerts[ j ].Position == pCur.Position )
-						{
-							tVerts.erase( tVerts.begin() + j );
-							break;
-						}
-					}
-
-					// reset i to the start
-					// -1 since loop will add 1 to it
-					i = -1;
-				}
-
-				// if no triangles were created
-				if ( oIndices.size() == 0 )
-					break;
-
-				// if no more vertices
-				if ( tVerts.size() == 0 )
-					break;
-			}
-		}
-
-		// Load Materials from .mtl file
-		bool LoadMaterials( std::string path )
-		{
-			// If the file is not a material file return false
-			if ( path.substr( path.size() - 4, path.size() ) != ".mtl" )
-				return false;
-
-			std::ifstream file( path );
-
-			// If the file is not found return false
-			if ( !file.is_open() )
-				return false;
-
-			Material tempMaterial;
-
-			bool listening = false;
-
-			// Go through each line looking for material variables
-			std::string curline;
-			while ( std::getline( file, curline ) )
-			{
-				// new material and material name
-				if ( algorithm::firstToken( curline ) == "newmtl" )
-				{
-					if ( !listening )
-					{
-						listening = true;
-
-						if ( curline.size() > 7 )
-						{
-							tempMaterial.name = algorithm::tail( curline );
-						}
-						else
-						{
-							tempMaterial.name = "none";
-						}
-					}
-					else
-					{
-						// Generate the material
-
-						// Push Back loaded Material
-						LoadedMaterials.push_back( tempMaterial );
-
-						// Clear Loaded Material
-						tempMaterial = Material();
-
-						if ( curline.size() > 7 )
-						{
-							tempMaterial.name = algorithm::tail( curline );
-						}
-						else
-						{
-							tempMaterial.name = "none";
-						}
-					}
-				}
-				// Ambient Color
-				if ( algorithm::firstToken( curline ) == "Ka" )
-				{
-					std::vector<std::string> temp;
-					algorithm::split( algorithm::tail( curline ), temp, " " );
-
-					if ( temp.size() != 3 )
-						continue;
-
-					tempMaterial.Ka.x = std::stof( temp[ 0 ] );
-					tempMaterial.Ka.y = std::stof( temp[ 1 ] );
-					tempMaterial.Ka.z = std::stof( temp[ 2 ] );
-				}
-				// Diffuse Color
-				if ( algorithm::firstToken( curline ) == "Kd" )
-				{
-					std::vector<std::string> temp;
-					algorithm::split( algorithm::tail( curline ), temp, " " );
-
-					if ( temp.size() != 3 )
-						continue;
-
-					tempMaterial.Kd.x = std::stof( temp[ 0 ] );
-					tempMaterial.Kd.y = std::stof( temp[ 1 ] );
-					tempMaterial.Kd.z = std::stof( temp[ 2 ] );
-				}
-				// Specular Color
-				if ( algorithm::firstToken( curline ) == "Ks" )
-				{
-					std::vector<std::string> temp;
-					algorithm::split( algorithm::tail( curline ), temp, " " );
-
-					if ( temp.size() != 3 )
-						continue;
-
-					tempMaterial.Ks.x = std::stof( temp[ 0 ] );
-					tempMaterial.Ks.y = std::stof( temp[ 1 ] );
-					tempMaterial.Ks.z = std::stof( temp[ 2 ] );
-				}
-				// Specular Exponent
-				if ( algorithm::firstToken( curline ) == "Ns" )
-				{
-					tempMaterial.Ns = std::stof( algorithm::tail( curline ) );
-				}
-				// Optical Density
-				if ( algorithm::firstToken( curline ) == "Ni" )
-				{
-					tempMaterial.Ni = std::stof( algorithm::tail( curline ) );
-				}
-				// Dissolve
-				if ( algorithm::firstToken( curline ) == "d" )
-				{
-					tempMaterial.d = std::stof( algorithm::tail( curline ) );
-				}
-				// Illumination
-				if ( algorithm::firstToken( curline ) == "illum" )
-				{
-					tempMaterial.illum = std::stoi( algorithm::tail( curline ) );
-				}
-				// Ambient Texture Map
-				if ( algorithm::firstToken( curline ) == "map_Ka" )
-				{
-					tempMaterial.map_Ka = algorithm::tail( curline );
-				}
-				// Diffuse Texture Map
-				if ( algorithm::firstToken( curline ) == "map_Kd" )
-				{
-					tempMaterial.map_Kd = algorithm::tail( curline );
-				}
-				// Specular Texture Map
-				if ( algorithm::firstToken( curline ) == "map_Ks" )
-				{
-					tempMaterial.map_Ks = algorithm::tail( curline );
-				}
-				// Specular Hightlight Map
-				if ( algorithm::firstToken( curline ) == "map_Ns" )
-				{
-					tempMaterial.map_Ns = algorithm::tail( curline );
-				}
-				// Alpha Texture Map
-				if ( algorithm::firstToken( curline ) == "map_d" )
-				{
-					tempMaterial.map_d = algorithm::tail( curline );
-				}
-				// Bump Map
-				if ( algorithm::firstToken( curline ) == "map_Bump" || algorithm::firstToken( curline ) == "map_bump" || algorithm::firstToken( curline ) == "bump" )
-				{
-					tempMaterial.map_bump = algorithm::tail( curline );
-				}
-			}
-
-			// Deal with last material
-
-			// Push Back loaded Material
-			LoadedMaterials.push_back( tempMaterial );
-
-			// Test to see if anything was loaded
-			// If not return false
-			return !LoadedMaterials.empty();
-		}
-	};
-}
-
-#pragma once
-#include <fstream>
-#include <vector>
-#include <stdexcept>
-#include <iostream>
-
-namespace bmp
+		_STL_ASSERT( m_Underlying != m_End, "Cannot iterate past end." );
+		while ( ( ++m_Underlying ) != m_End && !( m_Underlying )->is_regular_file() );
+		return *this;
+	}
+
+	inline FileIterator operator++( int )
+	{
+		FileIterator Iterator( m_Underlying );
+		++*this;
+		return Iterator;
+	}
+
+	inline File operator*()
+	{
+		return File( m_Underlying->path() );
+	}
+
+	inline bool operator==( const FileIterator& a_Iterator ) const
+	{
+		return m_Underlying == a_Iterator.m_Underlying;
+	}
+
+	inline bool operator!=( const FileIterator& a_Iterator ) const
+	{
+		return m_Underlying != a_Iterator.m_Underlying;
+	}
+
+	inline operator bool () const
+	{
+		return m_Underlying != m_End;
+	}
+
+private:
+
+	friend class Directory;
+
+	std::filesystem::directory_iterator m_Underlying;
+	std::filesystem::directory_iterator m_End;
+};
+
+class FileRecursiveIterator
 {
-	
+private:
 
-	#pragma pack(push, 1)
-	struct BMPFileHeader
+	FileRecursiveIterator( std::filesystem::recursive_directory_iterator a_DirectoryIterator )
+		: m_Underlying( a_DirectoryIterator )
+	{ }
+
+public:
+
+	FileRecursiveIterator( const Directory& a_Directory )
+		: m_Underlying( a_Directory.GetPath().m_Path )
+		, m_End( std::filesystem::end( std::filesystem::recursive_directory_iterator( a_Directory.GetPath().m_Path ) ) )
 	{
-		uint16_t file_type{ 0x4D42 };          // File type always BM which is 0x4D42 (stored as hex uint16_t in little endian)
-		uint32_t file_size{ 0 };               // Size of the file (in bytes)
-		uint16_t reserved1{ 0 };               // Reserved, always 0
-		uint16_t reserved2{ 0 };               // Reserved, always 0
-		uint32_t offset_data{ 0 };             // Start position of pixel data (bytes from the beginning of the file)
-	};
+		while ( m_Underlying != m_End && !std::filesystem::is_regular_file( *m_Underlying ) )
+		{
+			++m_Underlying;
+		}
+	}
 
-	struct BMPInfoHeader
+	inline FileRecursiveIterator& operator++()
 	{
-		uint32_t size{ 0 };                      // Size of this header (in bytes)
-		int32_t width{ 0 };                      // width of bitmap in pixels
-		int32_t height{ 0 };                     // width of bitmap in pixels
-												 //       (if positive, bottom-up, with origin in lower left corner)
-												 //       (if negative, top-down, with origin in upper left corner)
-		uint16_t planes{ 1 };                    // No. of planes for the target device, this is always 1
-		uint16_t bit_count{ 0 };                 // No. of bits per pixel
-		uint32_t compression{ 0 };               // 0 or 3 - uncompressed. THIS PROGRAM CONSIDERS ONLY UNCOMPRESSED BMP images
-		uint32_t size_image{ 0 };                // 0 - for uncompressed images
-		int32_t x_pixels_per_meter{ 0 };
-		int32_t y_pixels_per_meter{ 0 };
-		uint32_t colors_used{ 0 };               // No. color indexes in the color table. Use 0 for the max number of colors allowed by bit_count
-		uint32_t colors_important{ 0 };          // No. of colors used for displaying the bitmap. If 0 all colors are required
-	};
+		_STL_ASSERT( m_Underlying != m_End, "Cannot iterate past end." );
+		while ( ( ++m_Underlying ) != m_End && !( m_Underlying )->is_regular_file() );
+		return *this;
+	}
 
-	struct BMPColorHeader
+	inline FileRecursiveIterator operator++( int )
 	{
-		uint32_t red_mask{ 0x00ff0000 };         // Bit mask for the red channel
-		uint32_t green_mask{ 0x0000ff00 };       // Bit mask for the green channel
-		uint32_t blue_mask{ 0x000000ff };        // Bit mask for the blue channel
-		uint32_t alpha_mask{ 0xff000000 };       // Bit mask for the alpha channel
-		uint32_t color_space_type{ 0x73524742 }; // Default "sRGB" (0x73524742)
-		uint32_t unused[ 16 ]{ 0 };                // Unused data for sRGB color space
-	};
-	#pragma pack(pop)
+		FileRecursiveIterator Iterator( m_Underlying );
+		++* this;
+		return Iterator;
+	}
 
-	struct BMP
+	inline File operator*()
 	{
-		BMPFileHeader file_header;
-		BMPInfoHeader bmp_info_header;
-		BMPColorHeader bmp_color_header;
-		std::vector<uint8_t> data;
+		return File( m_Underlying->path() );
+	}
 
-		BMP( const char* fname )
-		{
-			read( fname );
-		}
+	inline bool operator==( const FileRecursiveIterator& a_Iterator ) const
+	{
+		return m_Underlying == a_Iterator.m_Underlying;
+	}
 
-		void read( const char* fname )
-		{
-			std::ifstream inp{ fname, std::ios_base::binary };
-			if ( inp )
-			{
-				inp.read( ( char* )&file_header, sizeof( file_header ) );
-				if ( file_header.file_type != 0x4D42 )
-				{
-					throw std::runtime_error( "Error! Unrecognized file format." );
-				}
-				inp.read( ( char* )&bmp_info_header, sizeof( bmp_info_header ) );
+	inline bool operator!=( const FileRecursiveIterator& a_Iterator ) const
+	{
+		return m_Underlying != a_Iterator.m_Underlying;
+	}
 
-				// The BMPColorHeader is used only for transparent images
-				if ( bmp_info_header.bit_count == 32 )
-				{
-					// Check if the file has bit mask color information
-					if ( bmp_info_header.size >= ( sizeof( BMPInfoHeader ) + sizeof( BMPColorHeader ) ) )
-					{
-						inp.read( ( char* )&bmp_color_header, sizeof( bmp_color_header ) );
-						// Check if the pixel data is stored as BGRA and if the color space type is sRGB
-						check_color_header( bmp_color_header );
-					}
-					else
-					{
-						std::cerr << "Error! The file \"" << fname << "\" does not seem to contain bit mask information\n";
-						throw std::runtime_error( "Error! Unrecognized file format." );
-					}
-				}
+	inline operator bool() const
+	{
+		return m_Underlying != m_End;
+	}
 
-				// Jump to the pixel data location
-				inp.seekg( file_header.offset_data, inp.beg );
+private:
 
-				// Adjust the header fields for output.
-				// Some editors will put extra info in the image file, we only save the headers and the data.
-				if ( bmp_info_header.bit_count == 32 )
-				{
-					bmp_info_header.size = sizeof( BMPInfoHeader ) + sizeof( BMPColorHeader );
-					file_header.offset_data = sizeof( BMPFileHeader ) + sizeof( BMPInfoHeader ) + sizeof( BMPColorHeader );
-				}
-				else
-				{
-					bmp_info_header.size = sizeof( BMPInfoHeader );
-					file_header.offset_data = sizeof( BMPFileHeader ) + sizeof( BMPInfoHeader );
-				}
-				file_header.file_size = file_header.offset_data;
+	friend class Directory;
 
-				if ( bmp_info_header.height < 0 )
-				{
-					throw std::runtime_error( "The program can treat only BMP images with the origin in the bottom left corner!" );
-				}
+	std::filesystem::recursive_directory_iterator m_Underlying;
+	std::filesystem::recursive_directory_iterator m_End;
+};
 
-				data.resize( bmp_info_header.width * bmp_info_header.height * bmp_info_header.bit_count / 8 );
-
-				// Here we check if we need to take into account row padding
-				if ( bmp_info_header.width % 4 == 0 )
-				{
-					inp.read( ( char* )data.data(), data.size() );
-					file_header.file_size += static_cast< uint32_t >( data.size() );
-				}
-				else
-				{
-					row_stride = bmp_info_header.width * bmp_info_header.bit_count / 8;
-					uint32_t new_stride = make_stride_aligned( 4 );
-					std::vector<uint8_t> padding_row( new_stride - row_stride );
-
-					for ( int y = 0; y < bmp_info_header.height; ++y )
-					{
-						inp.read( ( char* )( data.data() + row_stride * y ), row_stride );
-						inp.read( ( char* )padding_row.data(), padding_row.size() );
-					}
-					file_header.file_size += static_cast< uint32_t >( data.size() ) + bmp_info_header.height * static_cast< uint32_t >( padding_row.size() );
-				}
-			}
-			else
-			{
-				throw std::runtime_error( "Unable to open the input image file." );
-			}
-		}
-
-		BMP( int32_t width, int32_t height, bool has_alpha = true )
-		{
-			if ( width <= 0 || height <= 0 )
-			{
-				throw std::runtime_error( "The image width and height must be positive numbers." );
-			}
-
-			bmp_info_header.width = width;
-			bmp_info_header.height = height;
-			if ( has_alpha )
-			{
-				bmp_info_header.size = sizeof( BMPInfoHeader ) + sizeof( BMPColorHeader );
-				file_header.offset_data = sizeof( BMPFileHeader ) + sizeof( BMPInfoHeader ) + sizeof( BMPColorHeader );
-
-				bmp_info_header.bit_count = 32;
-				bmp_info_header.compression = 3;
-				row_stride = width * 4;
-				data.resize( row_stride * height );
-				file_header.file_size = file_header.offset_data + data.size();
-			}
-			else
-			{
-				bmp_info_header.size = sizeof( BMPInfoHeader );
-				file_header.offset_data = sizeof( BMPFileHeader ) + sizeof( BMPInfoHeader );
-
-				bmp_info_header.bit_count = 24;
-				bmp_info_header.compression = 0;
-				row_stride = width * 3;
-				data.resize( row_stride * height );
-
-				uint32_t new_stride = make_stride_aligned( 4 );
-				file_header.file_size = file_header.offset_data + static_cast< uint32_t >( data.size() ) + bmp_info_header.height * ( new_stride - row_stride );
-			}
-		}
-
-		void write( const char* fname )
-		{
-			std::ofstream of{ fname, std::ios_base::binary };
-			if ( of )
-			{
-				if ( bmp_info_header.bit_count == 32 )
-				{
-					write_headers_and_data( of );
-				}
-				else if ( bmp_info_header.bit_count == 24 )
-				{
-					if ( bmp_info_header.width % 4 == 0 )
-					{
-						write_headers_and_data( of );
-					}
-					else
-					{
-						uint32_t new_stride = make_stride_aligned( 4 );
-						std::vector<uint8_t> padding_row( new_stride - row_stride );
-
-						write_headers( of );
-
-						for ( int y = 0; y < bmp_info_header.height; ++y )
-						{
-							of.write( ( const char* )( data.data() + row_stride * y ), row_stride );
-							of.write( ( const char* )padding_row.data(), padding_row.size() );
-						}
-					}
-				}
-				else
-				{
-					throw std::runtime_error( "The program can treat only 24 or 32 bits per pixel BMP files" );
-				}
-			}
-			else
-			{
-				throw std::runtime_error( "Unable to open the output image file." );
-			}
-		}
-
-		void fill_region( uint32_t x0, uint32_t y0, uint32_t w, uint32_t h, uint8_t B, uint8_t G, uint8_t R, uint8_t A )
-		{
-			if ( x0 + w > ( uint32_t )bmp_info_header.width || y0 + h > ( uint32_t )bmp_info_header.height )
-			{
-				throw std::runtime_error( "The region does not fit in the image!" );
-			}
-
-			uint32_t channels = bmp_info_header.bit_count / 8;
-			for ( uint32_t y = y0; y < y0 + h; ++y )
-			{
-				for ( uint32_t x = x0; x < x0 + w; ++x )
-				{
-					data[ channels * ( y * bmp_info_header.width + x ) + 0 ] = B;
-					data[ channels * ( y * bmp_info_header.width + x ) + 1 ] = G;
-					data[ channels * ( y * bmp_info_header.width + x ) + 2 ] = R;
-					if ( channels == 4 )
-					{
-						data[ channels * ( y * bmp_info_header.width + x ) + 3 ] = A;
-					}
-				}
-			}
-		}
-
-		void set_pixel( uint32_t x0, uint32_t y0, uint8_t B, uint8_t G, uint8_t R, uint8_t A )
-		{
-			if ( x0 >= ( uint32_t )bmp_info_header.width || y0 >= ( uint32_t )bmp_info_header.height || x0 < 0 || y0 < 0 )
-			{
-				throw std::runtime_error( "The point is outside the image boundaries!" );
-			}
-
-			uint32_t channels = bmp_info_header.bit_count / 8;
-			data[ channels * ( y0 * bmp_info_header.width + x0 ) + 0 ] = B;
-			data[ channels * ( y0 * bmp_info_header.width + x0 ) + 1 ] = G;
-			data[ channels * ( y0 * bmp_info_header.width + x0 ) + 2 ] = R;
-			if ( channels == 4 )
-			{
-				data[ channels * ( y0 * bmp_info_header.width + x0 ) + 3 ] = A;
-			}
-		}
-
-		void draw_rectangle( uint32_t x0, uint32_t y0, uint32_t w, uint32_t h,
-							 uint8_t B, uint8_t G, uint8_t R, uint8_t A, uint8_t line_w )
-		{
-			if ( x0 + w > ( uint32_t )bmp_info_header.width || y0 + h > ( uint32_t )bmp_info_header.height )
-			{
-				throw std::runtime_error( "The rectangle does not fit in the image!" );
-			}
-
-			fill_region( x0, y0, w, line_w, B, G, R, A );                                             // top line
-			fill_region( x0, ( y0 + h - line_w ), w, line_w, B, G, R, A );                              // bottom line
-			fill_region( ( x0 + w - line_w ), ( y0 + line_w ), line_w, ( h - ( 2 * line_w ) ), B, G, R, A );  // right line
-			fill_region( x0, ( y0 + line_w ), line_w, ( h - ( 2 * line_w ) ), B, G, R, A );                 // left line
-		}
-
-	private:
-		uint32_t row_stride{ 0 };
-
-		void write_headers( std::ofstream& of )
-		{
-			of.write( ( const char* )&file_header, sizeof( file_header ) );
-			of.write( ( const char* )&bmp_info_header, sizeof( bmp_info_header ) );
-			if ( bmp_info_header.bit_count == 32 )
-			{
-				of.write( ( const char* )&bmp_color_header, sizeof( bmp_color_header ) );
-			}
-		}
-
-		void write_headers_and_data( std::ofstream& of )
-		{
-			write_headers( of );
-			of.write( ( const char* )data.data(), data.size() );
-		}
-
-		// Add 1 to the row_stride until it is divisible with align_stride
-		uint32_t make_stride_aligned( uint32_t align_stride )
-		{
-			uint32_t new_stride = row_stride;
-			while ( new_stride % align_stride != 0 )
-			{
-				new_stride++;
-			}
-			return new_stride;
-		}
-
-		// Check if the pixel data is stored as BGRA and if the color space type is sRGB
-		void check_color_header( BMPColorHeader& bmp_color_header )
-		{
-			BMPColorHeader expected_color_header;
-			if ( expected_color_header.red_mask != bmp_color_header.red_mask ||
-				 expected_color_header.blue_mask != bmp_color_header.blue_mask ||
-				 expected_color_header.green_mask != bmp_color_header.green_mask ||
-				 expected_color_header.alpha_mask != bmp_color_header.alpha_mask )
-			{
-				throw std::runtime_error( "Unexpected color mask format! The program expects the pixel data to be in the BGRA format" );
-			}
-			if ( expected_color_header.color_space_type != bmp_color_header.color_space_type )
-			{
-				throw std::runtime_error( "Unexpected color space type! The program expects sRGB values" );
-			}
-		}
-	};
-}
+typedef StreamSerializer   < File > FileSerializer;
+typedef StreamDeserializer < File > FileDeserializer;

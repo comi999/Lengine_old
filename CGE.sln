@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGE", "CGE\CGE.vcxproj", "{AC5593EB-FCAC-443D-8C13-FBF06C326FF6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGE_ResourcePackager", "CGE_ResourcePackager\CGE_ResourcePackager.vcxproj", "{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{AC5593EB-FCAC-443D-8C13-FBF06C326FF6}.Release|x64.Build.0 = Release|x64
 		{AC5593EB-FCAC-443D-8C13-FBF06C326FF6}.Release|x86.ActiveCfg = Release|Win32
 		{AC5593EB-FCAC-443D-8C13-FBF06C326FF6}.Release|x86.Build.0 = Release|Win32
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Debug|x64.ActiveCfg = Debug|x64
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Debug|x64.Build.0 = Debug|x64
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Debug|x86.ActiveCfg = Debug|Win32
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Debug|x86.Build.0 = Debug|Win32
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Release|x64.ActiveCfg = Release|x64
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Release|x64.Build.0 = Release|x64
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Release|x86.ActiveCfg = Release|Win32
+		{EFE1E4B7-E1F2-4EA2-AA4F-8CF94CE59DD6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

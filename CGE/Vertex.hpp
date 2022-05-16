@@ -1,5 +1,6 @@
 #pragma once
 #include "Math.hpp"
+#include "Colour.hpp"
 
 struct Vertex
 {

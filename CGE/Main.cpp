@@ -4,141 +4,27 @@
 #include "Component.hpp"
 #include "Light.hpp"
 #include "MeshRenderer.hpp"
-
-#pragma region Old
-
-//struct Cube
-//{
-//	Vector4 Corners[ 8 ]
-//	{
-//		Vector4( 0.5f,  0.5f, -0.5f, 1.0f ),
-//		Vector4( -0.5f,  0.5f, -0.5f, 1.0f ),
-//		Vector4( -0.5f, -0.5f, -0.5f, 1.0f ),
-//		Vector4( 0.5f, -0.5f, -0.5f, 1.0f ),
-//		Vector4( 0.5f,  0.5f,  0.5f, 1.0f ),
-//		Vector4( -0.5f,  0.5f,  0.5f, 1.0f ),
-//		Vector4( -0.5f, -0.5f,  0.5f, 1.0f ),
-//		Vector4( 0.5f, -0.5f,  0.5f, 1.0f ),
-//	};
-//};
-//
-//struct Plane
-//{
-//	Vector4 Corners[ 36 ]
-//	{
-//		Vector4( -0.500f, 0.000f, -0.500f, 1.000f ), Vector4( -0.500f, 0.000f,  0.500f, 1.000f ),
-//		Vector4( -0.375f, 0.000f, -0.500f, 1.000f ), Vector4( -0.375f, 0.000f,  0.500f, 1.000f ),
-//		Vector4( -0.250f, 0.000f, -0.500f, 1.000f ), Vector4( -0.250f, 0.000f,  0.500f, 1.000f ),
-//		Vector4( -0.125f, 0.000f, -0.500f, 1.000f ), Vector4( -0.125f, 0.000f,  0.500f, 1.000f ),
-//		Vector4(  0.000f, 0.000f, -0.500f, 1.000f ), Vector4(  0.000f, 0.000f,  0.500f, 1.000f ),
-//		Vector4(  0.125f, 0.000f, -0.500f, 1.000f ), Vector4(  0.125f, 0.000f,  0.500f, 1.000f ),
-//		Vector4(  0.250f, 0.000f, -0.500f, 1.000f ), Vector4(  0.250f, 0.000f,  0.500f, 1.000f ),
-//		Vector4(  0.375f, 0.000f, -0.500f, 1.000f ), Vector4(  0.375f, 0.000f,  0.500f, 1.000f ),
-//		Vector4(  0.500f, 0.000f, -0.500f, 1.000f ), Vector4(  0.500f, 0.000f,  0.500f, 1.000f ),
-//		Vector4( -0.500f, 0.000f,-0.500f, 1.000f ), Vector4( 0.500f, 0.000f,-0.500f, 1.000f ),
-//		Vector4( -0.500f, 0.000f,-0.375f, 1.000f ), Vector4( 0.500f, 0.000f,-0.375f, 1.000f ),
-//		Vector4( -0.500f, 0.000f,-0.250f, 1.000f ), Vector4( 0.500f, 0.000f,-0.250f, 1.000f ),
-//		Vector4( -0.500f, 0.000f,-0.125f, 1.000f ), Vector4( 0.500f, 0.000f,-0.125f, 1.000f ),
-//		Vector4( -0.500f, 0.000f, 0.000f, 1.000f ), Vector4( 0.500f, 0.000f, 0.000f, 1.000f ),
-//		Vector4( -0.500f, 0.000f, 0.125f, 1.000f ), Vector4( 0.500f, 0.000f, 0.125f, 1.000f ),
-//		Vector4( -0.500f, 0.000f, 0.250f, 1.000f ), Vector4( 0.500f, 0.000f, 0.250f, 1.000f ),
-//		Vector4( -0.500f, 0.000f, 0.375f, 1.000f ), Vector4( 0.500f, 0.000f, 0.375f, 1.000f ),
-//		Vector4( -0.500f, 0.000f, 0.500f, 1.000f ), Vector4( 0.500f, 0.000f, 0.500f, 1.000f ),
-//	};
-//};
-//
-//struct Axes
-//{
-//	Vector4 Corners[ 4 ]
-//	{
-//		Vector4( Vector3::Zero, 1.0f ),
-//		Vector4( Vector3::Right, 1.0f ),
-//		Vector4( Vector3::Up, 1.0f ),
-//		Vector4( Vector3::Forward, 1.0f )
-//	};
-//};
-
-#pragma endregion
-
 #include "Transform.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
 #include "File.hpp"
 
 #include "Resource.hpp"
-#include "Serialization.hpp"
-
-class TestTexture
-{
-public:
-	
-	friend class Serialization;
-
-	void load( const char* path )
-	{
-		auto d = stbi_load( path, &w, &h, &c, 4 );
-		data.resize( w * h );
-		memcpy( data.data(), d, sizeof( Colour ) * w * h );
-		stbi_image_free( d );
-	}
-
-	template < typename T >
-	void SizeOf( T& a_Sizer ) const
-	{
-		a_Sizer & w & h & c & data;
-	}
-
-	template < typename T >
-	void Serialize( T& stream ) const
-	{
-		stream << w << h << c << data;
-	}
-
-	template < typename T >
-	void Deserialize( T& stream )
-	{
-		stream >> w >> h >> c >> data;
-	}
-
-	int w, h, c;
-	std::vector< Colour > data;
-};
 
 int main()
 {
-	objl::Loader loader;
-	loader.LoadFile("./TestFiles/stanford_downscaled.obj");
-	Mesh& standford = loader.LoadedMeshes.front();
-
-	TestTexture t;
-	t.load( "./TestFiles/landscape.bmp" );
-
-	FileSerializer fil( "./TestFiles/somefile.txt" );
-	fil << t;
-	fil.Close();
-
-	FileDeserializer filout( "./TestFiles/somefile.txt" );
-	
-	TestTexture testText;
-	filout >> testText;
-
-	TextureCache cache;
-	auto handle = cache.load< TextureLoader >( 0, "./TestFiles/landscape.bmp" );
-	auto pixelData = testText.data.data();
-
 	CGE::Initialize( "Some title", { 64,64 }, { 1, 1 } );
 	Input::Initialize();
 	CGE::ShowFPS( true );
 	CGE::SetTargetFPS( 0.0f );
 	ScreenBuffer::BlendingEnabled = true;
-	/*Cube  cube;
-	Plane plane;
-	Axes  axes;*/
+
+	auto landscape = Resource::GetResourceByPath< Texture >( "./Resources/SomeFolder/landscape.bmp" );
 
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
 	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 7.0f );
 	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
-	CubeObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
+	//CubeObject.AddComponent< MeshRenderer >()->SetMesh( &standford );
 
 	GameObject SubCubeObject = GameObject::Instantiate( "SubCube"_N );
 	SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
@@ -171,87 +57,6 @@ int main()
 	Vector3 right = Vector3::Right;
 	Vector3 up = Vector3::Up;
 
-	#pragma region Old
-	/*auto drawCube = [&]( Transform* transform )
-	{
-		auto PVM = Math::Multiply( PVMatrix, transform->GetGlobalMatrix() );
-		Vector4 Verts[ 8 ];
-
-		for ( int i = 0; i < 8; ++i )
-		{
-			Verts[ i ] = Math::Multiply( PVM, cube.Corners[ i ] );
-			Verts[ i ] /= Verts[ i ].w;
-			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-			Verts[ i ] += Vector4( 64, 64, 0, 0 );
-		}
-
-		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 1 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 4 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 5 ].ToVector2(), Verts[ 7 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 4 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-		Primitive::DrawTriangle( Verts[ 3 ].ToVector2(), Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour( Colour::LIGHT_RED, 100 ) );
-
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 0 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 4 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 5 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 6 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 7 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 4 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 1 ].ToVector2(), Verts[ 5 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 2 ].ToVector2(), Verts[ 6 ].ToVector2(), Colour::DARK_GREY );
-		Primitive::DrawLine( Verts[ 3 ].ToVector2(), Verts[ 7 ].ToVector2(), Colour::DARK_GREY );
-	};
-
-	auto drawPlane = [&]()
-	{
-		auto PVM = Math::Multiply( PVMatrix, PlaneObject.GetTransform()->GetGlobalMatrix() );
-		Vector4 Verts[ 36 ];
-
-		for ( int i = 0; i < 36; ++i )
-		{
-			Verts[ i ] = Math::Multiply( PVM, plane.Corners[ i ] );
-			Verts[ i ] /= Verts[ i ].w;
-			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-			Verts[ i ] += Vector4( 64, 64, 0, 0 );
-		}
-
-		for ( int i = 0; i < 35; i += 2 )
-		{
-			Primitive::DrawLine( Verts[ i ].ToVector2(), Verts[ i + 1 ].ToVector2(), Colour::RED );
-		}
-
-		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Verts[ 17 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
-		Primitive::DrawTriangle( Verts[ 0 ].ToVector2(), Verts[ 17 ].ToVector2(), Verts[ 16 ].ToVector2(), Colour( Colour::LIGHT_PINK, 100 ) );
-	};
-
-	auto drawAxes = [&]()
-	{
-		auto PVM = Math::Multiply( PVMatrix, AxesObject.GetTransform()->GetGlobalMatrix() );
-		Vector4 Verts[ 4 ];
-
-		for ( int i = 0; i < 4; ++i )
-		{
-			Verts[ i ] = Math::Multiply( PVM, axes.Corners[ i ] );
-			Verts[ i ] /= Verts[ i ].w;
-			Verts[ i ] *= Vector4( 64, 64, 1, 1 );
-			Verts[ i ] += Vector4( 64, 64, 0, 0 );
-		}
-
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 1 ].ToVector2(), Colour::RED );
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 2 ].ToVector2(), Colour::GREEN );
-		Primitive::DrawLine( Verts[ 0 ].ToVector2(), Verts[ 3 ].ToVector2(), Colour::BLUE );
-	};*/
-
 	#pragma endregion
 
 	float movement = 1.0f;
@@ -275,26 +80,11 @@ int main()
 		{
 			for ( int x = 0; x < ScreenBuffer::GetBufferWidth(); ++x )
 			{
-				int X = handle->width  * ( float )x / ( ScreenBuffer::GetBufferWidth() );
-				int Y = handle->height * ( float )y / ( ScreenBuffer::GetBufferHeight() );
-
-				size_t index = Y * handle->width + X;
-
-				/*int r = pixelData[ 3 * index ];
-				int g = pixelData[ 3 * index + 1 ];
-				int b = pixelData[ 3 * index + 2 ];*/
-
-				Colour c = pixelData[ index ];
-
-				//Colour col( r, g, b, 255 );
-				ScreenBuffer::SetColour( { x, y }, c );
+				float U = float( x ) / ( ScreenBuffer::GetBufferWidth() - 1 );
+				float V = float( y ) / ( ScreenBuffer::GetBufferHeight() - 1 );
+				ScreenBuffer::SetColour( { x, y }, landscape->Sample( { U, V } ) );
 			}
 		}
-
-		/*drawPlane();
-		drawCube( CubeObject.GetTransform() );
-		drawCube( SubCubeObject.GetTransform() );
-		drawAxes();*/
 		
 		PlaneObject.GetComponent< MeshRenderer >()->Draw();
 		CubeObject.GetComponent< MeshRenderer >()->Draw();
