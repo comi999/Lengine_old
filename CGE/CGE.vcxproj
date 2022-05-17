@@ -28,26 +28,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -93,6 +93,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +130,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,11 +168,8 @@
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Miniz.cpp" />
-    <ClCompile Include="OFBX.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Name.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
@@ -195,12 +194,8 @@
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="FunctionTraits.hpp" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="JSON.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="File.hpp" />
-    <ClInclude Include="Miniz.hpp" />
-    <ClInclude Include="OFBX.hpp" />
-    <ClInclude Include="TOBJ.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -217,11 +212,11 @@
     <ClInclude Include="Primitive.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Resource.hpp" />
+    <ClInclude Include="ResourcePackage.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />
     <ClInclude Include="Serialization.hpp" />
     <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="STBI.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />

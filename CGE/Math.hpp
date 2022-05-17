@@ -3101,6 +3101,8 @@ struct Quaternion : public IVector< float, 4 >
 				);
 			}
 		}
+
+		return Vector3::Zero;
 	}
 
 	template < typename T, typename U >

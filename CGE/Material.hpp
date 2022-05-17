@@ -39,4 +39,21 @@ struct Material
 	std::string map_d;
 	// Bump Map
 	std::string map_bump;
+
+private:
+
+	friend class ResourcePackager;
+	friend class Serialization;
+
+	template < typename T >
+	void Deserializer( T& a_Deserializer )
+	{
+
+	}
+
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
+	{
+
+	}
 };

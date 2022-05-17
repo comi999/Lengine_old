@@ -13,8 +13,11 @@ namespace std
 	}
 }
 
+class Path;
+class Directory;
 class File;
-class FileIterator;
+class DirectoryIterator;
+class RecursiveDirectoryIterator;
 
 class Path
 {
@@ -26,25 +29,24 @@ public:
 	Path( const Path& a_Path );
 	Path( Path&& a_Path );
 	~Path();
-	inline Path GetAbsolute() const;
-	inline Path GetRelative() const;
-	inline Path GetParent() const;
-	inline Path GetRoot() const;
-	inline bool IsDirectory() const;
-	inline bool IsFile() const;
-	inline operator const char* () const;
-	inline operator std::string () const;
-	inline operator const std::filesystem::path& () const;
-	inline Path& operator =( const std::filesystem::path& a_Path );
-	inline Path& operator =( const Path& a_Path );
-	inline bool operator ==( const std::filesystem::path& a_Path ) const;
-	inline bool operator ==( const Path& a_Path ) const;
-	inline bool operator !=( const std::filesystem::path& a_Path ) const;
-	inline bool operator !=( const Path& a_Path ) const;
-	inline Path& operator /=( const char* a_Append );
-	inline Path  operator /( const char* a_Append ) const;
-	inline Path& operator --();
-	inline Path  operator --( int );
+	Path GetAbsolute() const;
+	Path GetRelative() const;
+	Path GetParent() const;
+	Path GetRoot() const;
+	bool IsDirectory() const;
+	bool IsFile() const;
+	operator std::string () const;
+	operator const std::filesystem::path& () const;
+	Path& operator =( const std::filesystem::path& a_Path );
+	Path& operator =( const Path& a_Path );
+	bool operator ==( const std::filesystem::path& a_Path ) const;
+	bool operator ==( const Path& a_Path ) const;
+	bool operator !=( const std::filesystem::path& a_Path ) const;
+	bool operator !=( const Path& a_Path ) const;
+	Path& operator /=( const char* a_Append );
+	Path  operator /( const char* a_Append ) const;
+	Path& operator --();
+	Path  operator --( int );
 
 private:
 
@@ -68,27 +70,30 @@ public:
 	Directory( Path&& a_Path );
 	Directory( const Directory& a_Directory );
 	Directory( Directory&& a_Directory );
-	inline Directory GetAbsolute() const;
-	inline Directory GetRelative() const;
-	inline Directory GetParent() const;
-	inline Directory GetRoot() const;
+	Directory GetAbsolute() const;
+	Directory GetRelative() const;
+	Directory GetParent() const;
+	Directory GetRoot() const;
 	bool Contains( const char* a_FileOrFolder ) const;
 	bool ContainsFile( const char* a_File ) const;
 	File CreateFile( const char* a_File, size_t a_Size ) const;
+	bool DeleteFile( const char* a_File ) const;
 	File GetFile( const char* a_File ) const;
 	bool ContainsDirectory( const char* a_Directory ) const;
 	Directory CreateDirectory( const char* a_Directory ) const;
-	Directory GetDirectory( const char* a_Directory );
+	bool DeleteDirectory( const char* a_Directory ) const;
+	Directory GetDirectory( const char* a_Directory ) const;
+	operator const Path& () const;
+	operator Path& ();
+	Directory& operator =( const std::filesystem::path& a_Path );
+	Directory& operator =( const Path& a_Path );
+	Directory& operator =( const Directory& a_Path );
+	Directory& operator /=( const char* a_Append );
+	Directory  operator /( const char* a_Append ) const;
+	Directory& operator --();
+	Directory  operator --( int );
 	static void SetWorkingDirectory( const Directory& a_Directory );
-	inline operator const Path& () const;
-	inline operator Path& ();
-	inline Directory& operator =( const std::filesystem::path& a_Path );
-	inline Directory& operator =( const Path& a_Path );
-	inline Directory& operator =( const Directory& a_Path );
-	inline Directory& operator /=( const char* a_Append );
-	inline Directory  operator /( const char* a_Append ) const;
-	inline Directory& operator --();
-	inline Directory  operator --( int );
+	static Directory Create( const char* a_Path );
 };
 
 class File : public Path
@@ -106,17 +111,19 @@ public:
 	std::string GetStem() const;
 	bool Open();
 	bool Close();
-	inline bool IsOpen() const;
-	inline void Write( const void* a_From, size_t a_Size );
-	inline void Read( void* a_To, size_t a_Size );
-	inline void Seek( size_t a_Position );
-	inline bool AtEnd() const;
-	inline size_t Size() const;
-	inline operator Directory () const;
-	inline operator std::ifstream ();
-	inline operator std::ofstream ();
-	inline operator std::fstream (); 
-	inline operator FILE* ();
+	bool IsOpen() const;
+	void Write( const void* a_From, size_t a_Size );
+	void Read( void* a_To, size_t a_Size );
+	size_t Tell() const;
+	void Seek( size_t a_Position );
+	bool AtEnd() const;
+	size_t Size() const;
+	File& operator =( const File& a_File );
+	operator Directory () const;
+	operator std::ifstream ();
+	operator std::ofstream ();
+	operator std::fstream (); 
+	operator FILE* ();
 
 private:
 
@@ -141,16 +148,16 @@ public:
 	DirectoryIterator( const DirectoryIterator& a_Iterator );
 	DirectoryIterator( DirectoryIterator&& a_Iterator );
 	~DirectoryIterator();
-	inline DirectoryIterator& operator++();
-	inline DirectoryIterator operator++( int );
-	inline reference operator*();
-	inline pointer operator->();
-	inline bool operator==( const DirectoryIterator& a_Iterator ) const;
-	inline bool operator!=( const DirectoryIterator& a_Iterator ) const;
-	inline operator bool () const;
-	inline operator Path () const;
-	inline operator Directory () const;
-	inline operator File () const;
+	DirectoryIterator& operator++();
+	DirectoryIterator operator++( int );
+	reference operator*();
+	pointer operator->();
+	bool operator==( const DirectoryIterator& a_Iterator ) const;
+	bool operator!=( const DirectoryIterator& a_Iterator ) const;
+	operator bool () const;
+	operator Path () const;
+	operator Directory () const;
+	operator File () const;
 
 private:
 
@@ -172,16 +179,16 @@ public:
 	RecursiveDirectoryIterator( const RecursiveDirectoryIterator& a_Iterator );
 	RecursiveDirectoryIterator( RecursiveDirectoryIterator&& a_Iterator );
 	~RecursiveDirectoryIterator();
-	inline RecursiveDirectoryIterator& operator++();
-	inline RecursiveDirectoryIterator operator++( int );
-	inline reference operator*();
-	inline pointer operator->();
-	inline bool operator==( const RecursiveDirectoryIterator& a_Iterator ) const;
-	inline bool operator!=( const RecursiveDirectoryIterator& a_Iterator ) const;
-	inline operator bool () const;
-	inline operator Path () const;
-	inline operator Directory () const;
-	inline operator File () const;
+	RecursiveDirectoryIterator& operator++();
+	RecursiveDirectoryIterator operator++( int );
+	reference operator*();
+	pointer operator->();
+	bool operator==( const RecursiveDirectoryIterator& a_Iterator ) const;
+	bool operator!=( const RecursiveDirectoryIterator& a_Iterator ) const;
+	operator bool () const;
+	operator Path () const;
+	operator Directory () const;
+	operator File () const;
 
 private:
 
