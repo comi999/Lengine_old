@@ -19,7 +19,6 @@ public:
             return false;
         }
 
-        Resource::Initialize();
         return true;
     }
 
@@ -31,7 +30,6 @@ public:
             return false;
         }
 
-        Resource::Initialize();
         return true;
     }
 

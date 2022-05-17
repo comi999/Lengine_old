@@ -454,6 +454,16 @@ public:
 		return m_Size;
 	}
 
+	inline void* Data()
+	{
+		return m_Data;
+	}
+
+	inline const void* Data() const
+	{
+		return m_Data;
+	}
+
 private:
 
 	uint8_t* m_Data;

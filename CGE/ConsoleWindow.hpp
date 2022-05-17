@@ -70,14 +70,15 @@ private:
 
     static bool Initialize( const char* a_Title, Vector< short, 2 > a_WindowSize, Vector< short, 2 > a_PixelSize )
     {
-        // If cannot create console window, return false.
-        if ( !AllocConsole() )
-        {
-            return false;
-        }
-
         // Retrieve handles for console window.
         s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+
+        if ( s_ConsoleHandle == INVALID_HANDLE_VALUE )
+        {
+            AllocConsole();
+            s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+        }
+
         s_WindowHandle = GetConsoleWindow();
 
         // Set console font.
@@ -146,18 +147,20 @@ private:
         SetWindowLong( s_WindowHandle, GWL_STYLE, WS_CAPTION | DS_MODALFRAME | WS_MINIMIZEBOX | WS_SYSMENU );
         SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
         SetTitle( a_Title );
+        return true;
     }
 
     static bool Initialize( const char* a_Title, Vector< short, 2 > a_PixelSize )
     {
-        // If cannot create console window, return false.
-        if ( !AllocConsole() )
-        {
-            return false;
-        }
-
         // Retrieve handles for console window.
         s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+
+        if ( s_ConsoleHandle == INVALID_HANDLE_VALUE )
+        {
+            AllocConsole();
+            s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+        }
+
         s_WindowHandle = GetConsoleWindow();
 
         // Set console font.
@@ -213,8 +216,11 @@ private:
         SetWindowLong( s_WindowHandle, GWL_STYLE, WS_CAPTION | DS_MODALFRAME | WS_MINIMIZEBOX | WS_SYSMENU );
         SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
         SetTitle( a_Title );
+        return true;
     }
-    public:
+
+public:
+
     static void WriteBuffer()
     {
         WriteConsoleOutput(

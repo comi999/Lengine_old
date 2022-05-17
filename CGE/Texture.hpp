@@ -1,5 +1,4 @@
 #pragma once
-#include "STBI.hpp"
 #include "Math.hpp"
 #include "File.hpp"
 #include "Colour.hpp"
@@ -86,16 +85,23 @@ private:
 	}
 
 	template < typename T >
-	void Deserialize( T& a_Serializer )
+	void Deserialize( T& a_Deserializer )
 	{
 		if ( m_Data )
 		{
 			delete[] m_Data;
 		}
 
-		a_Serializer >> m_Size;
+		a_Deserializer >> m_Size;
 		m_Data = new Colour[ m_Size.x * m_Size.y ];
-		a_Serializer.Read( m_Data, sizeof( Colour ) * m_Size.x * m_Size.y );
+		a_Deserializer.Stream().Read( m_Data, sizeof( Colour ) * m_Size.x * m_Size.y );
+	}
+
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
+	{
+		a_Sizer & m_Size;
+		a_Sizer += m_Size.x * m_Size.y * sizeof( Colour );
 	}
 
 	Vector2Int   m_Size;

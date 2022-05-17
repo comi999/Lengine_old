@@ -217,6 +217,7 @@ private:
         s_PixelBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
         s_ColourBuffer = new Colour[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
         s_Size = a_BufferSize;
+        return true;
     }
 
     friend class ConsoleWindow;

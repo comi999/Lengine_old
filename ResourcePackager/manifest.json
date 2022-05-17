@@ -1,0 +1,21 @@
+{
+  "Resources": 
+  {
+    "len": {
+      "Path": "./SomeFolder/len.jfif",
+      "Type": "texture"
+    },
+    "landscape": {
+      "Path": "./SomeFolder/landscape.bmp",
+      "Type": "texture"
+    },
+    "wierd": {
+      "Path": "./SomeFolder/wierd.jpg",
+      "Type": "texture"
+    },
+    "grass": {
+      "Path": "./SomeFolder/grass.obj",
+      "Type": "mesh"
+    }
+  }
+}

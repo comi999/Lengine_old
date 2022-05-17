@@ -1,96 +1,85 @@
 #pragma once
 #include <vector>
-#include <string>
 #include "Math.hpp"
 #include "Colour.hpp"
 #include "Vertex.hpp"
-#include "Material.hpp"
-#include "File.hpp"
 
 class Mesh
 {
 public:
 
-	Mesh( const File& a_File )
-		: m_Outermost( -1 )
-	{ }
-
-	void PopulateVertex( size_t a_Index, Vertex& a_Vertex ) const
+	void GetTriangle( size_t a_Index, Vertex( &o_Triangle )[ 3 ] ) const
 	{
-		auto& Vertex      = m_Vertices [ a_Index ];
-		a_Vertex.Colour   = m_Colours  [ Vertex[ 0 ] ];
-		a_Vertex.Position = m_Positions[ Vertex[ 1 ] ];
-		a_Vertex.Normal   = m_Normals  [ Vertex[ 2 ] ];
-		a_Vertex.Texel    = m_Texels   [ Vertex[ 3 ] ];
-	}
+		const Vector< size_t, 4 >* Vertex = &m_Vertices[ a_Index * 3 ];
 
-	const Vector3& GetOutermostPosition() const
-	{
-		if ( m_Outermost == static_cast< size_t >( -1 ) )
+		o_Triangle[ 0 ] =
 		{
-			const_cast< Mesh* >( this )->FindOutermost();
-		}
+			Colour::WHITE, //m_Colours  [ Vertex[ 0 ][ 0 ] ],
+			m_Positions[ Vertex[ 0 ][ 1 ] ],
+			m_Normals  [ Vertex[ 0 ][ 2 ] ],
+			m_Texels.size() ? m_Texels[ Vertex[ 0 ][ 3 ] ] : Vector2::Zero
+		};
 
-		return m_Positions[ m_Outermost ];
-	}
-
-	inline float GetRadius() const
-	{
-		return Math::Length( GetOutermostPosition() );
-	}
-
-	void FindOutermost()
-	{
-		float GreatestDistanceSqrd = 0.0f;
-
-		for ( size_t i = 0, size = m_Positions.size(); i < size; ++i )
+		o_Triangle[ 1 ] =
 		{
-			float DistanceSqrd = Math::LengthSqrd( m_Positions[ i ] );
+			Colour::WHITE, //m_Colours  [ Vertex[ 1 ][ 0 ] ],
+			m_Positions[ Vertex[ 1 ][ 1 ] ],
+			m_Normals  [ Vertex[ 1 ][ 2 ] ],
+			m_Texels.size() ? m_Texels[ Vertex[ 1 ][ 3 ] ] : Vector2::Zero
+		};
 
-			if ( DistanceSqrd > GreatestDistanceSqrd )
-			{
-				GreatestDistanceSqrd = DistanceSqrd;
-				m_Outermost = i;
-			}
-		}
+		o_Triangle[ 2 ] =
+		{
+			Colour::WHITE, //m_Colours  [ Vertex[ 2 ][ 0 ] ],
+			m_Positions[ Vertex[ 2 ][ 1 ] ],
+			m_Normals  [ Vertex[ 2 ][ 2 ] ],
+			m_Texels.size() ? m_Texels   [ Vertex[ 2 ][ 3 ] ] : Vector2::Zero
+		};
 	}
 
-	std::vector< Vector< size_t, 3 > > m_Triangles;
+	void GetVertex( size_t a_Index, Vertex& o_Vertex ) const
+	{
+		auto& Vertex = m_Vertices[ a_Index ];
+		o_Vertex = 
+		{
+			m_Colours  [ Vertex[ 0 ] ],
+			m_Positions[ Vertex[ 1 ] ],
+			m_Normals  [ Vertex[ 2 ] ],
+			m_Texels   [ Vertex[ 3 ] ]
+		};
+	}
+
+	inline size_t GetVertexCount() const
+	{
+		return m_Vertices.size();
+	}
+
+private:
+
+	friend class ResourcePackager;
+	friend class Serialization;
+
+	template < typename T >
+	void Serialize( T& a_Serializer ) const
+	{
+		a_Serializer << m_Vertices << m_Colours << m_Positions << m_Normals << m_Texels;
+	}
+
+	template < typename T >
+	void Deserialize( T& a_Deserializer )
+	{
+		a_Deserializer >> m_Vertices >> m_Colours >> m_Positions >> m_Normals >> m_Texels;
+	}
+
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
+	{
+		a_Sizer & m_Vertices & m_Colours & m_Positions & m_Normals & m_Texels;
+	}
+
 	std::vector< Vector< size_t, 4 > > m_Vertices;
 	std::vector< Colour  >             m_Colours;
 	std::vector< Vector3 >             m_Positions;
 	std::vector< Vector3 >             m_Normals;
 	std::vector< Vector2 >             m_Texels;
-	size_t                             m_Outermost;
-
-public:
-
-	static Mesh Cube;
-	static Mesh Plane;
 };
-
-//struct Mesh
-//{
-//	// Default Constructor
-//	Mesh()
-//	{
-//
-//	}
-//
-//	// Variable Set Constructor
-//	Mesh(std::vector<Vertex>& _Vertices, std::vector<unsigned int>& _Indices)
-//	{
-//		Vertices = _Vertices;
-//		Indices = _Indices;
-//	}
-//
-//	// Mesh Name
-//	std::string MeshName;
-//	// Vertex List
-//	std::vector<Vertex> Vertices;
-//	// Index List
-//	std::vector<unsigned int> Indices;
-//
-//	// Material
-//	Material MeshMaterial;
-//};
