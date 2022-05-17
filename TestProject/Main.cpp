@@ -17,7 +17,7 @@ int main()
 
 	CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 
-	auto landscape = Resource::FindOrLoad< Texture >( "grass_diffuse" );
+	auto landscape = Resource::GetOrLoad< Texture >( "grass_diffuse" );
 	auto grass = Resource::GetOrLoad< Mesh >( "grass" );
 
 	Input::Initialize();
@@ -28,7 +28,10 @@ int main()
 	GameObject CubeObject = GameObject::Instantiate( "Cube"_N );
 	CubeObject.GetTransform()->SetGlobalScale( Vector3::One * 1.0f );
 	CubeObject.GetTransform()->SetGlobalPosition( Vector3::Up );
-	CubeObject.AddComponent< MeshRenderer >()->SetMesh( grass );
+	auto CubeRenderer = CubeObject.AddComponent< MeshRenderer >();
+	CubeRenderer->SetMesh( grass );
+	CubeRenderer->SetTexture( landscape );
+	
 
 	GameObject SubCubeObject = GameObject::Instantiate( "SubCube"_N );
 	SubCubeObject.GetTransform()->SetParent( CubeObject.GetTransform() );
@@ -86,7 +89,7 @@ int main()
 					  {
 						  float U = float( x ) / ( ScreenBuffer::GetBufferWidth() - 1 );
 						  float V = float( y ) / ( ScreenBuffer::GetBufferHeight() - 1 );
-						  ScreenBuffer::SetColour( { x, y }, landscape->Sample( { U, V } ) );
+						  //ScreenBuffer::SetColour( { x, y }, landscape->Sample( { U, V } ) );
 					  }
 				  }
 
