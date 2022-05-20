@@ -432,6 +432,18 @@ public:
 	}
 
 	template < typename T >
+	inline static T Lerp( float a_Amount, T a_A, T a_B )
+	{
+		return a_Amount * ( a_B - a_A ) + a_A;
+	}
+
+	template < typename T, size_t S >
+	inline static Vector< T, S > Lerp( float a_Amount, const Vector< T, S >& a_A, const Vector< T, S >& a_B )
+	{
+		return a_Amount * ( a_B - a_A ) + a_A;
+	}
+
+	template < typename T >
 	inline static float Log( T a_Scalar )
 	{
 		return log( a_Scalar );

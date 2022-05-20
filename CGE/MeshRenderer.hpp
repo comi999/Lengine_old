@@ -23,7 +23,7 @@ private:
 	{
 		o_Colour = a_Texture.Sample( a_UV );
 	}
-
+	//old
 	static void DrawTriangle( Vector2 a_P0, Vector2 a_P1, Vector2 a_P2, Vector2 a_V0, Vector2 a_V1, Vector2 a_V2, const Texture& a_Texture, float a_Intensity )
 	{
 		// Correct Y
@@ -230,6 +230,142 @@ private:
 		}
 	}
 
+	static void DrawTriangleEx( Vector4 a_P0, Vector4 a_P1, Vector4 a_P2, Vector3 a_V0, Vector3 a_V1, Vector3 a_V2, const Texture& a_Texture, float a_Intensity )
+	{
+		// Correct Y
+		a_P0.y = -a_P0.y - 1.0f + ScreenBuffer::GetBufferHeight();
+		a_P1.y = -a_P1.y - 1.0f + ScreenBuffer::GetBufferHeight();
+		a_P2.y = -a_P2.y - 1.0f + ScreenBuffer::GetBufferHeight();
+
+		// Sort corners.
+		if ( a_P0.y < a_P1.y )
+		{
+			std::swap( a_P0, a_P1 );
+			std::swap( a_V0, a_V1 );
+		}
+
+		if ( a_P0.y < a_P2.y )
+		{
+			std::swap( a_P0, a_P2 );
+			std::swap( a_V0, a_V2 );
+		}
+
+		if ( a_P1.y < a_P2.y )
+		{
+			std::swap( a_P1, a_P2 );
+			std::swap( a_V1, a_V2 );
+		}
+
+		// If points are colinear, reject.
+		if ( a_P0.y == a_P2.y || a_P0.x == a_P2.x )
+		{
+			return;
+		}
+
+		// Align y.
+		a_P0.y = static_cast< int >( a_P0.y );
+		a_P1.y = static_cast< int >( a_P1.y );
+		a_P2.y = static_cast< int >( a_P2.y );
+
+		/*if ( a_P0.y == a_P2.y )
+		{
+			return;
+		}*/
+
+		// Find M
+		float L = ( a_P1.y - a_P2.y ) / ( a_P0.y - a_P2.y );
+		Vector4 PM = Math::Lerp( L, a_P2, a_P0 );
+		Vector3 TM = Math::Lerp( L, a_V2, a_V0 );
+
+		// Swap P1 and M if M is not on right.
+		if ( PM.x < a_P1.x )
+		{
+			std::swap( PM, a_P1 );
+			std::swap( TM, a_V1 );
+		}
+
+		{
+			Vector4 P[ 3 ] = { a_P0, a_P1, PM };
+			Vector2 V[ 3 ] = { a_V0, a_V1, TM };
+			DrawTriangleTop( P, V, a_Texture );
+		}
+
+		{
+			Vector4 P[ 3 ] = { a_P2, a_P1, PM };
+			Vector2 V[ 3 ] = { a_V2, a_V1, TM };
+			DrawTriangleBottom( P, V, a_Texture );
+		}
+	}
+
+	static void DrawTriangleTop( Vector4( &a_P )[ 3 ], Vector2( &a_V )[ 3 ], const Texture& a_Texture )
+	{
+		float Span = a_P[ 0 ].y - a_P[ 1 ].y;
+
+		Vector4 PStepL = a_P[ 0 ] - a_P[ 1 ]; PStepL /= Span;
+		Vector4 PStepR = a_P[ 0 ] - a_P[ 2 ]; PStepR /= Span;
+		Vector4 PL = a_P[ 1 ];
+		Vector4 PR = a_P[ 2 ];
+
+		Vector2 VStepL = a_V[ 0 ] - a_V[ 1 ]; VStepL /= Span;
+		Vector2 VStepR = a_V[ 0 ] - a_V[ 2 ]; VStepR /= Span;
+		Vector2 VL = a_V[ 1 ];
+		Vector2 VR = a_V[ 2 ];
+
+		for ( int y = a_P[ 1 ].y; y < a_P[ 0 ].y; ++y )
+		{
+			Vector4 PLeft = PL;
+			Vector4 PIncr = ( PR - PL ) / ( PR.x - PL.x );
+			Vector2 VLeft = VL;
+			Vector2 VIncr = ( VR - VL ) / ( PR.x - PL.x );
+
+			for ( ; PLeft.x < PR.x; PLeft += PIncr, VLeft += VIncr )
+			{
+				Vector2 UV = VLeft / PLeft.w;
+				auto c = a_Texture.Sample( UV );
+				ScreenBuffer::SetColour( { PLeft.x, PLeft.y }, c );
+			}
+
+			PL += PStepL;
+			PR += PStepR;
+			VL += VStepL;
+			VR += VStepR;
+		}
+	}
+
+	static void DrawTriangleBottom( Vector4( &a_P )[ 3 ], Vector2( &a_V )[ 3 ], const Texture& a_Texture )
+	{
+		float Span = a_P[ 1 ].y - a_P[ 0 ].y;
+		Vector4 PStepL = a_P[ 1 ] - a_P[ 0 ]; PStepL /= Span;
+		Vector4 PStepR = a_P[ 2 ] - a_P[ 0 ]; PStepR /= Span;
+		Vector4 PL = a_P[ 0 ];
+		Vector4 PR = a_P[ 0 ];
+
+		Vector2 VStepL = a_V[ 1 ] - a_V[ 0 ]; VStepL /= Span;
+		Vector2 VStepR = a_V[ 2 ] - a_V[ 0 ]; VStepR /= Span;
+		Vector2 VL = a_V[ 0 ];
+		Vector2 VR = a_V[ 0 ];
+
+		for ( int y = a_P[ 0 ].y; y < a_P[ 1 ].y; ++y )
+		{
+			Vector4 PLeft = PL;
+			Vector4 PIncr = ( PR - PL ) / ( PR.x - PL.x );
+			Vector2 VLeft = VL;
+			Vector2 VIncr = ( VR - VL ) / ( PR.x - PL.x );
+
+			for ( ; PLeft.x < PR.x; PLeft += PIncr, VLeft += VIncr )
+			{
+				Vector2 UV = VLeft / PLeft.w;
+				auto c = a_Texture.Sample( UV );
+				ScreenBuffer::SetColour( { PLeft.x, PLeft.y }, c );
+			}
+
+			PL += PStepL;
+			PR += PStepR;
+			VL += VStepL;
+			VR += VStepR;
+		}
+	}
+
 public:
 
 	void Draw()
@@ -249,14 +385,9 @@ public:
 		Matrix4 PVM = Math::Multiply( Camera::GetMainCamera()->GetProjectionViewMatrix(), this->GetOwner().GetTransform()->GetGlobalMatrix() );
 
 		for ( size_t i = 0; i < TriangleCount; ++i )
-		{/*
-			Vector3Int Triangle( i * 3, i * 3 + 1, i * 3 + 2 );
-			Vector3 Pos[ 3 ] { m_Mesh->Vertices[ Triangle[ 0 ] ].Position, m_Mesh->Vertices[ Triangle[ 1 ] ].Position, m_Mesh->Vertices[ Triangle[ 2 ] ].Position };
-			*/
+		{
 			Vertex Vert[ 3 ];
 			m_Mesh->GetTriangle( i, Vert );
-
-			//auto TriangleNormal = objl::algorithm::GenTriNormal( Vert[ 0 ].Position, Vert[ 1 ].Position, Vert[ 2 ].Position );
 			auto TriangleNormal = Math::Cross( Vert[ 0 ].Position - Vert[ 1 ].Position, Vert[ 0 ].Position - Vert[ 2 ].Position );
 			TriangleNormal = Math::Normalize( Math::Multiply( this->GetOwner().GetTransform()->GetGlobalMatrix(), Vector4( TriangleNormal, 0.0f ) ) );
 			NormalsBegin.Write( TriangleNormal, 0 );
@@ -265,11 +396,14 @@ public:
 			for ( size_t j = 0; j < 3; ++j )
 			{
 				auto P = Math::Multiply( PVM, Vector4( Vert[ j ].Position, 1.0f ) );
+				float w = P.w;
 				P /= P.w;
+				P.w = 1.0f / w;
 				P *= Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 1.0f, 1.0f );
 				P += Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 0.0f, 0.0f );
 				Begin.Write( P, 0 );
-				Begin.Write( Vert[ j ].Texel, sizeof( P ) );
+				//Begin.Write( Vector3( Vert[ j ].Texel / w, 1.0f / w ), sizeof( P ) );
+				Begin.Write( Vert[ j ].Texel / w, sizeof( P ) );
 				++Begin;
 			}
 		}
@@ -284,14 +418,13 @@ public:
 
 		for ( ; Begin != End; )
 		{
-			//Colour c = *Begin.Read< Colour >( sizeof( Vector4 ) );
-			auto v0 = Begin.Read< Vector4 >( 0 )->ToVector2();
+			auto v0 = *Begin.Read< Vector4 >( 0 );
 			auto t0 = *Begin.Read< Vector2 >( sizeof( Vector4 ) );
 			++Begin;
-			auto v1 = Begin.Read< Vector4 >( 0 )->ToVector2();
+			auto v1 = *Begin.Read< Vector4 >( 0 );
 			auto t1 = *Begin.Read< Vector2 >( sizeof( Vector4 ) );
 			++Begin;
-			auto v2 = Begin.Read< Vector4 >( 0 )->ToVector2();
+			auto v2 = *Begin.Read< Vector4 >( 0 );
 			auto t2 = *Begin.Read< Vector2 >( sizeof( Vector4 ) );
 			++Begin;
 
@@ -313,7 +446,7 @@ public:
 			{
 				//Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
 				//Primitive::DrawTriangle( v0, v1, v2, c );
-				DrawTriangle( v0, v1, v2, t0, t1, t2, *m_Texture, 1.0f );
+				DrawTriangleEx( v0, v1, v2, t0, t1, t2, *m_Texture, 1.0f );
 			}
 		}
 

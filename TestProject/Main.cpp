@@ -14,7 +14,6 @@
 
 int main()
 {
-
 	CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 
 	auto landscape = Resource::GetOrLoad< Texture >( "grass_diffuse" );
