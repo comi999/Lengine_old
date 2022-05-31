@@ -9,6 +9,10 @@ struct Matrix;
 
 struct Quaternion;
 
+struct Point;
+struct Line;
+struct Plane;
+
 enum class RotationOrder : char
 {
 	XYZ,
@@ -3288,4 +3292,62 @@ struct Quaternion : public IVector< float, 4 >
 		a_QuaternionA.y * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.y + a_QuaternionA.z * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.z,
 		a_QuaternionA.z * a_QuaternionB.w + a_QuaternionA.w * a_QuaternionB.z + a_QuaternionA.y * a_QuaternionB.x - a_QuaternionA.x * a_QuaternionB.y );
 	}
+};
+
+struct Point : public Vector3 { };
+
+struct Line : public Vector4 { };
+
+struct Plane
+{
+	Plane()
+		: a( 0 )
+		, b( 1 )
+		, c( 0 )
+		, d( 0 )
+	{ }
+
+	Plane( float a_A, float a_B, float a_C, float a_D = 0.0f )
+		: a( a_A )
+		, b( a_B )
+		, c( a_C )
+		, d( a_D )
+	{ }
+
+	template < typename T >
+	Plane( const Vector< T, 3 >& a_Vector )
+		: a( a_Vector.x )
+		, b( a_Vector.y )
+		, c( a_Vector.z )
+	{ }
+
+	template < typename T >
+	Plane( const Vector< T, 4 >& a_Vector )
+		: a( a_Vector.x )
+		, b( a_Vector.y )
+		, c( a_Vector.z )
+		, d( a_Vector.w )
+	{ }
+
+	float a, b, c, d;
+};
+
+class Geometry
+{
+public:
+
+	inline static Plane Normalize( const Plane& a_Plane )
+	{
+		float InvMagnitude = Math::InverseSqrt( a_Plane.a * a_Plane.a + a_Plane.b * a_Plane.b + a_Plane.c * a_Plane.c );
+		return { a_Plane.a * InvMagnitude, a_Plane.b * InvMagnitude, a_Plane.c * InvMagnitude, a_Plane.d * InvMagnitude };
+	}
+
+	inline static float DistanceFromPlane( const Plane& a_Plane, const Point& a_Point )
+	{
+		return a_Plane.a * a_Point.x + a_Plane.b * a_Point.y + a_Plane.c * a_Point.z + a_Plane.d;
+	}
+
+private:
+
+	Geometry() = delete;
 };

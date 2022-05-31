@@ -41,7 +41,7 @@ public:
 
 	inline const Alias* GetAlias() const
 	{
-		return ECS::GetExactComponentConst< Alias >( m_ID );
+		return ECS::GetExactComponent< const Alias >( m_ID );
 	}
 
 	inline Transform* GetTransform()
@@ -51,7 +51,7 @@ public:
 
 	inline const Transform* GetTransform() const
 	{
-		return ECS::GetExactComponentConst< Transform >( m_ID );
+		return ECS::GetExactComponent< const Transform >( m_ID );
 	}
 
 	template < typename T >

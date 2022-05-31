@@ -1,7 +1,12 @@
 #pragma once
 #include "Renderer.hpp"
-#include "Rendering.hpp"
 #include "Mesh.hpp"
+#include "Material.hpp"
+#include "Transform.hpp"
+#include "Material.hpp"
+#include "DrawCall.hpp"
+
+// Remove later
 #include "Camera.hpp"
 #include "ScreenBuffer.hpp"
 #include "Primitive.hpp"
@@ -19,17 +24,20 @@ class IMeshRenderer : public IRenderer< IMeshRenderer< T > >
 {
 private:
 
-	static void SampleColour( const Texture& a_Texture, Vector2 a_UV, Colour& o_Colour )
+	friend class RenderPipeline;
+
+	DrawCall GenerateDrawCall()
 	{
-		o_Colour = a_Texture.Sample( a_UV );
+		const Matrix4* Model = &Component::GetOwner().GetTransform()->GetGlobalMatrix();
+		return { m_Mesh, m_Material, Model, m_RenderMode };
 	}
-	//old
-	static void DrawTriangle( Vector2 a_P0, Vector2 a_P1, Vector2 a_P2, Vector2 a_V0, Vector2 a_V1, Vector2 a_V2, const Texture& a_Texture, float a_Intensity )
+
+	static void DrawTriangleEx( Vector4 a_P0, Vector4 a_P1, Vector4 a_P2, Vector2 a_V0, Vector2 a_V1, Vector2 a_V2, const Texture& a_Texture )
 	{
 		// Correct Y
-		a_P0.y = -a_P0.y - 1.0f + ScreenBuffer::GetBufferHeight();
-		a_P1.y = -a_P1.y - 1.0f + ScreenBuffer::GetBufferHeight();
-		a_P2.y = -a_P2.y - 1.0f + ScreenBuffer::GetBufferHeight();
+		a_P0.y = -a_P0.y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+		a_P1.y = -a_P1.y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+		a_P2.y = -a_P2.y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
 
 		// Sort corners.
 		if ( a_P0.y < a_P1.y )
@@ -49,216 +57,9 @@ private:
 			std::swap( a_P1, a_P2 );
 			std::swap( a_V1, a_V2 );
 		}
-
-		// If points are colinear, reject.
-		if ( a_P0.y == a_P2.y || a_P0.x == a_P2.x )
-		{
-			return;
-		}
-
-		// Align y.
-		a_P0.y = static_cast< int >( a_P0.y );
-		a_P1.y = static_cast< int >( a_P1.y );
-		a_P2.y = static_cast< int >( a_P2.y );
-
-		// Find M
-		Vector2 M;
 
 		if ( a_P0.y == a_P2.y )
 		{
-			M.y = a_P1.y;
-			M.x = a_P0.x;
-		}
-		else
-		{
-			M.y = a_P1.y;
-			M.x = a_P0.x - ( a_P0.y - a_P1.y ) * ( a_P0.x - a_P2.x ) / ( a_P0.y - a_P2.y );
-		}
-
-		float InvGrad = ( a_P0.x - a_P2.x ) / ( a_P0.y - a_P2.y );
-
-		auto GetBarycentric = []( const Vector2& a_P0, const Vector2& a_P1, const Vector2& a_P2, const Vector2& a_P3 )
-		{
-			// ( y2 - y3 )( x - x3 ) + ( x3 - x2 )( y - y3 )
-			// ( y2 - y3 )( x1 - x3 ) + ( x3 - x2 )( y1 - y3 )
-
-			// ( y3 - y1 )( x - x3 ) + ( x1 - x3 )( y - y3 )
-			// ( y2 - y3 )( x1 - x3 ) + ( x3 - x2 )( y1 - y3 )
-
-			Vector3 Barycentric;
-			Barycentric.x = ( a_P2.y - a_P3.y ) * ( a_P0.x - a_P3.x ) + ( a_P3.x - a_P2.x ) * ( a_P0.y - a_P3.y );
-			Barycentric.x /= ( a_P2.y - a_P3.y ) * ( a_P1.x - a_P3.x ) + ( a_P3.x - a_P2.x ) * ( a_P1.y - a_P3.y );
-			Barycentric.y = ( a_P3.y - a_P1.y ) * ( a_P0.x - a_P3.x ) + ( a_P1.x - a_P3.x ) * ( a_P0.y - a_P3.y );
-			Barycentric.y /= ( a_P2.y - a_P3.y ) * ( a_P1.x - a_P3.x ) + ( a_P3.x - a_P2.x ) * ( a_P1.y - a_P3.y );
-			Barycentric.z = 1.0f - Barycentric.x - Barycentric.y;
-
-			return Barycentric;
-		};
-		auto GetCartesian   = []( const Vector3& a_BC, const Vector2& a_P1, const Vector2& a_P2, const Vector2& a_P3 )
-		{
-			return Vector2(
-				a_BC.x * a_P1.x + a_BC.y * a_P2.x + a_BC.z * a_P3.x,
-				a_BC.x * a_P1.y + a_BC.y * a_P2.y + a_BC.z * a_P3.y
-			);
-		};
-
-		float tY = ( a_P1.y - a_P2.y ) / ( a_P0.y - a_P2.y );
-		Vector2 TM(
-			a_V2.x + ( a_V0.x - a_V2.x ) * tY,
-			a_V2.y + ( a_V0.y - a_V2.y ) * tY );
-
-		// Long side is on left
-		if ( M.x <= a_P1.x )
-		{
-			float InvM;
-			int XLeft, XRight, YMin, YMax;
-
-			// Top
-			if ( a_P0.y != a_P1.y )
-			{
-				InvM = ( a_P0.x - a_P1.x ) / ( a_P0.y - a_P1.y );
-				YMin = Math::Max( a_P1.y, 0.0f );
-				YMax = Math::Min( a_P0.y, -1.0f + ScreenBuffer::GetBufferHeight() );
-
-				for ( int y = YMin; y < YMax; ++y )
-				{
-					XLeft = Math::Max( 0.0f, ( y - a_P0.y ) * InvGrad + a_P0.x );
-					XRight = Math::Min( -1.0f + ScreenBuffer::GetBufferWidth(), ( y - a_P0.y ) * InvM + a_P0.x );
-					//ScreenBuffer::SetColours( Vector< short, 2 >( XLeft, y ), a_Colour, XRight - XLeft );
-
-					for ( int x = XLeft; x < XRight; ++x )
-					{
-						// Calculate barycentric coords
-						auto BC = GetBarycentric( { x, y }, a_P0, M, a_P1 );
-						auto CC = GetCartesian( BC, a_V0, TM, a_V1 );
-						Colour Sampled = a_Texture.Sample( CC );
-						Sampled.R *= a_Intensity;
-						Sampled.G *= a_Intensity;
-						Sampled.B *= a_Intensity;
-						ScreenBuffer::SetColour( { x, y }, Sampled );
-					}
-				}
-			}
-
-			// Bottom
-			if ( a_P1.y != a_P2.y )
-			{
-				InvM = ( a_P1.x - a_P2.x ) / ( a_P1.y - a_P2.y );
-				YMin = Math::Max( a_P2.y, 0.0f );
-				YMax = Math::Min( a_P1.y, -1.0f + ScreenBuffer::GetBufferHeight() );
-
-				for ( int y = YMin; y < YMax; ++y )
-				{
-					XLeft = Math::Max( 0.0f, ( y - a_P2.y ) * InvGrad + a_P2.x );
-					XRight = Math::Min( -1.0f + ScreenBuffer::GetBufferWidth(), ( y - a_P2.y ) * InvM + a_P2.x );
-					//ScreenBuffer::SetColours( Vector< short, 2 >( XLeft, y ), a_Colour, XRight - XLeft );
-
-					for ( int x = XLeft; x < XRight; ++x )
-					{
-						// Calculate barycentric coords
-						auto BC = GetBarycentric( { x, y }, M, a_P1, a_P2 );
-						auto CC = GetCartesian( BC, TM, a_V1, a_V2 );
-						Colour Sampled = a_Texture.Sample( CC );
-						Sampled.R *= a_Intensity;
-						Sampled.G *= a_Intensity;
-						Sampled.B *= a_Intensity;
-						ScreenBuffer::SetColour( { x, y }, Sampled );
-					}
-				}
-			}
-		}
-
-		// Long side is on right
-		if ( M.x > a_P1.x )
-		{
-			float InvM;
-			int XLeft, XRight, YMin, YMax;
-
-			// Top
-			if ( a_P0.y != a_P1.y )
-			{
-				InvM = ( a_P0.x - a_P1.x ) / ( a_P0.y - a_P1.y );
-				YMin = Math::Max( a_P1.y, 0.0f );
-				YMax = Math::Min( a_P0.y, -1.0f + ScreenBuffer::GetBufferHeight() );
-
-				for ( int y = YMin; y < YMax; ++y )
-				{
-					XLeft = Math::Max( 0.0f, ( y - a_P0.y ) * InvM + a_P0.x );
-					XRight = Math::Min( -1.0f + ScreenBuffer::GetBufferWidth(), ( y - a_P0.y ) * InvGrad + a_P0.x );
-					//ScreenBuffer::SetColours( Vector< short, 2 >( XLeft, y ), a_Colour, XRight - XLeft );
-
-					for ( int x = XLeft; x < XRight; ++x )
-					{
-						// Calculate barycentric coords
-						auto BC = GetBarycentric( { x, y }, a_P0, a_P1, M );
-						auto CC = GetCartesian( BC, a_V0, a_V1, TM );
-						Colour Sampled = a_Texture.Sample( CC );
-						Sampled.R *= a_Intensity;
-						Sampled.G *= a_Intensity;
-						Sampled.B *= a_Intensity;
-						ScreenBuffer::SetColour( { x, y }, Sampled );
-					}
-				}
-			}
-
-			// Bottom
-			if ( a_P1.y != a_P2.y )
-			{
-				InvM = ( a_P1.x - a_P2.x ) / ( a_P1.y - a_P2.y );
-				YMin = Math::Max( a_P2.y, 0.0f );
-				YMax = Math::Min( a_P1.y, -1.0f + ScreenBuffer::GetBufferHeight() );
-
-				for ( int y = YMin; y < YMax; ++y )
-				{
-					XLeft = Math::Max( 0.0f, ( y - a_P2.y ) * InvM + a_P2.x );
-					XRight = Math::Min( -1.0f + ScreenBuffer::GetBufferWidth(), ( y - a_P2.y ) * InvGrad + a_P2.x );
-					//ScreenBuffer::SetColours( Vector< short, 2 >( XLeft, y ), a_Colour, XRight - XLeft );
-
-					for ( int x = XLeft; x < XRight; ++x )
-					{
-						// Calculate barycentric coords
-						auto BC = GetBarycentric( { x, y }, a_P1, M, a_P2 );
-						auto CC = GetCartesian( BC, a_V1, TM, a_V2 );
-						Colour Sampled = a_Texture.Sample( CC );
-						Sampled.R *= a_Intensity;
-						Sampled.G *= a_Intensity;
-						Sampled.B *= a_Intensity;
-						ScreenBuffer::SetColour( { x, y }, Sampled );
-					}
-				}
-			}
-		}
-	}
-
-	static void DrawTriangleEx( Vector4 a_P0, Vector4 a_P1, Vector4 a_P2, Vector3 a_V0, Vector3 a_V1, Vector3 a_V2, const Texture& a_Texture, float a_Intensity )
-	{
-		// Correct Y
-		a_P0.y = -a_P0.y - 1.0f + ScreenBuffer::GetBufferHeight();
-		a_P1.y = -a_P1.y - 1.0f + ScreenBuffer::GetBufferHeight();
-		a_P2.y = -a_P2.y - 1.0f + ScreenBuffer::GetBufferHeight();
-
-		// Sort corners.
-		if ( a_P0.y < a_P1.y )
-		{
-			std::swap( a_P0, a_P1 );
-			std::swap( a_V0, a_V1 );
-		}
-
-		if ( a_P0.y < a_P2.y )
-		{
-			std::swap( a_P0, a_P2 );
-			std::swap( a_V0, a_V2 );
-		}
-
-		if ( a_P1.y < a_P2.y )
-		{
-			std::swap( a_P1, a_P2 );
-			std::swap( a_V1, a_V2 );
-		}
-
-		// If points are colinear, reject.
-		if ( a_P0.y == a_P2.y || a_P0.x == a_P2.x )
-		{
 			return;
 		}
 
@@ -266,16 +67,12 @@ private:
 		a_P0.y = static_cast< int >( a_P0.y );
 		a_P1.y = static_cast< int >( a_P1.y );
 		a_P2.y = static_cast< int >( a_P2.y );
-
-		/*if ( a_P0.y == a_P2.y )
-		{
-			return;
-		}*/
 
 		// Find M
 		float L = ( a_P1.y - a_P2.y ) / ( a_P0.y - a_P2.y );
 		Vector4 PM = Math::Lerp( L, a_P2, a_P0 );
-		Vector3 TM = Math::Lerp( L, a_V2, a_V0 );
+		PM.y = static_cast< int >( PM.y );
+		Vector2 TM = Math::Lerp( L, a_V2, a_V0 );
 
 		// Swap P1 and M if M is not on right.
 		if ( PM.x < a_P1.x )
@@ -284,85 +81,80 @@ private:
 			std::swap( TM, a_V1 );
 		}
 
+		float SpanX, SpanY, y;
+		Vector4 PStepL, PStepR, PBegin, PStep, PL, PR;
+		Vector2 VStepL, VStepR, VBegin, VStep, VL, VR;
+
+		if ( a_P2.y != a_P1.y )
 		{
-			Vector4 P[ 3 ] = { a_P0, a_P1, PM };
-			Vector2 V[ 3 ] = { a_V0, a_V1, TM };
-			DrawTriangleTop( P, V, a_Texture );
-		}
+			SpanY = 1.0f / ( a_P1.y - a_P2.y );
 
-		{
-			Vector4 P[ 3 ] = { a_P2, a_P1, PM };
-			Vector2 V[ 3 ] = { a_V2, a_V1, TM };
-			DrawTriangleBottom( P, V, a_Texture );
-		}
-	}
+			PStepL = a_P1 - a_P2; PStepL *= SpanY;
+			PStepR = PM - a_P2; PStepR *= SpanY;
+			PL = a_P2;
+			PR = a_P2;
 
-	static void DrawTriangleTop( Vector4( &a_P )[ 3 ], Vector2( &a_V )[ 3 ], const Texture& a_Texture )
-	{
-		float Span = a_P[ 0 ].y - a_P[ 1 ].y;
+			VStepL = a_V1 - a_V2; VStepL *= SpanY;
+			VStepR = TM - a_V2; VStepR *= SpanY;
+			VL = a_V2;
+			VR = a_V2;
 
-		Vector4 PStepL = a_P[ 0 ] - a_P[ 1 ]; PStepL /= Span;
-		Vector4 PStepR = a_P[ 0 ] - a_P[ 2 ]; PStepR /= Span;
-		Vector4 PL = a_P[ 1 ];
-		Vector4 PR = a_P[ 2 ];
+			y = a_P2.y;
 
-		Vector2 VStepL = a_V[ 0 ] - a_V[ 1 ]; VStepL /= Span;
-		Vector2 VStepR = a_V[ 0 ] - a_V[ 2 ]; VStepR /= Span;
-		Vector2 VL = a_V[ 1 ];
-		Vector2 VR = a_V[ 2 ];
-
-		for ( int y = a_P[ 1 ].y; y < a_P[ 0 ].y; ++y )
-		{
-			Vector4 PLeft = PL;
-			Vector4 PIncr = ( PR - PL ) / ( PR.x - PL.x );
-			Vector2 VLeft = VL;
-			Vector2 VIncr = ( VR - VL ) / ( PR.x - PL.x );
-
-			for ( ; PLeft.x < PR.x; PLeft += PIncr, VLeft += VIncr )
+			for ( ; y < a_P1.y; ++y )
 			{
-				Vector2 UV = VLeft / PLeft.w;
-				auto c = a_Texture.Sample( UV );
-				ScreenBuffer::SetColour( { PLeft.x, PLeft.y }, c );
-			}
+				PL += PStepL;
+				PR += PStepR;
+				VL += VStepL;
+				VR += VStepR;
 
-			PL += PStepL;
-			PR += PStepR;
-			VL += VStepL;
-			VR += VStepR;
+				SpanX = 1.0f / ( PR.x - PL.x );
+				PBegin = PL;
+				PStep = ( PR - PL ) * SpanX;
+				VBegin = VL;
+				VStep = ( VR - VL ) * SpanX;
+
+				for ( ; PBegin.x < PR.x; PBegin += PStep, VBegin += VStep )
+				{
+					ScreenBuffer::SetColour( { PBegin.x, y }, a_Texture.Sample( VBegin / PBegin.w ) );
+				}
+			}
 		}
-	}
-
-	static void DrawTriangleBottom( Vector4( &a_P )[ 3 ], Vector2( &a_V )[ 3 ], const Texture& a_Texture )
-	{
-		float Span = a_P[ 1 ].y - a_P[ 0 ].y;
-		Vector4 PStepL = a_P[ 1 ] - a_P[ 0 ]; PStepL /= Span;
-		Vector4 PStepR = a_P[ 2 ] - a_P[ 0 ]; PStepR /= Span;
-		Vector4 PL = a_P[ 0 ];
-		Vector4 PR = a_P[ 0 ];
-
-		Vector2 VStepL = a_V[ 1 ] - a_V[ 0 ]; VStepL /= Span;
-		Vector2 VStepR = a_V[ 2 ] - a_V[ 0 ]; VStepR /= Span;
-		Vector2 VL = a_V[ 0 ];
-		Vector2 VR = a_V[ 0 ];
-
-		for ( int y = a_P[ 0 ].y; y < a_P[ 1 ].y; ++y )
+		else
 		{
-			Vector4 PLeft = PL;
-			Vector4 PIncr = ( PR - PL ) / ( PR.x - PL.x );
-			Vector2 VLeft = VL;
-			Vector2 VIncr = ( VR - VL ) / ( PR.x - PL.x );
+			y = a_P1.y;
+			PL = a_P1, PR = PM;
+			VL = a_V1, VR = TM;
+		}
 
-			for ( ; PLeft.x < PR.x; PLeft += PIncr, VLeft += VIncr )
+		if ( a_P1.y != a_P0.y )
+		{
+			SpanY = 1.0f / ( a_P0.y - a_P1.y );
+
+			PStepL = a_P0 - a_P1; PStepL *= SpanY;
+			PStepR = a_P0 - PM; PStepR *= SpanY;
+
+			VStepL = a_V0 - a_V1; VStepL *= SpanY;
+			VStepR = a_V0 - TM; VStepR *= SpanY;
+
+			for ( ; y < a_P0.y; ++y )
 			{
-				Vector2 UV = VLeft / PLeft.w;
-				auto c = a_Texture.Sample( UV );
-				ScreenBuffer::SetColour( { PLeft.x, PLeft.y }, c );
-			}
+				PL += PStepL;
+				PR += PStepR;
+				VL += VStepL;
+				VR += VStepR;
 
-			PL += PStepL;
-			PR += PStepR;
-			VL += VStepL;
-			VR += VStepR;
+				SpanX = 1.0f / ( PR.x - PL.x );
+				PBegin = PL;
+				PStep = ( PR - PL ) * SpanX;
+				VBegin = VL;
+				VStep = ( VR - VL ) * SpanX;
+
+				for ( ; PBegin.x < PR.x; PBegin += PStep, VBegin += VStep )
+				{
+					ScreenBuffer::SetColour( { PBegin.x, y }, a_Texture.Sample( VBegin / PBegin.w ) );
+				}
+			}
 		}
 	}
 
@@ -375,7 +167,7 @@ public:
 			return;
 		}
 
-		auto VertexCount = m_Mesh->GetVertexCount();
+		/*auto VertexCount = m_Mesh->GetVertexCount();
 		auto TriangleCount = m_Mesh->GetVertexCount() / 3;
 		auto Handle = Rendering::CreateRenderBuffer( VertexCount, sizeof( Vertex ) );
 		auto NormalsHandle = Rendering::CreateRenderBuffer( TriangleCount, sizeof( Vector3 ) );
@@ -402,7 +194,6 @@ public:
 				P *= Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 1.0f, 1.0f );
 				P += Vector4( ScreenBuffer::GetBufferWidth() * 0.5f, ScreenBuffer::GetBufferHeight() * 0.5f, 0.0f, 0.0f );
 				Begin.Write( P, 0 );
-				//Begin.Write( Vector3( Vert[ j ].Texel / w, 1.0f / w ), sizeof( P ) );
 				Begin.Write( Vert[ j ].Texel / w, sizeof( P ) );
 				++Begin;
 			}
@@ -412,7 +203,7 @@ public:
 		NormalsBegin = Rendering::GetRenderBuffer( NormalsHandle ).Begin();
 		auto End = Buffer.End();
 
-		auto AllLights = ECS::GetAll< Light >();
+		auto AllLights = ECS::GetAllExactComponents< Light >();
 		Light& L = *AllLights.raw();
 		auto LightDirection = Math::Normalize( L.GetDirection() );
 
@@ -444,28 +235,38 @@ public:
 
 			if ( SurfaceNormal.z > 0.0f )
 			{
-				//Primitive::DrawTriangle( v0, v1, v2, Colour( 255 * Intensity, 255 * Intensity, 255 * Intensity, 255 ) );
-				//Primitive::DrawTriangle( v0, v1, v2, c );
-				DrawTriangleEx( v0, v1, v2, t0, t1, t2, *m_Texture, 1.0f );
+				DrawTriangleEx( v0, v1, v2, t0, t1, t2, *m_Texture );
 			}
 		}
 
 		Rendering::DestroyRenderBuffer( Handle );
-		Rendering::DestroyRenderBuffer( NormalsHandle );
+		Rendering::DestroyRenderBuffer( NormalsHandle );*/
 	}
 
-	void SetMesh( const Mesh* a_Mesh )
+	inline void SetMesh( const Mesh* a_Mesh )
 	{
 		m_Mesh = a_Mesh;
 	}
 
-	void SetTexture( const Texture* a_Texture )
+	inline void SetMaterial( const Material* a_Material )
+	{
+		m_Material = a_Material;
+	}
+
+	inline void SetTexture( const Texture* a_Texture )
 	{
 		m_Texture = a_Texture;
 	}
 
+	inline void SetRenderMode( RenderMode a_RenderMode )
+	{
+		m_RenderMode = a_RenderMode;
+	}
+
 private:
 
-	const Mesh* m_Mesh;
-	const Texture* m_Texture;
+	const Mesh*     m_Mesh;
+	const Material* m_Material;
+	RenderMode      m_RenderMode;
+	const Texture*  m_Texture;
 };

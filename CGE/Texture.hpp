@@ -68,9 +68,9 @@ public:
 
 	inline Colour Sample( Vector2 a_UV ) const
 	{
-		int Y = m_Size.y * a_UV.y, X = m_Size.x * a_UV.x;
-		int Index = Y * m_Size.x + X;
-		Index = Math::Clamp( Index, 0, m_Size.x * m_Size.y - 1 );
+		int Index = 
+			static_cast< int >( ( m_Size.y - 1 ) * a_UV.y ) * m_Size.x + 
+			static_cast< int >( ( m_Size.x - 1 ) * a_UV.x );
 		return m_Data[ Index ];
 	}
 

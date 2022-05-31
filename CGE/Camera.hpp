@@ -1,14 +1,10 @@
 #pragma once
+#include "CGE.hpp"
 #include "Component.hpp"
 #include "Math.hpp"
 #include "ScreenBuffer.hpp"
 #include "GameObject.hpp"
 #include "Transform.hpp"
-
-struct Frustum
-{
-
-};
 
 template < typename T >
 class ICamera;
@@ -24,7 +20,7 @@ public:
 	{
 		if ( m_Dirty )
 		{
-			float AspectRatio = static_cast< float >( ScreenBuffer::GetBufferWidth() ) / ScreenBuffer::GetBufferHeight();
+			float AspectRatio = static_cast< float >( ConsoleWindow::GetCurrentContext()->GetWidth() ) / ConsoleWindow::GetCurrentContext()->GetHeight();
 			const_cast< Camera* >( this )->m_Projection = Matrix4::CreateProjection( m_FOV, AspectRatio, m_NearZ, m_FarZ );
 			const_cast< Camera* >( this )->m_Dirty = false;
 		}

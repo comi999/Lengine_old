@@ -2,7 +2,7 @@
 #include "Math.hpp"
 #include "Rect.hpp"
 
-struct Line
+struct Segment
 {
 	Vector2 Start;
 	Vector2 End;

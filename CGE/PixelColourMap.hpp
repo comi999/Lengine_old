@@ -17,14 +17,14 @@ public:
 		delete[] m_PixelMap;
 	}
 
-	bool Initialize()
+	static bool Initialize()
 	{
-		if ( Load() )
+		if ( s_Active.Load() )
 		{
 			return true;
 		}
 
-		return BuildAndSave();
+		return s_Active.BuildAndSave();
 	}
 
 	void Build()
@@ -150,7 +150,7 @@ public:
 		return true;
 	}
 
-	Pixel ConvertColour( Colour a_Colour )
+	Pixel ConvertColour( Colour a_Colour ) const
 	{
 		return m_PixelMap[
 			static_cast< int >( a_Colour.R ) +
@@ -158,9 +158,15 @@ public:
 			static_cast< int >( a_Colour.B ) * 65536 ];
 	}
 
+	static const PixelColourMap& Get()
+	{
+		return s_Active;
+	}
+
 	static Colour SeedColours[ 376 ];
 
 private:
 
 	Pixel* m_PixelMap;
+	static PixelColourMap s_Active;
 };

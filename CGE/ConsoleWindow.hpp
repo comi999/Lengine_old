@@ -1,5 +1,7 @@
 #pragma once
 #include <Windows.h>
+#include <thread>
+#include <condition_variable>
 #include "Math.hpp"
 #include "Colour.hpp"
 #include "ScreenBuffer.hpp"
@@ -9,81 +11,80 @@ class ConsoleWindow
 {
 public:
 
-    typedef HANDLE ConsoleHandle;
-    typedef HWND   WindowHandle;
-    typedef SMALL_RECT WindowRegion;
+    typedef HANDLE      ConsoleHandle;
+    typedef HWND        WindowHandle;
+    typedef SMALL_RECT  WindowRegion;
+    typedef std::thread Thread;
 
-    static void SetTitle( const char* a_Title )
+    void SetTitle( const char* a_Title )
     {
         size_t Length = strlen( a_Title ) + 1;
         Length = Length > 64 ? 64 : Length;
-        mbstowcs_s( nullptr, s_TitleBuffer, Length, a_Title, Length );
-        SetConsoleTitle( s_TitleBuffer );
+        mbstowcs_s( nullptr, m_TitleBuffer, Length, a_Title, Length );
+        SetConsoleTitle( m_TitleBuffer );
     }
 
-    static inline Vector2Int GetWindowSize()
+    inline Vector2Int GetSize()
     {
-        return ScreenBuffer::GetBufferSize();
+        return m_ScreenBuffer.GetSize();
     }
 
-    static inline short GetWindowArea()
+    inline short GetArea()
     {
-        return ScreenBuffer::GetBufferArea();
+        return m_ScreenBuffer.GetArea();
     }
 
-    static inline short GetWindowWidth()
+    inline short GetWidth()
     {
-        return ScreenBuffer::GetBufferWidth();
+        return m_ScreenBuffer.GetWidth();
     }
 
-    static inline short GetWindowHeight()
+    inline short GetHeight()
     {
-        return ScreenBuffer::GetBufferHeight();
+        return m_ScreenBuffer.GetHeight();
     }
 
-    static inline Vector< short, 2 > GetPixelSize()
+    inline Vector< short, 2 > GetPixelSize()
     {
-        return s_PixelSize;
+        return m_PixelSize;
     }
 
-    static inline short GetPixelWidth()
+    inline short GetPixelWidth()
     {
-        return s_PixelSize.x;
+        return m_PixelSize.x;
     }
 
-    static inline short GetPixelHeight()
+    inline short GetPixelHeight()
     {
-        return s_PixelSize.y;
+        return m_PixelSize.y;
     }
 
-    static inline ConsoleHandle GetConsoleHandle()
+    inline ConsoleHandle GetConsoleHandle()
     {
-        return s_ConsoleHandle;
+        return m_ConsoleHandle;
     }
 
-    static inline WindowHandle GetWindowHandle()
+    inline WindowHandle GetWindowHandle()
     {
-        return s_WindowHandle;
+        return m_WindowHandle;
     }
 
-private:
-
-    static bool Initialize( const char* a_Title, Vector< short, 2 > a_WindowSize, Vector< short, 2 > a_PixelSize )
+    static ConsoleWindow* Create( const char* a_Title, Vector< short, 2 > a_Size, Vector< short, 2 > a_PixelSize )
     {
+        ConsoleWindow* NewWindow = new ConsoleWindow();
+
         // Retrieve handles for console window.
-        s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+        NewWindow->m_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
 
-        if ( s_ConsoleHandle == INVALID_HANDLE_VALUE )
+        if ( NewWindow->m_ConsoleHandle == INVALID_HANDLE_VALUE )
         {
             AllocConsole();
-            s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+            NewWindow->m_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
         }
 
-        s_WindowHandle = GetConsoleWindow();
-
         // Set console font.
-        a_PixelSize.x = a_PixelSize.x > 8 ? a_PixelSize.x : 8;
-        a_PixelSize.y = a_PixelSize.y > 8 ? a_PixelSize.y : 8;
+        a_PixelSize.x = Math::Min( a_PixelSize.x, static_cast< short >( 8 ) );
+        a_PixelSize.y = Math::Min( a_PixelSize.y, static_cast< short >( 8 ) );
         CONSOLE_FONT_INFOEX FontInfo;
         FontInfo.cbSize = sizeof( FontInfo );
         FontInfo.nFont = 0;
@@ -91,152 +92,128 @@ private:
         FontInfo.FontFamily = FF_DONTCARE;
         FontInfo.FontWeight = FW_NORMAL;
         wcscpy_s( FontInfo.FaceName, L"Terminal" );
-        SetCurrentConsoleFontEx( s_ConsoleHandle, false, &FontInfo );
-        s_PixelSize = a_PixelSize;
+        SetCurrentConsoleFontEx( NewWindow->m_ConsoleHandle, false, &FontInfo );
+        NewWindow->m_PixelSize = a_PixelSize;
 
         // Get screen buffer info object.
         CONSOLE_SCREEN_BUFFER_INFOEX ScreenBufferInfo;
         ScreenBufferInfo.cbSize = sizeof( ScreenBufferInfo );
-        GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-        
+        GetConsoleScreenBufferInfoEx( NewWindow->m_ConsoleHandle, &ScreenBufferInfo );
+
         for ( int i = 0; i < 16; ++i )
         {
             COLORREF& ColourRef = ScreenBufferInfo.ColorTable[ i ];
             Colour SeedColour = PixelColourMap::SeedColours[ i ];
             ColourRef =
                 SeedColour.B << 16 |
-                SeedColour.G << 8 |
+                SeedColour.G << 8  |
                 SeedColour.R;
         }
 
-        SetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
+        SetConsoleScreenBufferInfoEx( NewWindow->m_ConsoleHandle, &ScreenBufferInfo );
 
         // Get largest possible window size that can fit on screen.
-        COORD LargestWindow = GetLargestConsoleWindowSize( s_ConsoleHandle );
+        COORD LargestWindow = GetLargestConsoleWindowSize( NewWindow->m_ConsoleHandle );
 
         // If smaller than requested size, exit.
-        if ( LargestWindow.X < a_WindowSize.x ||
-            LargestWindow.Y < a_WindowSize.y )
+        if ( LargestWindow.X < a_Size.x ||
+             LargestWindow.Y < a_Size.y )
         {
-            return false;
+            return nullptr;
         }
 
         // Set screen buffer.
-        ScreenBuffer::Initialize( a_WindowSize );
-        COORD WindowSize = { GetWindowWidth(), GetWindowHeight() };
+        NewWindow->m_ScreenBuffer.Initialize( a_Size );
+        COORD WindowSize = { NewWindow->GetWidth(), NewWindow->GetHeight() };
 
         // Set window region rect.
-        s_WindowRegion.Left = 0;
-        s_WindowRegion.Top = 0;
-        s_WindowRegion.Right = WindowSize.X - 1;
-        s_WindowRegion.Bottom = WindowSize.Y - 1;
+        NewWindow->m_WindowRegion.Left = 0;
+        NewWindow->m_WindowRegion.Top = 0;
+        NewWindow->m_WindowRegion.Right = WindowSize.X - 1;
+        NewWindow->m_WindowRegion.Bottom = WindowSize.Y - 1;
 
         // Set console attributes.
-        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.x, a_WindowSize.y } );
-        SetConsoleWindowInfo( s_ConsoleHandle, true, &s_WindowRegion );
-        GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-        SetConsoleScreenBufferSize( s_ConsoleHandle, { a_WindowSize.x, a_WindowSize.y } );
+        SetConsoleScreenBufferSize( NewWindow->m_ConsoleHandle, { a_Size.x, a_Size.y } );
+        SetConsoleWindowInfo( NewWindow->m_ConsoleHandle, true, &NewWindow->m_WindowRegion );
+        GetConsoleScreenBufferInfoEx( NewWindow->m_ConsoleHandle, &ScreenBufferInfo );
+        SetConsoleScreenBufferSize( NewWindow->m_ConsoleHandle, { a_Size.x, a_Size.y } );
 
         // Set cursor attributes.
         CONSOLE_CURSOR_INFO CursorInfo;
-        GetConsoleCursorInfo( s_ConsoleHandle, &CursorInfo );
+        GetConsoleCursorInfo( NewWindow->m_ConsoleHandle, &CursorInfo );
         CursorInfo.bVisible = false;
-        SetConsoleCursorInfo( s_ConsoleHandle, &CursorInfo );
+        SetConsoleCursorInfo( NewWindow->m_ConsoleHandle, &CursorInfo );
 
         // Set window attributes.
-        SetWindowLong( s_WindowHandle, GWL_STYLE, WS_CAPTION | DS_MODALFRAME | WS_MINIMIZEBOX | WS_SYSMENU );
-        SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
-        SetTitle( a_Title );
-        return true;
+        SetWindowLong( NewWindow->m_WindowHandle, GWL_STYLE, WS_CAPTION | DS_MODALFRAME | WS_MINIMIZEBOX | WS_SYSMENU );
+        SetWindowPos( NewWindow->m_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
+        NewWindow->SetTitle( a_Title );
+        NewWindow->m_Thread = new Thread( []( ConsoleWindow* a_ConsoleWindow )
+                                          {
+                                              while ( true )
+                                              {
+                                                  std::unique_lock< std::mutex > Locker( a_ConsoleWindow->m_Mutex );
+                                                  a_ConsoleWindow->m_ConditionVariable.wait( Locker );
+                                                  
+                                                  if ( a_ConsoleWindow->m_BufferReady )
+                                                  {
+                                                      a_ConsoleWindow->WriteBuffer();
+                                                      a_ConsoleWindow->m_BufferReady = false;
+                                                  }
+                                              }
+                                          }, NewWindow );
+        return NewWindow;
     }
 
-    static bool Initialize( const char* a_Title, Vector< short, 2 > a_PixelSize )
+    ScreenBuffer& GetScreenBuffer()
     {
-        // Retrieve handles for console window.
-        s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
-
-        if ( s_ConsoleHandle == INVALID_HANDLE_VALUE )
-        {
-            AllocConsole();
-            s_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
-        }
-
-        s_WindowHandle = GetConsoleWindow();
-
-        // Set console font.
-        a_PixelSize.x = a_PixelSize.x > 8 ? a_PixelSize.x : 8;
-        a_PixelSize.y = a_PixelSize.y > 8 ? a_PixelSize.y : 8;
-        CONSOLE_FONT_INFOEX FontInfo;
-        FontInfo.cbSize = sizeof( FontInfo );
-        FontInfo.nFont = 0;
-        FontInfo.dwFontSize = { a_PixelSize.x, a_PixelSize.y };
-        FontInfo.FontFamily = FF_DONTCARE;
-        FontInfo.FontWeight = FW_NORMAL;
-        wcscpy_s( FontInfo.FaceName, L"Terminal" );
-        SetCurrentConsoleFontEx( s_ConsoleHandle, false, &FontInfo );
-
-        // Get screen buffer info object.
-        CONSOLE_SCREEN_BUFFER_INFOEX ScreenBufferInfo;
-        ScreenBufferInfo.cbSize = sizeof( ScreenBufferInfo );
-        GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-        SetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-
-        // Get largest possible window size that can fit on screen.
-        COORD LargestWindow = GetLargestConsoleWindowSize( s_ConsoleHandle );
-
-        // Set Screen Size.
-        ScreenBuffer::Initialize( { LargestWindow.X, LargestWindow.Y } );
-        s_WindowRegion.Left = 0;
-        s_WindowRegion.Top = 0;
-        s_WindowRegion.Right = LargestWindow.X - 1;
-        s_WindowRegion.Bottom = LargestWindow.Y - 1;
-
-        // Create a window area rect.
-        SMALL_RECT WindowArea =
-        {
-            0,
-            0,
-            LargestWindow.X - 1,
-            LargestWindow.Y - 1
-        };
-
-        // Set console attributes.
-        SetConsoleScreenBufferSize( s_ConsoleHandle, LargestWindow );
-        SetConsoleWindowInfo( s_ConsoleHandle, true, &WindowArea );
-        GetConsoleScreenBufferInfoEx( s_ConsoleHandle, &ScreenBufferInfo );
-        SetConsoleScreenBufferSize( s_ConsoleHandle, LargestWindow );
-
-        // Set cursor attributes.
-        CONSOLE_CURSOR_INFO CursorInfo;
-        GetConsoleCursorInfo( s_ConsoleHandle, &CursorInfo );
-        CursorInfo.bVisible = false;
-        SetConsoleCursorInfo( s_ConsoleHandle, &CursorInfo );
-
-        // Set window attributes.
-        SetWindowLong( s_WindowHandle, GWL_STYLE, WS_CAPTION | DS_MODALFRAME | WS_MINIMIZEBOX | WS_SYSMENU );
-        SetWindowPos( s_WindowHandle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_SHOWWINDOW );
-        SetTitle( a_Title );
-        return true;
+        return m_ScreenBuffer;
     }
 
-public:
+    static ConsoleWindow* GetCurrentContext()
+    {
+        return s_ActiveWindow;
+    }
 
-    static void WriteBuffer()
+    static void MakeContextCurrent( ConsoleWindow* a_Window )
+    {
+        s_ActiveWindow = a_Window;
+    }
+
+    static void SwapBuffers( ConsoleWindow* a_Window )
+    {
+        a_Window->m_ScreenBuffer.SwapPixelBuffer();
+        a_Window->DrawBuffer();
+    }
+
+private:
+
+    void DrawBuffer()
+    {
+        m_BufferReady = true;
+        m_ConditionVariable.notify_one();
+    }
+
+    void WriteBuffer()
     {
         WriteConsoleOutput(
-            s_ConsoleHandle,
-            ScreenBuffer::GetPixelBuffer(),
-            { ScreenBuffer::GetBufferWidth(), ScreenBuffer::GetBufferHeight() },
+            m_ConsoleHandle,
+            m_ScreenBuffer.GetPixelBuffer(),
+            { m_ScreenBuffer.GetWidth(), m_ScreenBuffer.GetHeight() },
             { 0, 0 },
-            &s_WindowRegion );
+            &m_WindowRegion );
     }
 
-    friend class CGE;
-
-    static ConsoleHandle      s_ConsoleHandle;
-    static WindowHandle       s_WindowHandle;
-    static WindowRegion       s_WindowRegion;
-    static Vector< short, 2 > s_PixelSize;
-    static wchar_t            s_TitleBuffer[ 64 ];
-    static std::string        s_Title;
+    bool                    m_BufferReady;
+    ConsoleHandle           m_ConsoleHandle;
+    WindowHandle            m_WindowHandle;
+    WindowRegion            m_WindowRegion;
+    Vector< short, 2 >      m_PixelSize;
+    wchar_t                 m_TitleBuffer[ 64 ];
+    std::string             m_Title;
+    ScreenBuffer            m_ScreenBuffer;
+    Thread*                 m_Thread;
+    std::condition_variable m_ConditionVariable;
+    std::mutex              m_Mutex;
+    static ConsoleWindow*   s_ActiveWindow;
 };

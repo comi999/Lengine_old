@@ -1,5 +1,7 @@
 #include "PixelColourMap.hpp"
 
+PixelColourMap PixelColourMap::s_Active;
+
 Colour PixelColourMap::SeedColours[ 376 ] =
 {
     /*Black         */  { 0,   0,   0   },
