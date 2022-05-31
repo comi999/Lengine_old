@@ -10,9 +10,6 @@
     <ClCompile Include="ScreenBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConsoleWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rect.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -49,6 +46,12 @@
     <ClCompile Include="Resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPipeline.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pixel.hpp">
@@ -69,7 +72,7 @@
     <ClInclude Include="ConsoleWindow.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Line.hpp">
+    <ClInclude Include="Segment.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="entt\entt.hpp">
@@ -181,6 +184,36 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Any.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawCall.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderMode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObject.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderState.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBuffer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStage.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderStage.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderPipeline.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderInstruction.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

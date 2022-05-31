@@ -108,25 +108,27 @@ public:
 	template < typename T >
 	static T* GetComponent( GameObjectID a_GameObjectID )
 	{
+		using Type = std::remove_const_t< T >;
+
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
 		{
 			return nullptr;
 		}
 
-		T* Found = s_Registry.try_get< T >( entt::entity( a_GameObjectID ) );
+		Type* Found = s_Registry.try_get< Type >( entt::entity( a_GameObjectID ) );
 
 		if ( Found )
 		{
 			return Found;
 		}
 
-		auto Begin = s_TypeMap.GetBFBegin< T >(), End = s_TypeMap.GetBFEnd();
+		auto Begin = s_TypeMap.GetBFBegin< Type >(), End = s_TypeMap.GetBFEnd();
 		++Begin;
 
 		for ( ; Begin != End; ++Begin )
 		{
 			size_t HashCode = Begin->hash_code();
-			T* Component = nullptr;
+			Type* Component = nullptr;
 			s_TypeMap.InvokeFunction( HashCode, "GetComponent"_H, Component, a_GameObjectID );
 
 			if ( Component )
@@ -139,26 +141,16 @@ public:
 	}
 
 	template < typename T >
-	inline static const T* GetComponentConst( GameObjectID a_GameObjectID )
-	{
-		return GetComponent< T >( a_GameObjectID );
-	}
-
-	template < typename T >
 	static T* GetExactComponent( GameObjectID a_GameObjectID )
 	{
+		using Type = std::remove_const_t< T >;
+
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
 		{
 			return nullptr;
 		}
 
-		return s_Registry.try_get< T >( entt::entity( a_GameObjectID ) );
-	}
-
-	template < typename T >
-	inline static const T* GetExactComponentConst( GameObjectID a_GameObjectID )
-	{
-		return GetComponent< T >( a_GameObjectID );
+		return s_Registry.try_get< Type >( entt::entity( a_GameObjectID ) );
 	}
 
 	template < typename T >
@@ -169,13 +161,24 @@ public:
 			return nullptr;
 		}
 
-		return false;//return s_Registry.remove_if_exists< T >( a_GameObjectID );
+		return s_Registry.remove_if_exists< T >( a_GameObjectID );
 	}
 
 	template < typename T >
-	static auto GetAll()
+	static auto GetAllComponents()
 	{
-		return s_Registry.view< T >();
+		
+	}
+
+	template < typename T >
+	static std::vector< T > GetAllExactComponents()
+	{
+		using Type = std::remove_const_t< T >;
+		auto Components = s_Registry.view< T >();
+		std::vector< T* > Collated;
+		Collated.reserve( Components.size() );
+		Components.each( [&]( T& Component ) { Collated.push_back( &Component ); } );
+		return std::move( Collated );
 	}
 
 private:

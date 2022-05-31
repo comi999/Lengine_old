@@ -6,66 +6,67 @@ class ScreenBuffer
 {
 public:
 
-    ScreenBuffer() = delete;
-
-    static inline Pixel* GetPixelBuffer()
+    void Initialize( Vector< short, 2 > a_BufferSize )
     {
-        return s_PixelBuffer;
+        m_FrontBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
+        m_BackBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];;
+        m_ColourBuffer = new Colour[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
+        m_Size = a_BufferSize;
     }
 
-    static inline Colour* GetColourBuffer()
+    inline Pixel* GetPixelBuffer()
     {
-        return s_ColourBuffer;
+        return m_BackBuffer;
     }
 
-    static inline Vector< short, 2 > GetBufferSize()
+    inline Colour* GetColourBuffer()
     {
-        return s_Size;
+        return m_ColourBuffer;
     }
 
-    static inline short GetBufferArea()
+    inline Vector< short, 2 > GetSize()
     {
-        return s_Size.x * s_Size.y;
+        return m_Size;
     }
 
-    static inline short GetBufferWidth()
+    inline short GetArea()
     {
-        return s_Size.x;
+        return m_Size.x * m_Size.y;
     }
 
-    static inline short GetBufferHeight()
+    inline short GetWidth()
     {
-        return s_Size.y;
+        return m_Size.x;
     }
 
-    static inline Rect GetBufferRect()
+    inline short GetHeight()
     {
-        return { { 0, 0 }, { s_Size.x, s_Size.y } };
+        return m_Size.y;
     }
 
-    static PixelColourMap& GetPixelColourMap()
+    inline Rect GetBufferRect()
     {
-        return s_PixelColourMap;
+        return { { 0, 0 }, { m_Size.x, m_Size.y } };
     }
 
-    static void SetPixel( Vector< short, 2 > a_Coord, Pixel a_Pixel )
-    {
-        if ( a_Coord.x < 0 || a_Coord.x >= GetBufferWidth() )
+    void SetPixel( Vector< short, 2 > a_Coord, Pixel a_Pixel )
+    {//These early outs can be removed when rendering pipeline is done.
+        if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() )
         {
             return;
         }
 
-        if ( a_Coord.y < 0 || a_Coord.y >= GetBufferHeight() )
+        if ( a_Coord.y < 0 || a_Coord.y >= GetHeight() )
         {
             return;
         }
 
-        s_PixelBuffer[ a_Coord.y * s_Size.x + a_Coord.x ] = a_Pixel;
+        m_BackBuffer[ a_Coord.y * m_Size.x + a_Coord.x ] = a_Pixel;
     }
 
-    static void SetPixels( int a_Index, Pixel a_Pixel, short a_Count )
+    void SetPixels( int a_Index, Pixel a_Pixel, short a_Count )
     {
-        Pixel* PixelBegin = s_PixelBuffer + a_Index;
+        Pixel* PixelBegin = m_BackBuffer + a_Index;
         for ( ; a_Count > 0; --a_Count )
         {
             *PixelBegin = a_Pixel;
@@ -73,9 +74,9 @@ public:
         }
     }
 
-    static void SetPixels( Vector< short, 2 > a_Coord, Pixel a_Pixel, short a_Count )
+    void SetPixels( Vector< short, 2 > a_Coord, Pixel a_Pixel, short a_Count )
     {
-        Pixel* PixelBegin = s_PixelBuffer + GetIndex( a_Coord );
+        Pixel* PixelBegin = m_BackBuffer + GetIndex( a_Coord );
         for ( ; a_Count > 0; --a_Count )
         {
             *PixelBegin = a_Pixel;
@@ -83,36 +84,39 @@ public:
         }
     }
 
-    static void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
-    { if ( a_Coord.x < 0 || a_Coord.x >= ScreenBuffer::GetBufferWidth() || a_Coord.y < 0 || a_Coord.y >= ScreenBuffer::GetBufferHeight() ) return;
+    void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
+    { // Remove these when rendering pipeline clipping is complete.
+        if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() || a_Coord.y < 0 || a_Coord.y >= GetHeight() ) return;
         int Index = GetIndex( a_Coord );
 
+
+        // Remove this when blending is done through pipeline.
         if ( BlendingEnabled )
         {
-            Colour& Background = s_ColourBuffer[ Index ];
+            Colour& Background = m_ColourBuffer[ Index ];
             Background += a_Colour;
-            s_PixelBuffer[ Index ] = s_PixelColourMap.ConvertColour( Background );
+            m_BackBuffer[ Index ] = PixelColourMap::Get().ConvertColour( Background );
         }
         else
         {
-            s_PixelBuffer[ Index ] = s_PixelColourMap.ConvertColour( a_Colour );
-            s_ColourBuffer[ Index ] = a_Colour;
+            m_BackBuffer[ Index ] = PixelColourMap::Get().ConvertColour( a_Colour );
+            m_ColourBuffer[ Index ] = a_Colour;
         }
     }
 
-    static void SetColours( Vector< short, 2 > a_Coord, Colour a_Colour, short a_Count )
+    void SetColours( Vector< short, 2 > a_Coord, Colour a_Colour, short a_Count )
     {
         int Index = GetIndex( a_Coord );
-        Pixel PixelToSet = s_PixelColourMap.ConvertColour( a_Colour );
-        Pixel* PixelBegin = s_PixelBuffer + Index;
-        Colour* ColourBegin = s_ColourBuffer + Index;
+        Pixel PixelToSet = PixelColourMap::Get().ConvertColour( a_Colour );
+        Pixel* PixelBegin = m_BackBuffer + Index;
+        Colour* ColourBegin = m_ColourBuffer + Index;
 
         if ( BlendingEnabled )
         {
             for ( ; a_Count > 0; --a_Count )
             {
                 *ColourBegin += a_Colour;
-                *PixelBegin = s_PixelColourMap.ConvertColour( *ColourBegin );
+                *PixelBegin = PixelColourMap::Get().ConvertColour( *ColourBegin );
                 ++PixelBegin;
                 ++ColourBegin;
             }
@@ -129,18 +133,18 @@ public:
         }
     }
 
-    static void SetColours( int a_Index, Colour a_Colour, short a_Count )
+    void SetColours( int a_Index, Colour a_Colour, short a_Count )
     {
-        Pixel PixelToSet = s_PixelColourMap.ConvertColour( a_Colour );
-        Pixel* PixelBegin = s_PixelBuffer + a_Index;
-        Colour* ColourBegin = s_ColourBuffer + a_Index;
+        Pixel PixelToSet = PixelColourMap::Get().ConvertColour( a_Colour );
+        Pixel* PixelBegin = m_BackBuffer + a_Index;
+        Colour* ColourBegin = m_ColourBuffer + a_Index;
 
         if ( BlendingEnabled )
         {
             for ( ; a_Count > 0; --a_Count )
             {
                 *ColourBegin += a_Colour;
-                *PixelBegin = s_PixelColourMap.ConvertColour( *ColourBegin );
+                *PixelBegin = PixelColourMap::Get().ConvertColour( *ColourBegin );
                 ++PixelBegin;
                 ++ColourBegin;
             }
@@ -157,17 +161,17 @@ public:
         }
     }
 
-    static inline void SetBuffer( Pixel a_Pixel )
+    inline void SetBuffer( Pixel a_Pixel )
     {
-        SetPixels( { 0, 0 }, a_Pixel, GetBufferArea() );
+        SetPixels( { 0, 0 }, a_Pixel, GetArea() );
     }
 
-    static inline void SetBuffer( Colour a_Colour )
+    inline void SetBuffer( Colour a_Colour )
     {
-        SetColours( { 0, 0 }, a_Colour, GetBufferArea() );
+        SetColours( { 0, 0 }, a_Colour, GetArea() );
     }
 
-    static void SetRect( const Rect& a_Rect, Pixel a_Pixel )
+    void SetRect( const Rect& a_Rect, Pixel a_Pixel )
     {
         int Index = GetIndex( {
             static_cast< short >( a_Rect.Origin.x ),
@@ -176,11 +180,11 @@ public:
         for ( int y = 0; y < a_Rect.Size.y; ++y )
         {
             SetPixels( Index, a_Pixel, a_Rect.Size.x );
-            Index += s_Size.x;
+            Index += m_Size.x;
         }
     }
 
-    static void SetRect( const Rect& a_Rect, Colour a_Colour )
+    void SetRect( const Rect& a_Rect, Colour a_Colour )
     {
         int Index = GetIndex( {
             static_cast< short >( a_Rect.Origin.x ),
@@ -189,43 +193,35 @@ public:
         for ( int y = 0; y < a_Rect.Size.y; ++y )
         {
             SetColours( Index, a_Colour, a_Rect.Size.x );
-            Index += s_Size.x;
+            Index += m_Size.x;
         }
     }
 
-    static inline Vector< short, 2 > GetCoordinate( int a_Index )
+    void SwapPixelBuffer()
     {
-        Vector< short, 2 > Coordinate = { 0, static_cast< short >( a_Index ) / s_Size.x };
-        Coordinate.x = a_Index - Coordinate.y * s_Size.y;
+        std::swap( m_BackBuffer, m_FrontBuffer );
+    }
+
+    inline Vector< short, 2 > GetCoordinate( int a_Index )
+    {
+        Vector< short, 2 > Coordinate = { 0, static_cast< short >( a_Index ) / m_Size.x };
+        Coordinate.x = a_Index - Coordinate.y * m_Size.y;
         return Coordinate;
     }
 
-    static inline int GetIndex( Vector< short, 2 > a_Coord )
+    inline int GetIndex( Vector< short, 2 > a_Coord )
     {
-        return a_Coord.y * s_Size.x + a_Coord.x;
+        return a_Coord.y * m_Size.x + a_Coord.x;
     }
 
 private:
 
-    static bool Initialize( Vector< short, 2 > a_BufferSize )
-    {
-        if ( !s_PixelColourMap.Initialize() )
-        {
-            return false;
-        }
-
-        s_PixelBuffer = new Pixel[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
-        s_ColourBuffer = new Colour[ static_cast< size_t >( a_BufferSize.x ) * a_BufferSize.y ];
-        s_Size = a_BufferSize;
-        return true;
-    }
-
     friend class ConsoleWindow;
 
-    static Pixel*            s_PixelBuffer;
-    static Colour*           s_ColourBuffer;
-    static Vector< short, 2 > s_Size;
-    static PixelColourMap    s_PixelColourMap;
+    Pixel*             m_BackBuffer;
+    Pixel*             m_FrontBuffer;
+    Colour*            m_ColourBuffer;
+    Vector< short, 2 > m_Size;
 
 public:
 

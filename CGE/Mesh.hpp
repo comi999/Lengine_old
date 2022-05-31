@@ -8,6 +8,10 @@ class Mesh
 {
 public:
 
+	Mesh()
+		: m_Outermost( size_t( -1 ) )
+	{ }
+
 	void GetTriangle( size_t a_Index, Vertex( &o_Triangle )[ 3 ] ) const
 	{
 		const Vector< size_t, 4 >* Vertex = &m_Vertices[ a_Index * 3 ];
@@ -54,6 +58,30 @@ public:
 		return m_Vertices.size();
 	}
 
+	inline float GetRadius() const
+	{
+		if ( m_Outermost == size_t( -1 ) )
+		{
+			// Find outmost point.
+			float RadiusSqrd = 0.0f;
+
+			for ( size_t i = 0; i < m_Positions.size(); ++i )
+			{
+				float CurrentRadiusSqrd = Math::LengthSqrd( m_Positions[ i ] );
+
+				if ( CurrentRadiusSqrd < RadiusSqrd )
+				{
+					const_cast< Mesh* >( this )->m_Outermost = i;
+					RadiusSqrd = CurrentRadiusSqrd;
+				}
+			}
+
+			return RadiusSqrd;
+		}
+
+		return Math::LengthSqrd( m_Positions[ m_Outermost ] );
+	}
+
 private:
 
 	friend class ResourcePackager;
@@ -82,4 +110,5 @@ private:
 	std::vector< Vector3 >             m_Positions;
 	std::vector< Vector3 >             m_Normals;
 	std::vector< Vector2 >             m_Texels;
+	size_t                             m_Outermost;
 };

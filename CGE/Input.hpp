@@ -178,7 +178,7 @@ public:
 			return Vector2::Zero;
 		}
 
-		if ( !ScreenToClient( ConsoleWindow::GetWindowHandle(), &Coordinates ) )
+		if ( !ScreenToClient( ConsoleWindow::GetCurrentContext()->GetWindowHandle(), &Coordinates ) )
 		{
 			return Vector2::Zero;
 		}

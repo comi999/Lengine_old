@@ -11,28 +11,6 @@ class CGE
 {
 public:
 
-    // Create a console window.
-    static bool Initialize( const char* a_Title, Vector< short, 2 > a_WindowSize, Vector< short, 2 > a_PixelSize )
-    {
-        if ( !ConsoleWindow::Initialize( a_Title, a_WindowSize, a_PixelSize ) )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // Create a console window with largest possible size.
-    static bool Initialize( const char* a_Title, Vector< short, 2 > a_PixelSize )
-    {
-        if ( !ConsoleWindow::Initialize( a_Title, a_PixelSize ) )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     // Begin ticking.
     static void Run( const Action<>& a_Action )
     {
@@ -41,7 +19,6 @@ public:
 
         while ( s_Running )
         {
-            PadDeltaTime();
             a_Action.Invoke();
 
             // Update calls.
@@ -49,7 +26,7 @@ public:
             Time::Tick();
             
             // Draw calls.
-            ConsoleWindow::WriteBuffer();
+            ConsoleWindow::SwapBuffers( ConsoleWindow::GetCurrentContext() );
 
             // Console Window
             if ( s_ShowFPS )
@@ -83,7 +60,7 @@ public:
         return s_Running;
     }
 
-    inline static void ShowFPS( bool a_Value )
+    /*inline static void ShowFPS( bool a_Value )
     {
         s_ShowFPS = a_Value;
     }
@@ -101,11 +78,11 @@ public:
     inline static float GetTargetFPS()
     {
         return s_TargetFPS;
-    }
+    }*/
 
 private:
 
-    static void PadDeltaTime()
+    /*static void PadDeltaTime()
     {
         if ( s_TargetFPS )
         {
@@ -116,7 +93,7 @@ private:
                 Sleep( 1000.0f * ( s_TargetDeltaTime - RealDeltaTime ) );
             }
         }
-    }
+    }*/
 
     static bool  s_Running;
     static bool  s_ShowFPS;
