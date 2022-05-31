@@ -5,6 +5,7 @@
 #include <vector>
 #include <bitset>
 #include <type_traits>
+		#include <iostream> // delete
 #include "Math.hpp"
 #include "RenderMode.hpp"
 #include "Colour.hpp"
@@ -124,13 +125,16 @@ enum class TextureFormat : uint8_t
 	RGBA
 };
 
-enum class DataType : uint32_t
+enum class DataType : uint8_t
 {
 	UNSIGNED_BYTE,
 	BYTE,
+	UNSIGNED_SHORT,
+	SHORT,
 	UNSIGNED_INT,
 	INT,
-	FLOAT
+	FLOAT,
+	DOUBLE
 };
 
 enum class DataUsage : uint8_t
@@ -147,6 +151,8 @@ typedef uint32_t BufferHandle;
 typedef uint32_t ArrayHandle;
 typedef uint32_t ShaderProgram;
 
+
+
 // Analogous to OpenGL
 class Rendering
 {
@@ -160,7 +166,7 @@ public:
 	static bool UseProgram( ShaderProgram a_ShaderProgram );
 	static void Clear( BufferFlag a_Flags );
 	static void ClearColour( float a_R, float a_G, float a_B, float a_A );
-	static void DrawArrays( RenderMode a_Mode, size_t a_Start, size_t a_Count );
+	static void DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Count );
 	static void BufferData( BufferTarget a_BufferTarget, size_t a_Size, const void* a_Data, DataUsage a_DataUsage );
 	static void NamedBufferData( BufferHandle a_Handle, size_t a_Size, const void* a_Data, DataUsage a_DataUsage );
 	static void GenVertexArrays( uint32_t a_Count, ArrayHandle* a_Handles );
@@ -182,27 +188,154 @@ public:
 
 private:
 
+	//----------SHADER_ACCESS--------------
+
+	template < uint32_t _Position, typename _Type >
+	class In
+	{
+		In()
+		{
+
+		}
+
+		operator _Type& const() const
+		{
+			return m_Value;
+		}
+
+	private:
+
+		const _Type m_Value;
+	};
+
+
+	//----------IMPLEMENTATION-------------
+
 	struct VertexAttribute
 	{
 		bool         Enabled;
 		BufferHandle Buffer;
 		uint32_t     Offset;
 		uint32_t     Stride;
-
-		union
-		{
-			struct
-			{
-				uint32_t Type : 3;
-				uint32_t Size : 4;
-				uint32_t Normalized : 1;
-			};
-
-			uint8_t Interface;
-		};
+		uint8_t      Normalized : 1;
+		uint8_t      Size       : 4;
+		uint8_t      Type       : 3;
 	};
+	class AttributeIterator
+	{
+	public:
 
-	static constexpr size_t s = sizeof( double );
+		AttributeIterator()
+			: m_Output( nullptr )
+			, m_Stride( 0 )
+			, m_Data( nullptr )
+		{ }
+
+		AttributeIterator( VertexAttribute a_VertexAttribute )
+		{
+			m_Output = OutputArray(
+				std::in_place_type< std::make_integer_sequence< size_t, 256 > > )[
+					( a_VertexAttribute.Type << 5 ) |
+						( a_VertexAttribute.Size << 1 ) |
+						( a_VertexAttribute.Normalized ) ];
+
+			m_Data = 
+				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() + 
+				a_VertexAttribute.Offset;
+
+			m_Stride = a_VertexAttribute.Stride;
+		}
+
+		inline operator bool() const
+		{
+			return m_Data;
+		}
+
+		inline auto& operator++()
+		{
+			m_Data += m_Stride;
+			return *this;
+		}
+
+		inline void operator()( void* o_Output ) const
+		{
+			m_Output( m_Data, o_Output );
+		}
+
+	private:
+
+		template < DataType _DataType > struct DataTypeImpl { using Type = void; };
+		template <> struct DataTypeImpl< DataType::UNSIGNED_BYTE  > { using Type = uint8_t;  };
+		template <> struct DataTypeImpl< DataType::BYTE           > { using Type = int8_t;   };
+		template <> struct DataTypeImpl< DataType::UNSIGNED_SHORT > { using Type = uint16_t; };
+		template <> struct DataTypeImpl< DataType::SHORT          > { using Type = int16_t;  };
+		template <> struct DataTypeImpl< DataType::UNSIGNED_INT   > { using Type = uint32_t; };
+		template <> struct DataTypeImpl< DataType::INT            > { using Type = int32_t;  };
+		template <> struct DataTypeImpl< DataType::FLOAT          > { using Type = float;    };
+		template <> struct DataTypeImpl< DataType::DOUBLE         > { using Type = double;   };
+
+		template < DataType _DataType >
+		using GetDataType = typename DataTypeImpl< _DataType >::Type;
+
+		template < typename _Type >
+		static constexpr float Normalizer( _Type a_Value )
+		{
+			if ( std::is_integral_v< _Type > )
+			{
+				if constexpr ( std::is_unsigned_v< _Type > )
+				{
+					constexpr float InvMax = 1.0f / static_cast< _Type >( -1 );
+					return InvMax * a_Value;
+				}
+				else
+				{
+					constexpr double InvMin = 1.0f / ( static_cast< size_t >( 1 ) << ( sizeof( _Type ) * 8 - 1 ) );
+					constexpr double InvMax = 1.0f / ( ( static_cast< size_t >( 1 ) << ( sizeof( _Type ) * 8 - 1 ) ) - 1 );
+					return ( a_Value < 0 ? InvMin : InvMax ) * a_Value;
+				}
+			}
+			else
+			{
+				return a_Value;
+			}
+		}
+
+		template < typename _Type, size_t _Size, bool _Normalize, size_t... Idxs >
+		static void Cast( const uint8_t* a_Data, void* o_Output, std::in_place_type_t< std::index_sequence< Idxs... > > )
+		{
+			if constexpr ( _Normalize )
+			{
+				( ( ( *reinterpret_cast< Vector< float, _Size >* >( o_Output ) )[ Idxs ] = Normalizer( reinterpret_cast< _Type* >( a_Data )[ Idxs ] ) ), ... );
+			}
+			else
+			{
+				( ( ( *reinterpret_cast< Vector< float, _Size >* >( o_Output ) )[ Idxs ] = reinterpret_cast< _Type* >( a_Data )[ Idxs ] ), ... );
+			}
+		}
+
+		template < uint8_t _Interface >
+		static void Output( const uint8_t* a_Data, void* o_Output )
+		{
+			constexpr uint8_t Type = ( _Interface & 0b11100000 ) >> 5;
+			constexpr uint8_t Size = ( _Interface & 0b00011110 ) >> 1;
+			constexpr uint8_t Norm = ( _Interface & 0b00000001 ) >> 0;
+
+			Cast< GetDataType< static_cast< DataType >( Type ) >, Size, Norm >( a_Data, o_Output, std::in_place_type< std::make_index_sequence< Size > > );
+		}
+
+		typedef void( *OutputFunc )( const uint8_t*, void* );
+
+		template < size_t... Idxs >
+		static OutputFunc* OutputArray( std::in_place_type_t< std::integer_sequence< size_t, Idxs... > > )
+		{
+			static OutputFunc Funcs[ 256 ] = { Output< static_cast< uint8_t >( Idxs ) >... };
+			return &Funcs[ 0 ];
+		}
+
+		OutputFunc m_Output;
+		uint32_t   m_Stride;
+		uint8_t*   m_Data;
+	};
 
 	typedef std::vector< uint8_t > Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
@@ -272,182 +405,82 @@ private:
 		std::bitset< 32 >       m_Availability;
 		std::array< Array, 32 > m_Arrays;
 	};
-	public:
-	//----------IMPLEMENTATION-------------
-	class AttributeIterator
+	class AttributeRegistry
 	{
 	public:
 
-		AttributeIterator( VertexAttribute a_VertexAttribute )
+		inline void Increment( uint32_t a_Position )
 		{
-			m_Output = GetOutputFunc( a_VertexAttribute.Interface );
-			m_Data = 
-				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() + 
-				a_VertexAttribute.Offset;
-			m_Stride = a_VertexAttribute.Stride;
+			++m_VertexAttributes[ a_Position ];
 		}
 
-		inline auto& operator++()
+		inline void IncrementAll()
 		{
-			m_Data += m_Stride;
-			return *this;
+			// In future, use a static incrementing function.
+
+			++m_VertexAttributes[ 0 ];
+			++m_VertexAttributes[ 1 ];
+			++m_VertexAttributes[ 2 ];
+			++m_VertexAttributes[ 3 ];
+			++m_VertexAttributes[ 4 ];
+			++m_VertexAttributes[ 5 ];
+			++m_VertexAttributes[ 6 ];
+			++m_VertexAttributes[ 7 ];
 		}
 
-		inline void operator()( void* o_Output )
+		inline void Value( uint32_t a_Position, void* o_Output )
 		{
-			m_Output( m_Data, o_Output );
+			m_VertexAttributes[ a_Position ]( o_Output );
+		}
+
+		inline AttributeIterator& operator[]( uint32_t a_Position )
+		{
+			return m_VertexAttributes[ a_Position ];
 		}
 
 	private:
 
-		typedef void( *OutputFunc )( uint8_t*, void* );
-
-		template < DataType _DataType > struct DataTypeImpl { using Type = void; };
-		template <> struct DataTypeImpl< DataType::BYTE          > { using Type = int8_t;   };
-		template <> struct DataTypeImpl< DataType::UNSIGNED_BYTE > { using Type = uint8_t;  };
-		template <> struct DataTypeImpl< DataType::INT           > { using Type = int16_t;  };
-		template <> struct DataTypeImpl< DataType::UNSIGNED_INT  > { using Type = uint16_t; };
-		template <> struct DataTypeImpl< DataType::FLOAT         > { using Type = float;    };
-		
-		template < DataType _DataType >
-		using GetDataType = typename DataTypeImpl< _DataType >::Type;
-
-		template < typename _Type >
-		static constexpr float Normalizer( _Type a_Value )
-		{
-			if ( std::is_integral_v< _Type > )
-			{
-				if constexpr ( std::is_unsigned_v< _Type > )
-				{
-					constexpr float InvMax = 1.0f / static_cast< _Type >( -1 );
-					return InvMax * a_Value;
-				}
-				else
-				{
-					constexpr float InvMin = 1.0f / ( 1 << ( sizeof( _Type ) * 8 - 1 ) );
-					constexpr float InvMax = 1.0f / ( ( 1 << ( sizeof( _Type ) * 8 - 1 ) ) - 1 );
-					return ( a_Value < 0 ? InvMin : InvMax ) * a_Value;
-				}
-			}
-			else
-			{
-				return a_Value;
-			}
-		}
-
-		template < typename _Type, size_t _Size, bool _Normalize, size_t... Idxs >
-		static void Cast( uint8_t* a_Data, void* o_Output, std::in_place_type_t< std::index_sequence< Idxs... > > )
-		{
-			using Vector_t = Vector< float, _Size / sizeof( _Type ) >;
-			auto* Data = reinterpret_cast< _Type* >( a_Data );
-			auto& Vec  = *reinterpret_cast< Vector_t* >( o_Output );
-
-			Vec = { ( _Normalize ? Normalizer( Data[ Idxs ] ) : Data[ Idxs ] )... };
-		}
-
-		template < uint8_t _Interface >
-		static void Output( uint8_t* a_Data, void* o_Output )
-		{/*
-			static constexpr uint8_t Type = ( _Interface & 0b11100000 ) >> 5;
-			static constexpr uint8_t Size = ( ( _Interface & 0b11110 ) >> 1 ) / 4;
-			static constexpr uint8_t Norm = _Interface & 0b1;*/
-
-			struct Interface
-			{
-				union
-				{
-					struct
-					{
-						uint32_t Type : 3;
-						uint32_t Size : 4;
-						uint32_t Normalized : 1;
-					};
-
-					uint8_t someting;
-				};
-
-			};
-
-			static constexpr Interface _interface = _Interface;
-			static constexpr uint8_t Type = _interface.Type;
-			static constexpr uint8_t Size = _interface.Size;
-			static constexpr uint8_t Norm = _interface.Normalize;
-
-			//using Type_t = GetDataType< static_cast< DataType >( _interface.Type ) >;
-			//using Vector_t = Vector< float, _interface.Size >;
-
-			
-			
-
-			//Cast< Type_t, _interface.Size, _interface.Normalize >( a_Data, o_Output, std::in_place_type< std::make_index_sequence< _interface.Size > > );
-		}
-
-		
-
-		template < size_t... Idxs >
-		static OutputFunc* GetOutputFuncArray( std::in_place_type_t< std::integer_sequence< size_t, Idxs... > > )
-		{
-			static OutputFunc Funcs[ 256 ] = { Output< static_cast< uint8_t >( Idxs ) >... };
-			return &Funcs[ 0 ];
-		}
-
-		static OutputFunc GetOutputFunc( uint8_t a_Interface )
-		{
-			static OutputFunc* Funcs = GetOutputFuncArray( std::in_place_type< std::make_integer_sequence< size_t, 256 > > );
-			return Funcs[ a_Interface ];
-		}
-
-		OutputFunc m_Output;
-		uint32_t   m_Stride;
-		uint8_t*   m_Data;
+		AttributeIterator m_VertexAttributes[ 8 ];
 	};
 
-	static auto CreateSomething()
+	static void DrawArraysImpl_Triangle( uint32_t a_Begin, uint32_t a_Count )
 	{
-		VertexAttribute v;
-		v.Buffer = 1;
-		v.Enabled = true;
-		v.Normalized = true;
-		v.Offset = 0;
-		v.Size = 3;
-		v.Stride = 3;
-		v.Type = (uint32_t)DataType::UNSIGNED_BYTE;
-		return v;
+		auto& ActiveArray = s_ArrayRegistry[ s_BoundArray ];
+
+		AttributeIterator Iterators[]
+		{
+			ActiveArray[ 0 ].Enabled ? AttributeIterator( ActiveArray[ 0 ] ) : AttributeIterator(),
+			ActiveArray[ 1 ].Enabled ? AttributeIterator( ActiveArray[ 1 ] ) : AttributeIterator(),
+			ActiveArray[ 2 ].Enabled ? AttributeIterator( ActiveArray[ 2 ] ) : AttributeIterator(),
+			ActiveArray[ 3 ].Enabled ? AttributeIterator( ActiveArray[ 3 ] ) : AttributeIterator(),
+			ActiveArray[ 4 ].Enabled ? AttributeIterator( ActiveArray[ 4 ] ) : AttributeIterator(),
+			ActiveArray[ 5 ].Enabled ? AttributeIterator( ActiveArray[ 5 ] ) : AttributeIterator(),
+			ActiveArray[ 6 ].Enabled ? AttributeIterator( ActiveArray[ 6 ] ) : AttributeIterator(),
+			ActiveArray[ 7 ].Enabled ? AttributeIterator( ActiveArray[ 7 ] ) : AttributeIterator()
+		};
+
+		auto IncrementIters = [&]()
+		{
+			for ( uint32_t i = 0; i < 8; ++i ) ++Iterators[ i ];
+		};
+
+		uint32_t End = a_Begin + a_Count;
+
+		do
+		{
+
+
+		} while ( a_Begin < End );
+
+		for ( uint32_t End = a_Begin + a_Count; a_Begin < End; ++a_Begin, IncrementIters() )
+		{
+
+		}
 	}
 
-	template < typename _Type, size_t _Attribs, size_t _Size, size_t _Stride >
-	static void DrawArraysImpl( uint32_t a_Start, uint32_t a_Count )
-	{
-		//auto& ActiveArray = s_ArrayRegistry[ s_BoundArray ];
-
-		//// Per Primitive Triangle in this case.
-		//Vector< _Type, _Size > P[  ];
-
-		//for ( size_t End = a_Start + a_Count; a_Start < End; )
-		//{
-		//	for ( uint32_t i = 0; i < 3; ++i )
-		//	{
-
-		//	}
-
-		//	for ( uint32_t i = 0; i < ActiveArray.size(); ++i )
-		//	{
-		//		auto& Attrib = ActiveArray[ i ];
-		//		
-		//		if ( !Attrib.Enabled )
-		//		{
-		//			continue;
-		//		}
-
-		//		auto& Buffer = s_BufferRegistry[ Attrib.Buffer ];
-
-
-		//	}
-		//}
-	}
-
-	static BufferRegistry s_BufferRegistry;
-	static ArrayRegistry  s_ArrayRegistry;
-	static ArrayHandle    s_BoundArray;
-	static BufferHandle   s_BufferTargets[ 14 ];
+	static BufferRegistry    s_BufferRegistry;
+	static ArrayRegistry     s_ArrayRegistry;
+	static AttributeRegistry s_AttributeRegistry;
+	static ArrayHandle       s_BoundArray;
+	static BufferHandle      s_BufferTargets[ 14 ];
 };

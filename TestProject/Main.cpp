@@ -20,7 +20,7 @@
 int main()
 {
 	PixelColourMap::Initialize();
-
+	
 	auto* window = ConsoleWindow::Create( "SomeTitle", { 64, 64 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( window );
 
@@ -40,20 +40,6 @@ int main()
 		0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
 	};
-
-	uint8_t vals[] = {
-		0, 255, 127, 64, 64, 192
-	};
-
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vals ), vals, DataUsage::DRAW );
-
-	Rendering::AttributeIterator iter( Rendering::CreateSomething() );
-	
-	Vector3 v0;
-	iter( &v0 );
-	++iter;
-	Vector3 v1;
-	iter( &v1 );
 
 	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::DRAW );
 
@@ -80,7 +66,6 @@ int main()
 		Rendering::BindVertexArray( 0 );
 		ConsoleWindow::SwapBuffers( window );
 	}
-
 
 	//CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 

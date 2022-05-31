@@ -1,10 +1,11 @@
 #include "Rendering.hpp"
 #include "ConsoleWindow.hpp"
 
-Rendering::BufferRegistry Rendering::s_BufferRegistry;
-Rendering::ArrayRegistry  Rendering::s_ArrayRegistry;
-ArrayHandle               Rendering::s_BoundArray;
-BufferHandle              Rendering::s_BufferTargets[ 14 ];
+Rendering::BufferRegistry    Rendering::s_BufferRegistry;
+Rendering::ArrayRegistry     Rendering::s_ArrayRegistry;
+Rendering::AttributeRegistry Rendering::s_AttributeRegistry;
+ArrayHandle                  Rendering::s_BoundArray;
+BufferHandle                 Rendering::s_BufferTargets[ 14 ];
 
 void Rendering::GenBuffers( uint32_t a_Count, BufferHandle* a_Handles )
 {
@@ -81,7 +82,7 @@ void Rendering::ClearColour( float a_R, float a_G, float a_B, float a_A )
 		static_cast< unsigned char >( 255u * a_A ) } );
 }
 
-void Rendering::DrawArrays( RenderMode a_Mode, size_t a_Start, size_t a_Count )
+void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Count )
 {
 	switch ( a_Mode )
 	{
@@ -90,7 +91,10 @@ void Rendering::DrawArrays( RenderMode a_Mode, size_t a_Start, size_t a_Count )
 		case RenderMode::LINE:
 			break;
 		case RenderMode::TRIANGLE:
+		{
+			DrawArraysImpl_Triangle( a_Begin, a_Count );
 			break;
+		}
 		default:
 			break;
 	}
@@ -156,6 +160,7 @@ void Rendering::DisableVertexAttribArray( uint32_t a_Position )
 void Rendering::VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset )
 {
 	auto& Attributes = s_ArrayRegistry[ s_BoundArray ][ a_Index ];
+	Attributes.Buffer = s_BufferTargets[ ( uint32_t )BufferTarget::ARRAY_BUFFER ];
 	Attributes.Size = a_Size;
 	Attributes.Normalized = a_Normalized;
 	Attributes.Type = ( uint32_t )a_DataType;
