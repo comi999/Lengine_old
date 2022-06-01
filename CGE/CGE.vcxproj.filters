@@ -138,9 +138,6 @@
     <ClInclude Include="Rendering.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
