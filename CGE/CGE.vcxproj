@@ -225,7 +225,6 @@
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />
     <ClInclude Include="Serialization.hpp" />
-    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="ShaderPipeline.hpp" />
     <ClInclude Include="ShaderStage.hpp" />
     <ClInclude Include="Texture.hpp" />

@@ -11,11 +11,88 @@
 #include "Camera.hpp"
 #include "File.hpp"
 #include "Resource.hpp"
-#include "Rendering.hpp"
 #include "ConsoleWindow.hpp"
+#include "Rendering.hpp"
 
 #include <thread>
 #include <iostream>
+
+void Shader_Vertex()
+{
+	Rendering::In< 0, Vector2 > i_Position;
+	Rendering::In< 1, Vector3 > i_Colour;
+	Rendering::Out< 0, Vector4 > o_Colour;
+
+	Rendering::Position = Vector4( *i_Position, 0.0f, 1.0f );
+	*o_Colour = Vector4( *i_Colour, 1.0f );
+
+	//std::cout << "X: " << _Position->x << ", Y: " << _Position->y << std::endl;
+	//std::cout << "R: " << _Colour->x << ", G: " << _Colour->y << ", B: " << _Colour->z << std::endl;
+}
+void Shader_Fragment()
+{
+	Rendering::In< 0, Vector2 > _Position;
+	Rendering::In< 1, Vector3 > _Colour;
+
+	Rendering::FragColour = Vector4( 1, 0, 0, 1 );
+}
+
+ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
+{
+	ShaderHandle VertexShaderID = Rendering::CreateShader( ShaderType::VERTEX_SHADER );
+	ShaderHandle FragmentShaderID = Rendering::CreateShader( ShaderType::FRAGMENT_SHADER );
+
+	bool Result = false;
+	int InfoLogLength;
+
+	const void* VertexSourcePointer = a_VertexShader;
+	const void* FragmentSourcePointer = a_FragmentShader;
+
+	Rendering::ShaderSource( VertexShaderID, 1, &VertexSourcePointer, NULL );
+	Rendering::CompileShader( VertexShaderID );
+	Rendering::GetShaderIV( VertexShaderID, ShaderInfo::COMPILE_STATUS, &Result );
+	Rendering::GetShaderIV( VertexShaderID, ShaderInfo::INFO_LOG_LENGTH, &InfoLogLength );
+
+	/*if ( InfoLogLength > 0 )
+	{
+		std::vector<char> VertexShaderErrorMessage( InfoLogLength + 1 );
+		Rendering::GetShaderInfoLog( VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[ 0 ] );
+		printf( "%s\n", &VertexShaderErrorMessage[ 0 ] );
+	}*/
+
+	Rendering::ShaderSource( FragmentShaderID, 1, &FragmentSourcePointer, NULL );
+	Rendering::CompileShader( FragmentShaderID );
+	Rendering::GetShaderIV( FragmentShaderID, ShaderInfo::COMPILE_STATUS, &Result );
+	Rendering::GetShaderIV( FragmentShaderID, ShaderInfo::INFO_LOG_LENGTH, &InfoLogLength );
+
+	/*if ( InfoLogLength > 0 )
+	{
+		std::vector<char> FragmentShaderErrorMessage( InfoLogLength + 1 );
+		Rendering::GetShaderInfoLog( FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[ 0 ] );
+		printf( "%s\n", &FragmentShaderErrorMessage[ 0 ] );
+	}*/
+
+	ShaderProgramHandle ProgramID = Rendering::CreateProgram();
+	Rendering::AttachShader( ProgramID, VertexShaderID );
+	Rendering::AttachShader( ProgramID, FragmentShaderID );
+	Rendering::LinkProgram( ProgramID );
+	Rendering::GetProgramIV( ProgramID, ShaderInfo::LINK_STATUS, &Result );
+	Rendering::GetProgramIV( ProgramID, ShaderInfo::INFO_LOG_LENGTH, &InfoLogLength );
+
+	/*if ( InfoLogLength > 0 )
+	{
+		std::vector<char> ProgramErrorMessage( InfoLogLength + 1 );
+		Rendering::GetProgramInfoLog( ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[ 0 ] );
+		printf( "%s\n", &ProgramErrorMessage[ 0 ] );
+	}*/
+
+	Rendering::DetachShader( ProgramID, VertexShaderID );
+	Rendering::DetachShader( ProgramID, FragmentShaderID );
+	Rendering::DeleteShader( VertexShaderID );
+	Rendering::DeleteShader( FragmentShaderID );
+
+	return ProgramID;
+}
 
 int main()
 {
@@ -41,7 +118,7 @@ int main()
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
 	};
 
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::STATIC_DRAW );
 
 	Rendering::VertexAttribPointer( 0, 2, DataType::FLOAT, false, 5 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
@@ -52,13 +129,17 @@ int main()
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
 	Rendering::BindVertexArray( 0 );
 
-	//shader = LoadShaders( "shader.vert", "shader.frag" );
-	ShaderProgram shader = 0;
-
+	ShaderProgramHandle shader = LoadShaders( Shader_Vertex, Shader_Fragment );
+	float i = 0.0f;
 	while ( 1 )
 	{
+		vertices[ 0 ] = 0.5f * Math::Sin( i += 0.1f );
+		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo );
+		Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::STATIC_DRAW );
+		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
+
 		Sleep( 66 );
-		Rendering::ClearColour( 0.5f, 0.2f, 0.1f, 1.0f );
+		Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 0.0f );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT );
 		Rendering::UseProgram( shader );
 		Rendering::BindVertexArray( vao );

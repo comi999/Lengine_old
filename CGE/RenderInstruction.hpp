@@ -8,7 +8,7 @@ struct RenderInstruction
 		SET,
 		ENABLE,
 		DISABLE,
-		DRAW
+		STATIC_DRAW
 	};
 
 	Modification Modification;
