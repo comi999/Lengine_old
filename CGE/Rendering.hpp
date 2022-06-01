@@ -8,6 +8,7 @@
 #include "RenderMode.hpp"
 #include "Colour.hpp"
 #include "ConsoleWindow.hpp"
+#include "Hash.hpp"
 
 // broad phase filtering: remove OBJECTS that will definitely not show up on screen by using encompassing regions and frustum planes
 // vertex shader transform vertices into clip space
@@ -209,9 +210,12 @@ class Rendering
 {
 public:
 
-	// Shader IO.
+	// Vertex out variables.
 	static Vector4 Position;
+
+	// Fragment out variables.
 	static Vector4 FragColour;
+	static Vector4 FragDepth;
 
 	// Shader functions
 	static ShaderHandle CreateShader( ShaderType a_ShaderType );
@@ -257,64 +261,63 @@ public:
 
 	//----------SHADER_ACCESS--------------
 
-	template < uint32_t _Position, typename _Type >
-	class In
+	template < uint32_t _Location >
+	class Layout
 	{
 	public:
 
-		In()
+		template < typename _Type >
+		class In
 		{
-			s_AttributeRegistry[ _Position ]( &s_Value );
-		}
+		public:
 
-		operator _Type& const() const
-		{
-			return s_Value;
-		}
-
-		const _Type* operator->() const
-		{
-			return &s_Value;
-		}
-
-		_Type operator*() const
-		{
-			return s_Value;
-		}
-
-	private:
-
-		static _Type s_Value;
+			static const _Type& Value()
+			{
+				static _Type Value;
+				s_AttributeRegistry[ _Location ]( &Value );
+				return Value;
+			}
+		};
 	};
 
-	template < uint32_t _Position, typename _Type >
-	class Out
+	template < Hash _Name, typename _Type >
+	class Varying
 	{
 	public:
 
-		Out& operator =( const _Type& a_Value )
+		class In
 		{
-			s_Value = a_Value;
-		}
+		public:
 
-		operator _Type& ()
-		{
-			return s_Value;
-		}
+			static const _Type& Value()
+			{
+				return Varying::Value();
+			}
+		};
 
-		_Type* operator->()
+		class Out
 		{
-			return &s_Value;
-		}
+		public:
 
-		_Type& operator*() const
-		{
-			return s_Value;
-		}
+			static _Type& Value()
+			{
+				return Varying::Value();
+			}
+		};
 
 	private:
 
-		static _Type s_Value;
+		inline static _Type& Value()
+		{
+			static _Type Value;
+			return Value;
+		}
+	};
+
+	template < Hash _Name, typename _Type >
+	class Uniform
+	{
+
 	};
 
 	class ShaderRegistry
@@ -830,8 +833,7 @@ private:
 			{
 				ActiveProgram[ ShaderType::VERTEX_SHADER ]();
 				*PositionsBegin = Rendering::Position;
-				Rendering::Out< 0, Vector4 > col;
-				*ColoursBegin = *col;
+				*ColoursBegin = Rendering::Varying< "Colour"_H, Vector4 >::In::Value();
 			}
 
 		} while ( Begin < End );
@@ -882,9 +884,3 @@ private:
 	static ShaderProgramHandle   s_ActiveShaderProgram;
 	static BufferHandle          s_BufferTargets[ 14 ];
 };
-
-template < uint32_t _Position, typename _Type >
-_Type Rendering::In< _Position, _Type >::s_Value;
-
-template < uint32_t _Position, typename _Type >
-_Type Rendering::Out< _Position, _Type >::s_Value;

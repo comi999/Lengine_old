@@ -19,22 +19,20 @@
 
 void Shader_Vertex()
 {
-	Rendering::In< 0, Vector2 > i_Position;
-	Rendering::In< 1, Vector3 > i_Colour;
-	Rendering::Out< 0, Vector4 > o_Colour;
+	auto& i_Position = Rendering::Layout< 0 >::In< Vector2 >::Value();
+	auto& i_Colour   = Rendering::Layout< 1 >::In< Vector3 >::Value();
+	auto& o_Position = Rendering::Position;
+	auto& o_Colour   = Rendering::Varying< "Colour"_H, Vector4 >::Out::Value();
 
-	Rendering::Position = Vector4( *i_Position, 0.0f, 1.0f );
-	*o_Colour = Vector4( *i_Colour, 1.0f );
-
-	//std::cout << "X: " << _Position->x << ", Y: " << _Position->y << std::endl;
-	//std::cout << "R: " << _Colour->x << ", G: " << _Colour->y << ", B: " << _Colour->z << std::endl;
+	o_Position = Vector4( i_Position, 0.0f, 1.0f );
+	o_Colour   = Vector4( i_Colour, 1.0f );
 }
 void Shader_Fragment()
 {
-	Rendering::In< 0, Vector2 > _Position;
-	Rendering::In< 1, Vector3 > _Colour;
+	auto& i_Colour = Rendering::Varying< "Colour"_H, Vector4 >::In::Value();
+	auto& o_Colour = Rendering::FragColour;
 
-	Rendering::FragColour = Vector4( 1, 0, 0, 1 );
+	o_Colour = i_Colour;
 }
 
 ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
@@ -109,12 +107,18 @@ int main()
 	Rendering::GenBuffers( 1, &vbo );
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo );
 
-	float vertices[] = {
+	/*float vertices[] = {
 		-0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
 		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
 		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 		0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+	};*/
+
+	float vertices[] = {
+		+0.0f, +0.5f, 1.0f, 0.0f, 0.0f,
+		+0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
 	};
 
@@ -133,17 +137,17 @@ int main()
 	float i = 0.0f;
 	while ( 1 )
 	{
-		vertices[ 0 ] = 0.5f * Math::Sin( i += 0.1f );
+		/*vertices[ 0 ] = 0.5f * Math::Sin( i += 0.1f );
 		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo );
 		Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::STATIC_DRAW );
-		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
+		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );*/
 
 		Sleep( 66 );
 		Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 0.0f );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT );
 		Rendering::UseProgram( shader );
 		Rendering::BindVertexArray( vao );
-		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 6 );
+		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 3 );
 		Rendering::BindVertexArray( 0 );
 		ConsoleWindow::SwapBuffers( window );
 	}
