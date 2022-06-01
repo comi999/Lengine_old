@@ -252,12 +252,14 @@ public:
 	static void TexParameter( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, void* a_Value );
 	static void GenTextures( size_t a_Count, BufferHandle* a_Handles );
 	static void BindTexture( TextureTarget a_TextureTarget, BufferHandle a_Handle );
-	//static void TexImage1D( /*something*/ );
-	//static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_TextureFormat, Texture* a_Texture );
-	//static void TexImage3D( /*something*/ );
+	static void TexImage1D( /*something*/ );
+	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_TextureFormat/*, Texture* a_Texture*/ );
+	static void TexImage3D( /*something*/ );
 	static void GenMipmap( TextureTarget a_TextureTarget );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
 	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, size_t a_Offset );
+
+	//static void Uniform
 
 	//----------SHADER_ACCESS--------------
 
