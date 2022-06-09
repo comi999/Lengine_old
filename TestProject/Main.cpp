@@ -239,7 +239,7 @@ void RunCubeDemo()
 	Rendering::BindVertexArray( 0 );
 
 
-	ShaderProgramHandle shader = LoadShaders( Shader_Basic_Vertex, Shader_Basic_Fragment );
+	ShaderProgramHandle shader = LoadShaders( Shader_Lit_Test_Vertex, Shader_Lit_Test_Fragment );
 	
 
 	Rendering::UseProgram( shader );
@@ -267,10 +267,12 @@ void RunCubeDemo()
 		auto PVM = Math::Multiply( PV, Modl );
 		Rendering::UniformMatrix4fv( RotationLocation, 1, false, &PVM[ 0 ] );
 
+
 		LightPosition.x = 50.0f * Math::Cos( i );
 		LightPosition.z = 50.0f * Math::Sin( i );
 		LightPosition.y = 0.0f;
-		//Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );
+		LightPosition = Math::Multiply( PV, Vector4( LightPosition ) );
+		Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );
 
 		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
