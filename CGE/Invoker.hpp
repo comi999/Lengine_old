@@ -261,7 +261,7 @@ public:
 	/// <summary>
 	/// Clear the stored function.
 	/// </summary>
-	inline void Reset() const
+	inline void Rewind() const
 	{
 		m_Object = nullptr;
 		m_Function = nullptr;

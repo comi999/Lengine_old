@@ -204,16 +204,16 @@ private:
             &m_WindowRegion );
     }
 
-    bool                    m_BufferReady;
-    ConsoleHandle           m_ConsoleHandle;
-    WindowHandle            m_WindowHandle;
-    WindowRegion            m_WindowRegion;
-    Vector< short, 2 >      m_PixelSize;
-    wchar_t                 m_TitleBuffer[ 64 ];
-    std::string             m_Title;
-    ScreenBuffer            m_ScreenBuffer;
-    Thread*                 m_Thread;
-    std::condition_variable m_ConditionVariable;
-    std::mutex              m_Mutex;
-    static ConsoleWindow*   s_ActiveWindow;
+    bool                         m_BufferReady;
+    ConsoleHandle                m_ConsoleHandle;
+    WindowHandle                 m_WindowHandle;
+    WindowRegion                 m_WindowRegion;
+    Vector< short, 2 >           m_PixelSize;
+    wchar_t                      m_TitleBuffer[ 64 ];
+    std::string                  m_Title;
+    ScreenBuffer                 m_ScreenBuffer;
+    Thread*                      m_Thread;
+    std::condition_variable      m_ConditionVariable;
+    std::mutex                   m_Mutex;
+    inline static ConsoleWindow* s_ActiveWindow;
 };

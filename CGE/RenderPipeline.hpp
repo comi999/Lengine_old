@@ -1,7 +1,6 @@
 #pragma once
 #include "ECS.hpp"
 #include "RenderBuffer.hpp"
-#include "RenderState.hpp"
 #include "RenderStage.hpp"
 #include "RenderInstruction.hpp"
 #include "ShaderPipeline.hpp"
@@ -199,7 +198,6 @@ private:
 	}
 
 	RenderStage                      m_RenderStage;
-	RenderState                      m_RenderState;
 	ShaderPipeline                   m_ShaderPipeline;
 	std::vector< RenderBuffer >      m_RenderBuffers;
 	std::vector< DrawCall >          m_DrawCalls;

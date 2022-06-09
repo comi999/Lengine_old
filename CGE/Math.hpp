@@ -26,9 +26,30 @@ enum class RotationOrder : char
 typedef Matrix< float, 2 > Matrix2;
 typedef Matrix< float, 3 > Matrix3;
 typedef Matrix< float, 4 > Matrix4;
-typedef Matrix< int, 2 > Matrix2Int;
-typedef Matrix< int, 3 > Matrix3Int;
-typedef Matrix< int, 4 > Matrix4Int;
+typedef Matrix< float, 2, 3 > Matrix2x3;
+typedef Matrix< float, 2, 4 > Matrix2x4;
+typedef Matrix< float, 3, 2 > Matrix3x2;
+typedef Matrix< float, 3, 4 > Matrix3x4;
+typedef Matrix< float, 4, 2 > Matrix4x2;
+typedef Matrix< float, 4, 3 > Matrix4x3;
+typedef Matrix< int32_t, 2 > Matrix2Int;
+typedef Matrix< int32_t, 3 > Matrix3Int;
+typedef Matrix< int32_t, 4 > Matrix4Int;
+typedef Matrix< int32_t, 2, 3 > MatrixInt2x3;
+typedef Matrix< int32_t, 2, 4 > MatrixInt2x4;
+typedef Matrix< int32_t, 3, 2 > MatrixInt3x2;
+typedef Matrix< int32_t, 3, 4 > MatrixInt3x4;
+typedef Matrix< int32_t, 4, 2 > MatrixInt4x2;
+typedef Matrix< int32_t, 4, 3 > MatrixInt4x3;
+typedef Matrix< uint32_t, 2 > Matrix2UInt;
+typedef Matrix< uint32_t, 3 > Matrix3UInt;
+typedef Matrix< uint32_t, 4 > Matrix4UInt;
+typedef Matrix< uint32_t, 2, 3 > MatrixUInt2x3;
+typedef Matrix< uint32_t, 2, 4 > MatrixUInt2x4;
+typedef Matrix< uint32_t, 3, 2 > MatrixUInt3x2;
+typedef Matrix< uint32_t, 3, 4 > MatrixUInt3x4;
+typedef Matrix< uint32_t, 4, 2 > MatrixUInt4x2;
+typedef Matrix< uint32_t, 4, 3 > MatrixUInt4x3;
 
 class Math
 {
@@ -889,7 +910,7 @@ struct IVector
 		return *this;
 	}
 
-	constexpr size_t GetDimensions() const
+	constexpr size_t GetSize() const
 	{
 		return S;
 	}
@@ -1862,9 +1883,12 @@ template < typename T > const Vector< T, 4 > Vector< T, 4 >::One ( 1, 1, 1, 1 );
 typedef Vector< float, 2 > Vector2;
 typedef Vector< float, 3 > Vector3;
 typedef Vector< float, 4 > Vector4;
-typedef Vector< int, 2 > Vector2Int;
-typedef Vector< int, 3 > Vector3Int;
-typedef Vector< int, 4 > Vector4Int;
+typedef Vector< int32_t, 2 > Vector2Int;
+typedef Vector< int32_t, 3 > Vector3Int;
+typedef Vector< int32_t, 4 > Vector4Int;
+typedef Vector< uint32_t, 2 > Vector2UInt;
+typedef Vector< uint32_t, 3 > Vector3UInt;
+typedef Vector< uint32_t, 4 > Vector4UInt;
 
 template < typename T, size_t M, size_t N >
 struct Matrix;
@@ -2245,7 +2269,7 @@ template < typename T, size_t M, size_t N > const Matrix< T, M, N > Matrix< T, M
 	Matrix< T, M, N > Result( 0 );
 	auto& Diagonal = Result.diagonal;
 
-	for ( int i = 0; i < Diagonal.GetDimensions(); ++i )
+	for ( int i = 0; i < Diagonal.GetSize(); ++i )
 	{
 		Diagonal[ i ] = static_cast< T >( 1 );
 	}
@@ -2922,7 +2946,7 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 	template < typename U, typename V, typename W >
 	inline static Matrix< T, 4 > CreateLookAt( const Vector< U, 3 >& a_Eye, const Vector< V, 3 >& a_Centre, const Vector< W, 3 >& a_Up )
 	{
-		auto Forward = Math::Normalize( a_Eye - a_Centre );
+		auto Forward = Math::Normalize( a_Centre - a_Eye );
 		auto Right = Math::Cross( a_Up, Forward );
 		auto Up = Math::Cross( Forward, Right );
 
@@ -2930,18 +2954,18 @@ struct Matrix< T, 4 > : public IMatrix< T, 4 >
 			static_cast< T >( Right.x ),
 			static_cast< T >( Up.x ),
 			static_cast< T >( Forward.x ),
-			static_cast< T >( -Math::Dot( Right, a_Eye ) ),
+			static_cast< T >( 1 ),
 			static_cast< T >( Right.y ),
 			static_cast< T >( Up.y ),
 			static_cast< T >( Forward.y ),
-			static_cast< T >( -Math::Dot( Up, a_Eye ) ),
+			static_cast< T >( 1 ),
 			static_cast< T >( Right.z ),
 			static_cast< T >( Up.z ),
 			static_cast< T >( Forward.z ),
+			static_cast< T >( 1 ),
+			static_cast< T >( -Math::Dot( Right, a_Eye ) ),
+			static_cast< T >( -Math::Dot( Up, a_Eye ) ),
 			static_cast< T >( -Math::Dot( Forward, a_Eye ) ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
-			static_cast< T >( 0 ),
 			static_cast< T >( 1 ) );
 	}
 

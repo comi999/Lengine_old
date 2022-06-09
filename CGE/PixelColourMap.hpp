@@ -19,6 +19,39 @@ public:
 
 	static bool Initialize()
 	{
+		//0.2989 * R + 0.5870 * G + 0.1140 * B
+		/*for ( int i = 0; i < 16; ++i )
+		{
+			Colour& c = SeedColours[ i ];
+			Vector3 crgb = { ( float )c.R / 255, ( float )c.G / 255, ( float )c.B / 255 };
+			float weighting = 0.2989 * crgb.x + 0.5870 * crgb.y + 0.1140 * crgb.z;
+			Vector3 n( weighting );
+			c.R = 255 * n.x;
+			c.G = 255 * n.y;
+			c.B = 255 * n.z;
+		}*/
+
+		// sepia
+		//tr = 0.393R + 0.769G + 0.189B
+		//tg = 0.349R + 0.686G + 0.168B
+		//tb = 0.272R + 0.534G + 0.131B
+		/*for ( int i = 0; i < 16; ++i )
+		{
+			Colour& c = SeedColours[ i ];
+			Vector3 crgb = { ( float )c.R / 255, ( float )c.G / 255, ( float )c.B / 255 };
+
+			Vector3 n;
+			n.x = 0.393 * crgb.x + 0.769 * crgb.y + 0.189 * crgb.z;
+			n.y = 0.349 * crgb.x + 0.686 * crgb.y + 0.168 * crgb.z;
+			n.z = 0.272 * crgb.x + 0.534 * crgb.y + 0.131 * crgb.z;
+
+			n = Math::Clamp( n, Vector3::Zero, Vector3::One );
+
+			c.R = 255 * n.x;
+			c.G = 255 * n.y;
+			c.B = 255 * n.z;
+		}*/
+
 		if ( s_Active.Load() )
 		{
 			return true;
@@ -163,10 +196,28 @@ public:
 		return s_Active;
 	}
 
-	static Colour SeedColours[ 376 ];
+	inline static Colour SeedColours[ 376 ] =
+	{
+		/*Black         */  { 0,   0,   0   },
+		/*Dark_Blue     */  { 255, 0,   0   },
+		/*Dark_Green    */  { 0,   255, 0   },
+		/*Dark_Cyan     */  { 0,   0,   255 },
+		/*Dark_Red      */  { 255, 255, 0   },
+		/*Dark_Magenta  */  { 255, 0,   255 },
+		/*Dark_Yellow   */  { 0,   255, 255 },
+		/*Dark_White    */  { 255, 255, 255 },
+		/*Bright_Black  */  { 85,  85,  85  },
+		/*Bright_Blue   */  { 170, 85,  85  },
+		/*Bright_Green  */  { 85,  170, 85  },
+		/*Bright_Cyan   */  { 85,  85,  170 },
+		/*Bright_Red    */  { 170, 170, 85  },
+		/*Bright_Magenta*/  { 170, 85,  170 },
+		/*Bright_Yellow */  { 85,  170, 170 },
+		/*White         */  { 170, 170, 170 }
+	};
 
 private:
 
-	Pixel* m_PixelMap;
+	Pixel*                m_PixelMap;
 	static PixelColourMap s_Active;
 };

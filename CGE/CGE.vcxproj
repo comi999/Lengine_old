@@ -165,7 +165,6 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
-    <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Rendering.cpp" />
@@ -208,7 +207,6 @@
     <ClInclude Include="RenderMode.hpp" />
     <ClInclude Include="RenderObject.hpp" />
     <ClInclude Include="RenderStage.hpp" />
-    <ClInclude Include="RenderState.hpp" />
     <ClInclude Include="Segment.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Math.hpp" />
@@ -233,6 +231,7 @@
     <ClInclude Include="Tree.hpp" />
     <ClInclude Include="TypeMap.hpp" />
     <ClInclude Include="TypeMapNew.hpp" />
+    <ClInclude Include="Utilities.hpp" />
     <ClInclude Include="Vertex.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

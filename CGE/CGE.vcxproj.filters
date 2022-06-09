@@ -49,9 +49,6 @@
     <ClCompile Include="RenderPipeline.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConsoleWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pixel.hpp">
@@ -192,9 +189,6 @@
     <ClInclude Include="RenderObject.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderState.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="RenderBuffer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -211,6 +205,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Frustum.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

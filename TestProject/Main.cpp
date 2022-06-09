@@ -13,26 +13,58 @@
 #include "Resource.hpp"
 #include "ConsoleWindow.hpp"
 #include "Rendering.hpp"
-
+#include "Math.hpp"
 #include <thread>
 #include <iostream>
 
-void Shader_Vertex()
-{
-	auto& i_Position = Rendering::Layout< 0 >::In< Vector2 >::Value();
-	auto& i_Colour   = Rendering::Layout< 1 >::In< Vector3 >::Value();
-	auto& o_Position = Rendering::Position;
-	auto& o_Colour   = Rendering::Varying< "Colour"_H, Vector4 >::Out::Value();
+#define GLM_LEFT_HANDED
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
-	o_Position = Vector4( i_Position, 0.0f, 1.0f );
-	o_Colour   = Vector4( i_Colour, 1.0f );
+DefineShader( Basic_Vertex )
+{
+	Uniform( Matrix4, PVM );
+	Attribute( 0, Vector4, i_Position );
+	Attribute( 1, Vector4, i_Colour );
+	Varying_Out( Vector4, colour );
+
+	Rendering::Position = Math::Multiply( PVM, i_Position );
+	colour = i_Colour;
 }
-void Shader_Fragment()
-{
-	auto& i_Colour = Rendering::Varying< "Colour"_H, Vector4 >::In::Value();
-	auto& o_Colour = Rendering::FragColour;
 
-	o_Colour = i_Colour;
+DefineShader( Basic_Fragment )
+{
+	Varying_In( Vector4, colour );
+
+	Rendering::FragColour = colour;
+}
+
+DefineShader( Lit_Test_Vertex )
+{
+	Uniform( Matrix4, PVM );
+	Uniform( Vector3, Light );
+
+	Attribute( 0, Vector4, i_Position );
+	Attribute( 1, Vector4, i_Colour );
+	Attribute( 2, Vector3, i_Normal );
+
+	Varying_Out( Vector3, lit );
+	Varying_Out( Vector4, colour );
+
+	colour = i_Colour;
+	Rendering::Position = Math::Multiply( PVM, i_Position );
+	Vector3 normal = Math::Multiply( PVM, Vector4( i_Normal, 1.0f ) );
+	auto intensity = Math::Normalize( Light - Vector3( Rendering::Position ) );
+	lit = Vector3( 0.5f * Math::Dot( intensity, Math::Normalize( normal ) ) + 0.5f );
+}
+
+DefineShader( Lit_Test_Fragment )
+{
+	Uniform( Vector3, Light );
+	Varying_In( Vector3, lit );
+	Varying_In( Vector4, colour );
+
+	Rendering::FragColour = Vector4( lit * Vector3( colour ), 1.0f );
 }
 
 ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
@@ -92,66 +124,281 @@ ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
 	return ProgramID;
 }
 
-int main()
+void RunCubeDemo()
 {
 	PixelColourMap::Initialize();
-	
-	auto* window = ConsoleWindow::Create( "SomeTitle", { 64, 64 }, { 8, 8 } );
-	ConsoleWindow::MakeContextCurrent( window );
 
+	auto* window = ConsoleWindow::Create( "Title", { 64, 64 }, { 8, 8 } );
+	ConsoleWindow::MakeContextCurrent( window );
+	Rendering::Init();
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
 	Rendering::BindVertexArray( vao );
 
-	BufferHandle vbo;
-	Rendering::GenBuffers( 1, &vbo );
-	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo );
+	BufferHandle vbo[ 3 ];
+	Rendering::GenBuffers( 3, vbo );
 
-	/*float vertices[] = {
-		-0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-		0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
-	};*/
-
-	float vertices[] = {
-		+0.0f, +0.5f, 1.0f, 0.0f, 0.0f,
-		+0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+	Vector4 cube_positions[] = {
+		{ +1, +1, -1, +1 },
+		{ -1, +1, -1, +1 },
+		{ -1, -1, -1, +1 },
+		{ +1, -1, -1, +1 },
+		{ +1, +1, +1, +1 },
+		{ -1, +1, +1, +1 },
+		{ -1, -1, +1, +1 },
+		{ +1, -1, +1, +1 }
 	};
 
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::STATIC_DRAW );
+	const Vector4 cube_colours[] = {
+		{ 1, 0, 0, 1 },
+		{ 0, 1, 0, 1 },
+		{ 0, 0, 1, 1 },
+		{ 1, 0, 1, 1 },
+		{ 0, 0, 1, 1 },
+		{ 1, 1, 0, 1 },
+		{ 1, 1, 1, 1 },
+		{ 0, 0, 1, 1 }
+	};
 
-	Rendering::VertexAttribPointer( 0, 2, DataType::FLOAT, false, 5 * sizeof( float ), ( void* )0 );
+	const Vector3 cube_normals[] = {
+		{ +1, +1, -1 },
+		{ -1, +1, -1 },
+		{ -1, -1, -1 },
+		{ +1, -1, -1 },
+		{ +1, +1, +1 },
+		{ -1, +1, +1 },
+		{ -1, -1, +1 },
+		{ +1, -1, +1 }
+	};
+
+	Vector4 vertices_positions[] = {
+		cube_positions[ 0 ], cube_positions[ 1 ], cube_positions[ 2 ],
+		cube_positions[ 0 ], cube_positions[ 2 ], cube_positions[ 3 ],
+		cube_positions[ 1 ], cube_positions[ 5 ], cube_positions[ 6 ],
+		cube_positions[ 1 ], cube_positions[ 6 ], cube_positions[ 2 ],
+		cube_positions[ 5 ], cube_positions[ 4 ], cube_positions[ 7 ],
+		cube_positions[ 5 ], cube_positions[ 7 ], cube_positions[ 6 ],
+		cube_positions[ 4 ], cube_positions[ 0 ], cube_positions[ 3 ],
+		cube_positions[ 4 ], cube_positions[ 3 ], cube_positions[ 7 ],
+		cube_positions[ 4 ], cube_positions[ 5 ], cube_positions[ 1 ],
+		cube_positions[ 4 ], cube_positions[ 1 ], cube_positions[ 0 ],
+		cube_positions[ 3 ], cube_positions[ 2 ], cube_positions[ 6 ],
+		cube_positions[ 3 ], cube_positions[ 6 ], cube_positions[ 7 ],
+	};
+
+	Vector4 vertices_colours[] = {
+		cube_colours[ 0 ], cube_colours[ 1 ], cube_colours[ 2 ],
+		cube_colours[ 0 ], cube_colours[ 2 ], cube_colours[ 3 ],
+		cube_colours[ 1 ], cube_colours[ 5 ], cube_colours[ 6 ],
+		cube_colours[ 1 ], cube_colours[ 6 ], cube_colours[ 2 ],
+		cube_colours[ 5 ], cube_colours[ 4 ], cube_colours[ 7 ],
+		cube_colours[ 5 ], cube_colours[ 7 ], cube_colours[ 6 ],
+		cube_colours[ 4 ], cube_colours[ 0 ], cube_colours[ 3 ],
+		cube_colours[ 4 ], cube_colours[ 3 ], cube_colours[ 7 ],
+		cube_colours[ 4 ], cube_colours[ 5 ], cube_colours[ 1 ],
+		cube_colours[ 4 ], cube_colours[ 1 ], cube_colours[ 0 ],
+		cube_colours[ 3 ], cube_colours[ 2 ], cube_colours[ 6 ],
+		cube_colours[ 3 ], cube_colours[ 6 ], cube_colours[ 7 ],
+	};
+
+	Vector3 vertices_normals[] = {
+		cube_normals[ 0 ], cube_normals[ 1 ], cube_normals[ 2 ],
+		cube_normals[ 0 ], cube_normals[ 2 ], cube_normals[ 3 ],
+		cube_normals[ 1 ], cube_normals[ 5 ], cube_normals[ 6 ],
+		cube_normals[ 1 ], cube_normals[ 6 ], cube_normals[ 2 ],
+		cube_normals[ 5 ], cube_normals[ 4 ], cube_normals[ 7 ],
+		cube_normals[ 5 ], cube_normals[ 7 ], cube_normals[ 6 ],
+		cube_normals[ 4 ], cube_normals[ 0 ], cube_normals[ 3 ],
+		cube_normals[ 4 ], cube_normals[ 3 ], cube_normals[ 7 ],
+		cube_normals[ 4 ], cube_normals[ 5 ], cube_normals[ 1 ],
+		cube_normals[ 4 ], cube_normals[ 1 ], cube_normals[ 0 ],
+		cube_normals[ 3 ], cube_normals[ 2 ], cube_normals[ 6 ],
+		cube_normals[ 3 ], cube_normals[ 6 ], cube_normals[ 7 ],
+	};
+
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_positions ), vertices_positions, DataUsage::STATIC_DRAW );
+
+	Rendering::VertexAttribPointer( 0, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
-	Rendering::VertexAttribPointer( 1, 3, DataType::FLOAT, false, 5 * sizeof( float ), ( void* )( 2 * sizeof( float ) ) );
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_colours ), vertices_colours, DataUsage::STATIC_DRAW );
+
+	Rendering::VertexAttribPointer( 1, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_normals ), vertices_normals, DataUsage::STATIC_DRAW );
+
+	Rendering::VertexAttribPointer( 2, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
+	Rendering::EnableVertexAttribArray( 2 );
+
+	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
 	Rendering::BindVertexArray( 0 );
 
-	ShaderProgramHandle shader = LoadShaders( Shader_Vertex, Shader_Fragment );
+
+	ShaderProgramHandle shader = LoadShaders( Shader_Basic_Vertex, Shader_Basic_Fragment );
+	
+
+	Rendering::UseProgram( shader );
+	
+	Vector3 LightPosition = Vector3::Up * 5.0f + Vector3::Left * 3.0f;
+	auto LightLocation = Rendering::GetUniformLocation( shader, "Light" );
+
+	auto RotationLocation = Rendering::GetUniformLocation( shader, "PVM" );
+
+	Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 0.0f );
+	
+	//Rendering::Enable( RenderSetting::CULL_FACE );
+	Rendering::Enable( RenderSetting::DEPTH_TEST );
+	Rendering::ClearDepth( 1000.0f );
+
+	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 0.1f, 1000.0f );
+	auto View = Matrix4::CreateLookAt( Vector3( 0.0f, 2.0f, -5.0f ), Vector3::Zero, Vector3::Up );
+	Matrix4 PV = Math::Multiply( Proj, View );
+	float i = std::chrono::high_resolution_clock::now().time_since_epoch().count() * 0.0000000005;
+	
+	while ( 1 )
+	{
+		i += 0.1f;
+		auto Modl = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, i, 0.0f ) ), Vector3::One );
+		auto PVM = Math::Multiply( PV, Modl );
+		Rendering::UniformMatrix4fv( RotationLocation, 1, false, &PVM[ 0 ] );
+
+		LightPosition.x = 50.0f * Math::Cos( i );
+		LightPosition.z = 50.0f * Math::Sin( i );
+		LightPosition.y = 0.0f;
+		//Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );
+
+		Sleep( 33 );
+		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
+		Rendering::BindVertexArray( vao );
+		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 36 );
+		Rendering::BindVertexArray( 0 );
+
+		ConsoleWindow::SwapBuffers( window );
+	}
+}
+
+void RunSquaresDemo()
+{
+	PixelColourMap::Initialize();
+
+	auto* window = ConsoleWindow::Create( "Title", { 64, 64 }, { 8, 8 } );
+	ConsoleWindow::MakeContextCurrent( window );
+	Rendering::Init();
+	ArrayHandle vao;
+	Rendering::GenVertexArrays( 1, &vao );
+	Rendering::BindVertexArray( vao );
+
+	BufferHandle vbo[ 2 ];
+	Rendering::GenBuffers( 2, vbo );
+
+	const Vector4 cube_positions[] = {
+		{ +1, +1, +1, +1 },
+		{ -1, +1, +1, +1 },
+		{ -1, -1, +1, +1 },
+		{ +1, -1, +1, +1 },
+		{ +1, +1, -1, +1 },
+		{ -1, +1, -1, +1 },
+		{ -1, -1, -1, +1 },
+		{ +1, -1, -1, +1 }
+	};
+
+	const Vector4 cube_colours[] = {
+		{ 1, 0, 0, 1 },
+		{ 0, 1, 0, 1 },
+		{ 0, 0, 1, 1 },
+		{ 1, 0, 1, 1 },
+		{ 0, 0, 1, 1 },
+		{ 1, 1, 0, 1 },
+		{ 1, 1, 1, 1 },
+		{ 0, 0, 1, 1 }
+	};
+
+	Vector4 vertices_positions[] = {
+		cube_positions[ 0 ], cube_positions[ 1 ], cube_positions[ 2 ],
+		cube_positions[ 0 ], cube_positions[ 2 ], cube_positions[ 3 ],
+		cube_positions[ 1 ], cube_positions[ 5 ], cube_positions[ 6 ],
+		cube_positions[ 1 ], cube_positions[ 6 ], cube_positions[ 2 ],
+		cube_positions[ 5 ], cube_positions[ 4 ], cube_positions[ 7 ],
+		cube_positions[ 5 ], cube_positions[ 7 ], cube_positions[ 6 ],
+		cube_positions[ 4 ], cube_positions[ 0 ], cube_positions[ 3 ],
+		cube_positions[ 4 ], cube_positions[ 3 ], cube_positions[ 7 ],
+		cube_positions[ 4 ], cube_positions[ 5 ], cube_positions[ 1 ],
+		cube_positions[ 4 ], cube_positions[ 1 ], cube_positions[ 0 ],
+		cube_positions[ 3 ], cube_positions[ 2 ], cube_positions[ 6 ],
+		cube_positions[ 3 ], cube_positions[ 6 ], cube_positions[ 7 ],
+	};
+
+	Vector4 vertices_colours[] = {
+		cube_colours[ 0 ], cube_colours[ 1 ], cube_colours[ 2 ],
+		cube_colours[ 0 ], cube_colours[ 2 ], cube_colours[ 3 ],
+		cube_colours[ 1 ], cube_colours[ 5 ], cube_colours[ 6 ],
+		cube_colours[ 1 ], cube_colours[ 6 ], cube_colours[ 2 ],
+		cube_colours[ 5 ], cube_colours[ 4 ], cube_colours[ 7 ],
+		cube_colours[ 5 ], cube_colours[ 7 ], cube_colours[ 6 ],
+		cube_colours[ 4 ], cube_colours[ 0 ], cube_colours[ 3 ],
+		cube_colours[ 4 ], cube_colours[ 3 ], cube_colours[ 7 ],
+		cube_colours[ 4 ], cube_colours[ 5 ], cube_colours[ 1 ],
+		cube_colours[ 4 ], cube_colours[ 1 ], cube_colours[ 0 ],
+		cube_colours[ 3 ], cube_colours[ 2 ], cube_colours[ 6 ],
+		cube_colours[ 3 ], cube_colours[ 6 ], cube_colours[ 7 ],
+	};
+
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_positions ), vertices_positions, DataUsage::STATIC_DRAW );
+
+	Rendering::VertexAttribPointer( 0, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
+	Rendering::EnableVertexAttribArray( 0 );
+
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_colours ), vertices_colours, DataUsage::STATIC_DRAW );
+
+	Rendering::VertexAttribPointer( 1, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
+	Rendering::EnableVertexAttribArray( 1 );
+
+	//-------------------------------------------------------------
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
+	Rendering::BindVertexArray( 0 );
+
+	ShaderProgramHandle shader = LoadShaders( Shader_Basic_Vertex, Shader_Basic_Fragment );
+
+	auto RotationLocation = Rendering::GetUniformLocation( shader, "PVM" );
+	Rendering::UseProgram( shader );
+
+	//Rendering::Enable( RenderSetting::CULL_FACE );
+	Rendering::Enable( RenderSetting::DEPTH_TEST );
+	Rendering::ClearDepth( 0.00000f );
+	Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 0.0f );
+
+	float rotation = 0.0f;
+	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f );
+	auto View = Matrix4::CreateLookAt( Vector3( 10.0f, 2.0f, -5.0f ), Vector3::Zero, Vector3::Up );
+
+	Matrix4 PV = Math::Multiply( Proj, View );
 	float i = 0.0f;
 	while ( 1 )
 	{
-		/*vertices[ 0 ] = 0.5f * Math::Sin( i += 0.1f );
-		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo );
-		Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices ), vertices, DataUsage::STATIC_DRAW );
-		Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );*/
+		i += 0.1f;
+		auto Modl = Matrix4::CreateTransform( Vector3( Math::Cos( i ), 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, i, 0.0f ) ), Vector3::One );
+		auto PVM = Math::Multiply( PV, Modl );
+		Rendering::UniformMatrix4fv( RotationLocation, 1, false, &PVM[ 0 ] );
 
-		Sleep( 66 );
-		Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 0.0f );
-		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT );
-		Rendering::UseProgram( shader );
+		Sleep( 33 );
+		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
 		Rendering::BindVertexArray( vao );
-		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 3 );
+		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 36 );
 		Rendering::BindVertexArray( 0 );
+
 		ConsoleWindow::SwapBuffers( window );
 	}
+}
 
+void RunOldDemo()
+{
 	//CGE::Initialize( "Some title", { 64, 64 }, { 1, 1 } );
 
 	//auto landscape = Resource::GetOrLoad< Texture >( "grass_diffuse" );
@@ -302,6 +549,15 @@ int main()
 
 	//			  //CameraObject.GetTransform()->SetGlobalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetGlobalPosition() ) );
 	//		  } );
+}
+
+int main()
+{
+	
+	RunCubeDemo();
+	//RunSquaresDemo();
+	//RunOldDemo();
+	
 
 
 	return 0;

@@ -3,40 +3,36 @@
 #include "File.hpp"
 #include "Colour.hpp"
 
-class Texture
+class Texture2D
 {
 public:
 
-	Texture()
-		: m_Data( nullptr )
+	Texture2D()
+		: m_Size( 0 )
+		, m_Data( nullptr )
 	{ }
 
-	Texture( Vector2Int a_Size )
+	Texture2D( Vector2Int a_Size )
 		: m_Size( a_Size )
 		, m_Data( new Colour[ a_Size.x * a_Size.y ] )
 	{ }
 
-	Texture( Vector2Int a_Size, Colour a_Colour )
+	Texture2D( Vector2Int a_Size, Colour a_Colour )
 		: m_Size( a_Size )
 		, m_Data( new Colour[ a_Size.x * a_Size.y ] { a_Colour } )
 	{ }
 
-	Texture( Colour a_Colour )
+	Texture2D( Colour a_Colour )
 		: m_Size( Vector2Int::One )
 		, m_Data( new Colour( a_Colour ) )
 	{ }
 
-	Texture( const File& a_Path )
+	~Texture2D()
 	{
-		// Need to load a .texture file
+		delete[] m_Data;
 	}
 
-	~Texture()
-	{
-		
-	}
-
-	inline Vector2Int GetDimensions() const
+	inline Vector2Int GetSize() const
 	{
 		return m_Size;
 	}
@@ -56,9 +52,9 @@ public:
 		return m_Data;
 	}
 
-	const Colour* GetData() const
+	inline const Colour* GetData() const
 	{
-
+		return m_Data;
 	}
 
 	inline Colour operator[]( size_t a_Index ) const
