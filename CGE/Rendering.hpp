@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <iostream>
 #include <array>
 #include <vector>
 #include <bitset>
@@ -171,10 +172,19 @@ enum class TextureSetting : uint32_t
 	ALPHA,
 	ZERO,
 	ONE,
+
+	// Texture data format
+	UNSIGNED_BYTE, 
+	UNSIGNED_SHORT_5_6_5, 
+	UNSIGNED_SHORT_4_4_4_4, 
+	UNSIGNED_SHORT_5_5_5_1,
 };
 
 enum class TextureFormat : uint8_t
 {
+	ALPHA,
+	LUMINANCE,
+	LUMINANCE_ALPHA,
 	RGB,
 	RGBA
 };
@@ -247,6 +257,14 @@ typedef uint32_t ArrayHandle;
 typedef uint32_t TextureHandle;
 typedef uint32_t ShaderHandle;
 typedef uint32_t ShaderProgramHandle;
+
+struct Sampler2D
+{
+	typedef Vector4 Output;
+	typedef Vector2 Input;
+	static constexpr TextureTarget Target = TextureTarget::TEXTURE_2D;
+	uint32_t Location;
+};
 
 class Rendering;
 
@@ -360,7 +378,9 @@ public:
 	static void CullFace( CullFaceMode a_CullFace );
 
 	// Textures
-	static void ActiveTexture( uint32_t a_ActiveTexture );
+	static void ActiveTexture( uint32_t a_ActiveTexture );	
+	static void GenTextures( size_t a_Count, TextureHandle* a_Handles );
+	static void BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle );
 	static void TexParameterf( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, float a_Value );
 	static void TexParameterfv( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, const float* a_Value );
 	static void TexParameteri( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, int32_t a_Value );
@@ -373,10 +393,10 @@ public:
 	static void TextureParameteri( TextureHandle a_Handle, TextureParameter a_TextureParameter, const int32_t* a_Value );
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, uint32_t a_Value );
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, const uint32_t* a_Value );
-	static void GenTextures( size_t a_Count, TextureHandle* a_Handles );
-	static void BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle );
+	// Need to look into the Tex/ture/ParameterI* variants.
+	
 	static void TexImage1D( /*something*/ );
-	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, DataType a_DataType, void* a_Data );
+	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data );
 	static void TexImage3D( /*something*/ );
 	static void GenerateMipmap( TextureTarget a_TextureTarget );
 
@@ -415,7 +435,6 @@ public:
 	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
 	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
 	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	//static void Uniform
 
 	//----------SHADER_ACCESS--------------
 
@@ -542,6 +561,20 @@ public:
 
 		inline static OnStart s_Setup = Setup;
 	};
+
+	template < typename _Type >
+	static typename _Type::Output Sample( _Type a_Sampler, const typename _Type::Input& a_Input )
+	{
+		auto Handle = s_TextureUnits[ a_Sampler.Location ][ ( uint32_t )_Type::Target ];
+		auto& Target = s_TextureRegistry[ Handle ];
+		auto& Dimensions = Target.Dimensions;
+		auto r = Vector2Int( ( Dimensions.x - 1 ) * a_Input.x, ( Dimensions.y - 1 ) * a_Input.y );
+		uint32_t Position = r.y * Dimensions.x + r.x;
+		const Colour* Data = reinterpret_cast< const Colour* >( Target.Data ) + Position;
+
+		static constexpr float Denom = 1.0f / 255;
+		return { Denom * Data->R, Denom * Data->G, Denom * Data->B, Denom * Data->A };
+	}
 
 private:
 
@@ -783,11 +816,11 @@ private:
 		uint8_t*   m_Begin;
 		uint8_t*   m_Data;
 	};
-	class TextureBuffer
+	class Texture
 	{
 	public:
 
-		TextureBuffer()
+		Texture()
 			: TextureMinLOD( -1000 )
 			, TextureMaxLOD( 1000 )
 			, TextureMaxLevel( 1000 )
@@ -795,32 +828,37 @@ private:
 			, TextureSwizzleG( 1 )
 			, TextureSwizzleB( 2 )
 			, TextureSwizzleA( 3 )
+			, Data( nullptr )
+			, Dimensions( 0 )
 		{ }
 
-		uint8_t DepthStencilTextureMode : 1;
-		int32_t TextureBaseLevel;
-		Vector4 TextureBorderColour;
-		uint8_t TextureCompareFunc      : 3;
-		uint8_t TextureCompareMode      : 1;
-		float   TextureLODBias;
-		int8_t  TextureMagFilter        : 1;
-		int8_t  TextureMinFilter        : 3;
-		float   TextureMinLOD;
-		float   TextureMaxLOD;
-		int32_t TextureMaxLevel;
-		int8_t  TextureSwizzleR         : 3;
-		int8_t  TextureSwizzleG         : 3;
-		int8_t  TextureSwizzleB         : 3;
-		int8_t  TextureSwizzleA         : 3;
-		uint8_t TextureWrapS            : 3;
-		uint8_t TextureWrapT            : 3;
-		uint8_t TextureWrapR            : 3;
-
+		uint8_t     DepthStencilTextureMode : 1;
+		int32_t     TextureBaseLevel;
+		Vector4     TextureBorderColour;
+		uint8_t     TextureCompareFunc      : 3;
+		uint8_t     TextureCompareMode      : 1;
+		float       TextureLODBias;
+		int8_t      TextureMagFilter        : 1;
+		int8_t      TextureMinFilter        : 3;
+		float       TextureMinLOD;
+		float       TextureMaxLOD;
+		int32_t     TextureMaxLevel;
+		int8_t      TextureSwizzleR         : 3;
+		int8_t      TextureSwizzleG         : 3;
+		int8_t      TextureSwizzleB         : 3;
+		int8_t      TextureSwizzleA         : 3;
+		uint8_t     TextureWrapS            : 3;
+		uint8_t     TextureWrapT            : 3;
+		uint8_t     TextureWrapR            : 3;
+		const void* Data;
+		Vector2Int  Dimensions;
+		uint8_t     Format;
 	};
 
 	typedef std::vector< uint8_t >           Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
+	typedef std::array< TextureHandle, 10  > TextureUnit;
 
 	class BufferRegistry
 	{
@@ -896,18 +934,31 @@ private:
 			size_t Index = 0;
 			while ( m_Availability[ Index++ ] );
 			m_Availability[ Index - 1 ] = true;
+			m_Targets[ Index - 1 ] = -1;
 			return Index;
 		}
 
-		void Destroy( BufferHandle a_Handle )
+		bool Bind( TextureTarget a_Target, TextureHandle a_Handle )
 		{
-			m_Availability[ a_Handle - 1 ] = false;
-			//m_Buffers[ a_Handle - 1 ];
+			if ( m_Targets[ a_Handle - 1 ] != -1 )
+			{
+				return false;
+			}
+
+			m_Targets[ a_Handle - 1 ] = ( int8_t )a_Target;
+			return true;
 		}
 
-		inline TextureBuffer& operator[]( BufferHandle a_Handle )
+		void Destroy( TextureHandle a_Handle )
 		{
-			return m_Buffers[ a_Handle - 1 ];
+			m_Availability[ a_Handle - 1 ] = false;
+			// m_Textures[ a_Handle - 1 ] reset this
+			m_Targets[ a_Handle - 1 ] = -1;
+		}
+
+		inline Texture& operator[]( BufferHandle a_Handle )
+		{
+			return m_Textures[ a_Handle - 1 ];
 		}
 
 		inline bool Valid( TextureHandle a_Handle )
@@ -917,8 +968,9 @@ private:
 
 	private:
 
-		std::bitset< 32 >               m_Availability;
-		std::array< TextureBuffer, 32 > m_Buffers;
+		std::array< int8_t, 32 >  m_Targets;
+		std::bitset< 32 >         m_Availability;
+		std::array< Texture, 32 > m_Textures;
 	};
 	class AttributeRegistry
 	{
@@ -1314,7 +1366,7 @@ private:
 	{
 
 	}
-
+	
 	template <>
 	static void DrawArraysImpl< 3 >( uint32_t a_Begin, uint32_t a_Count )
 	{
@@ -1377,6 +1429,26 @@ private:
 				*a_P1 = Positions[ 1 ],
 				*a_P2 = Positions[ 2 ];
 
+			// Check if any point lay outside of viewport, basic clipping.
+			bool TriangleOutside = false;
+
+			for ( uint32_t i = 0; i < 3; ++i )
+			{
+				Vector4* pos = Positions[ i ];
+
+				if ( pos->x < 0 || pos->x >= ConsoleWindow::GetCurrentContext()->GetWidth() ||
+					 pos->y < 0 || pos->y >= ConsoleWindow::GetCurrentContext()->GetHeight() )
+				{
+					TriangleOutside = true;
+					break;
+				}
+			}
+
+			if ( TriangleOutside )
+			{
+				continue;
+			}
+
 			// Move this out into Rendering settings for backface culling
 
 			bool FacingForward = Math::Cross( Vector3( *a_P1 - *a_P0 ), Vector3( *a_P2 - *a_P0 ) ).z > 0.0f;
@@ -1430,7 +1502,7 @@ private:
 
 			if ( a_P0->y == a_P2->y )
 			{
-				return;
+				continue;
 			}
 
 			// Find M
@@ -1599,7 +1671,8 @@ private:
 	template < typename T >
 	static void TexParameterImpl( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, T a_Value )
 	{
-		TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+		TextureHandle Handle = s_TextureUnits[ s_ActiveTextureUnit ][ ( uint32_t )a_TextureTarget ];
+		Texture& Target = s_TextureRegistry[ Handle ];
 
 		switch ( a_TextureParameter )
 		{
@@ -1820,7 +1893,7 @@ private:
 	template < typename T >
 	static void TextureParameterImpl( TextureHandle a_Handle, TextureParameter a_TextureParameter, T a_Value )
 	{
-		TextureBuffer& Target = s_TextureRegistry[ a_Handle ];
+		Texture& Target = s_TextureRegistry[ a_Handle ];
 
 		switch ( a_TextureParameter )
 		{
@@ -2040,24 +2113,24 @@ private:
 		}
 	}
 
-
-	inline static BufferRegistry        s_BufferRegistry;
-	inline static ArrayRegistry         s_ArrayRegistry;
-	inline static TextureRegistry       s_TextureRegistry;
-	inline static AttributeRegistry     s_AttributeRegistry;
-	inline static ShaderRegistry        s_ShaderRegistry;
-	inline static ShaderProgramRegistry s_ShaderProgramRegistry;
-	inline static ArrayHandle           s_ActiveArray;
-	inline static ShaderProgramHandle   s_ActiveShaderProgram;
-	inline static BufferHandle          s_BufferTargets[ 14 ];
-	inline static TextureHandle         s_TextureTargets[ 17 ];
-	inline static UniformMap            s_UniformMap;
-	inline static VertexDataStorage     s_VertexDataStorage;
-	inline static PositionDataStorage   s_PositionDataStorage;
-	inline static StrideRegistry        s_VaryingStrides;
-	inline static RenderState           s_RenderState;
-	inline static DepthBuffer           s_DepthBuffer;
-	inline static Pixel                 s_ClearColour;
-	inline static float                 s_ClearDepth;
-
+	inline static BufferRegistry                  s_BufferRegistry;
+	inline static ArrayRegistry                   s_ArrayRegistry;
+	inline static TextureRegistry                 s_TextureRegistry;
+	inline static AttributeRegistry               s_AttributeRegistry;
+	inline static ShaderRegistry                  s_ShaderRegistry;
+	inline static ShaderProgramRegistry           s_ShaderProgramRegistry;
+	inline static ArrayHandle                     s_ActiveArray;
+	inline static ShaderProgramHandle             s_ActiveShaderProgram;
+	inline static std::array< BufferHandle, 14 >  s_BufferTargets;
+	inline static UniformMap                      s_UniformMap;
+	inline static VertexDataStorage               s_VertexDataStorage;
+	inline static PositionDataStorage             s_PositionDataStorage;
+	inline static StrideRegistry                  s_VaryingStrides;
+	inline static RenderState                     s_RenderState;
+	inline static DepthBuffer                     s_DepthBuffer;
+	inline static Pixel                           s_ClearColour;
+	inline static float                           s_ClearDepth;
+	inline static std::array< TextureUnit, 32 >   s_TextureUnits;
+	inline static uint32_t                        s_ActiveTextureUnit;
+	inline static uint32_t                        s_ActiveTextureTarget;
 };

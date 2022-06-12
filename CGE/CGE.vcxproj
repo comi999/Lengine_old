@@ -177,7 +177,6 @@
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
-    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />
@@ -198,7 +197,6 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="File.hpp" />
-    <ClInclude Include="RenderBuffer.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -206,7 +204,6 @@
     <ClInclude Include="RenderInstruction.hpp" />
     <ClInclude Include="RenderMode.hpp" />
     <ClInclude Include="RenderObject.hpp" />
-    <ClInclude Include="RenderStage.hpp" />
     <ClInclude Include="Segment.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Math.hpp" />

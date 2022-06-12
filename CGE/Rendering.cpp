@@ -750,6 +750,11 @@ void Rendering::DeleteProgram( ShaderProgramHandle a_ShaderProgramHandle )
 	s_ShaderProgramRegistry.Destroy( a_ShaderProgramHandle );
 }
 
+void Rendering::ActiveTexture( uint32_t a_ActiveTexture )
+{
+	s_ActiveTextureUnit = a_ActiveTexture;
+}
+
 void Rendering::TexParameterf( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, float a_Value )
 {
 	TexParameterImpl( a_TextureTarget, a_TextureParameter, a_Value );
@@ -817,11 +822,22 @@ void Rendering::GenTextures( size_t a_Count, TextureHandle* a_Handles )
 
 void Rendering::BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle )
 {
-	s_TextureTargets[ ( uint32_t )a_TextureTarget ] = a_Handle;
+	if ( s_TextureRegistry.Bind( a_TextureTarget, a_Handle ) )
+	{
+		s_ActiveTextureTarget = ( uint32_t )a_TextureTarget;
+	}
+
+	auto& ActiveTextureUnit = s_TextureUnits[ s_ActiveTextureUnit ];
+	ActiveTextureUnit[ s_ActiveTextureTarget ] = a_Handle;
 }
 
-void Rendering::TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, DataType a_DataType, void* a_Data )
+void Rendering::TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data )
 {
-	TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+	//TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+	auto Handle = s_TextureUnits[ s_ActiveTextureUnit ][ ( uint32_t )a_TextureTarget ];
+	auto& Target = s_TextureRegistry[ Handle ];
+	Target.Data = a_Data;
+	Target.Dimensions = { a_Width, a_Height };
 
+	// Need to implement rest of all the settings.
 }
