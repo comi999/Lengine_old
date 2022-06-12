@@ -6,11 +6,6 @@
 
 int main( int argc, char** argv )
 {
-    ResourcePackager p;
-    p.BuildPackage( Directory() );
-
-    return 0;
-
     if ( argc != 2 )
     {
         return 1;

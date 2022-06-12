@@ -2,7 +2,7 @@
 #include <string>
 #include "File.hpp"
 
-class Texture;
+class Texture2D;
 class Mesh;
 class Material;
 
@@ -45,7 +45,7 @@ private:
 		return ResourceSize;
 	}
 
-	bool Load( Texture& o_Texture, File& a_File ) const;
+	bool Load( Texture2D& o_Texture, File& a_File ) const;
 	bool Load( Mesh& o_Mesh, File& a_File ) const;
 	bool Load( Material& o_Material, File& a_File ) const;
 };

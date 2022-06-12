@@ -19,9 +19,6 @@
     <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Time.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Name.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -187,12 +184,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderObject.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderBuffer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderStage.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderStage.hpp">

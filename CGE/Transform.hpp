@@ -713,12 +713,12 @@ public:
 		}
 	}
 
-	Matrix4      m_GlobalMatrix;
-	Matrix4      m_LocalMatrix;
-	Vector3      m_LocalPosition;
-	Quaternion   m_LocalRotation;
-	Vector3      m_LocalScale;
-	bool         m_IsDirty;
-	GameObjectID m_Parent;
+	Matrix4                     m_GlobalMatrix;
+	Matrix4                     m_LocalMatrix;
+	Vector3                     m_LocalPosition;
+	Quaternion                  m_LocalRotation;
+	Vector3                     m_LocalScale;
+	bool                        m_IsDirty;
+	GameObjectID                m_Parent;
 	std::vector< GameObjectID > m_Children;
 };
