@@ -575,8 +575,8 @@ void RunLitSpearDemo()
 	auto AmbientLightLoc = Rendering::GetUniformLocation( shader, "AmbientLight" );
 
 	// Set light colour
-	Rendering::Uniform4f( LightColourLoc, 1.0f, 1.0f, 1.0f, 1.0f );
-	Rendering::Uniform4f( AmbientLightLoc, 0.0f, 0.0f, 0.0f, 1.0f );
+	Rendering::Uniform4f( LightColourLoc, 0.0f, 1.0f, 0.0f, 1.0f );
+	Rendering::Uniform4f( AmbientLightLoc, 0.5f, 0.5f, 0.5f, 1.0f );
 
 	TextureHandle tbo[ 3 ];
 	Rendering::GenTextures( 3, tbo );
@@ -600,7 +600,7 @@ void RunLitSpearDemo()
 
 	Rendering::Enable( RenderSetting::CULL_FACE );
 	Rendering::CullFace( CullFaceMode::BACK );
-	//Rendering::Enable( RenderSetting::DEPTH_TEST );
+	Rendering::Enable( RenderSetting::DEPTH_TEST );
 	Rendering::ClearDepth( 1000.0f );
 
 
@@ -616,16 +616,16 @@ void RunLitSpearDemo()
 
 	while ( 1 )
 	{
-		i += 0.1f;
-		auto M = Matrix4::CreateTransform( Vector3( 0.0f, -i, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, 0.0f, 0.0f ) ), Vector3::One * 2.0f );
+		i += 0.05f;
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 2.0f * Math::Sin( i ) - 3.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, i, 0.0f ) ), Vector3::One * 2.0f );
 		auto PVM = Math::Multiply( PV, M );
 		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 		Rendering::UniformMatrix4fv( PVLocation, 1, false, &PV[ 0 ] );
 		Rendering::UniformMatrix4fv( MLocation, 1, false, &M[ 0 ] );
 
-		LightObject.x = 1.0f;//Math::Cos( i );
+		LightObject.x = Math::Cos( i );
 		LightObject.y = 0.0f;
-		LightObject.z = 0.0;//Math::Sin( i );
+		LightObject.z = Math::Sin( i );
 		LightObject = Math::Multiply( M, Vector4( LightObject, 1.0f ) );
 		Rendering::Uniform3f( LightObjectLoc, LightObject.x, LightObject.y, LightObject.z );
 

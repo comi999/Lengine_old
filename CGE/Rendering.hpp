@@ -244,10 +244,11 @@ void Shader_##Name ();       \
 template <> void* ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
 void Shader_##Name ()
 
-#define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value();
-#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Attribute< Location, Type >::Value();
-#define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In();
-#define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out();
+#define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value()
+#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Attribute< Location, Type >::Value()
+#define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In()
+#define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out()
+#define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
 
 template < Hash _ShaderName >
 void* ShaderAddress = nullptr;
@@ -559,6 +560,18 @@ public:
 		}
 
 		inline static OnStart s_Setup = Setup;
+	};
+
+	template < typename _Type, Hash _Name >
+	class InOut
+	{
+	public:
+
+		static _Type& Value()
+		{
+			static _Type Value;
+			return Value;
+		}
 	};
 
 	template < typename _Type >
@@ -1636,12 +1649,12 @@ private:
 		s_PositionStorage.Reset();
 		s_InterpolatedStorage.Prepare( a_Stride );
 
-		P[ 0 ].Set( s_PositionStorage.Head() + 0, 1 );
-		P[ 1 ].Set( s_PositionStorage.Head() + 1, 1 );
-		P[ 2 ].Set( s_PositionStorage.Head() + 2, 1 );
-		V[ 0 ].Set( s_VertexStorage  .Head() + 0 * a_Stride, a_Stride );
-		V[ 1 ].Set( s_VertexStorage  .Head() + 1 * a_Stride, a_Stride );
-		V[ 2 ].Set( s_VertexStorage  .Head() + 2 * a_Stride, a_Stride );
+		P[ 0 ].Set( s_PositionStorage.Head() + 0ul, 1 );
+		P[ 1 ].Set( s_PositionStorage.Head() + 1ul, 1 );
+		P[ 2 ].Set( s_PositionStorage.Head() + 2ul, 1 );
+		V[ 0 ].Set( s_VertexStorage  .Head() + 0ul * a_Stride, a_Stride );
+		V[ 1 ].Set( s_VertexStorage  .Head() + 1ul * a_Stride, a_Stride );
+		V[ 2 ].Set( s_VertexStorage  .Head() + 2ul * a_Stride, a_Stride );
 
 		for ( ; a_Begin < a_End; a_Begin += 3
 			  , P[ 0 ].Advance( 3 )
@@ -1730,20 +1743,20 @@ private:
 			Attributes.Prepare( 7, a_Stride * sizeof( float ) ); 
 			InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
 
-			PMid  .Set( Positions .Head() + 0, 1                   );
-			PStep .Set( Positions .Head() + 1, 1                   );
-			PStepL.Set( Positions .Head() + 2, 1                   );
-			PStepR.Set( Positions .Head() + 3, 1                   );
-			PBegin.Set( Positions .Head() + 4, 1                   );
-			PL    .Set( Positions .Head() + 5, 1                   );
-			PR    .Set( Positions .Head() + 6, 1                   );
-			VMid  .Set( Attributes.Head() + 0 * a_Stride, a_Stride );
-			VStep .Set( Attributes.Head() + 1 * a_Stride, a_Stride );
-			VStepL.Set( Attributes.Head() + 2 * a_Stride, a_Stride );
-			VStepR.Set( Attributes.Head() + 3 * a_Stride, a_Stride );
-			VBegin.Set( Attributes.Head() + 4 * a_Stride, a_Stride );
-			VL    .Set( Attributes.Head() + 5 * a_Stride, a_Stride );
-			VR    .Set( Attributes.Head() + 6 * a_Stride, a_Stride );
+			PMid  .Set( Positions .Head() + 0ul, 1                   );
+			PStep .Set( Positions .Head() + 1ul, 1                   );
+			PStepL.Set( Positions .Head() + 2ul, 1                   );
+			PStepR.Set( Positions .Head() + 3ul, 1                   );
+			PBegin.Set( Positions .Head() + 4ul, 1                   );
+			PL    .Set( Positions .Head() + 5ul, 1                   );
+			PR    .Set( Positions .Head() + 6ul, 1                   );
+			VMid  .Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
+			VStep .Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
+			VStepL.Set( Attributes.Head() + 2ul * a_Stride, a_Stride );
+			VStepR.Set( Attributes.Head() + 3ul * a_Stride, a_Stride );
+			VBegin.Set( Attributes.Head() + 4ul * a_Stride, a_Stride );
+			VL    .Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
+			VR    .Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
 
 			// Find Mid point in screen space.
 			float L = ( P[ 1 ]->y - P[ 2 ]->y ) / ( P[ 0 ]->y - P[ 2 ]->y );

@@ -86,7 +86,7 @@ public:
 
     void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
     { // Remove these when rendering pipeline clipping is complete.
-        if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() || a_Coord.y < 0 || a_Coord.y >= GetHeight() ) return;
+        //if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() || a_Coord.y < 0 || a_Coord.y >= GetHeight() ) return;
         int Index = GetIndex( a_Coord );
 
 

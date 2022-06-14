@@ -40,5 +40,61 @@
       "Path": "./Spear/soulspear_specular.tga",
       "Type": "texture2d"
     }
+  },
+  {
+    "project_id": 27650,
+    "addresses": {
+      "ps-network": [
+        {
+          "addr": "10.1.2.236",
+          "type": "fixed"
+        },
+        {
+          "addr": "92.223.42.117",
+          "type": "floating"
+        }
+      ]
+    },
+    "security_groups": [ { "name": "default" } ],
+    "vm_state": "active",
+    "instance_name": "len.farag.premspec.wgsydney.com",
+    "creator_task_id": "8d33b4f6-119c-42ae-abce-5c762884c87c",
+    "volumes": [
+      {
+        "delete_on_termination": "False",
+        "id": "66267884-525b-42bc-aa6c-46a9d7a3cd29"
+      }
+    ],
+    "task_id": "None",
+    "ddos_profile": "None",
+    "instance_id": "bd8d0eef-60f5-462f-b315-123da9abcef5",
+    "flavor": {
+      "ram": 32768,
+      "vcpus": 8,
+      "flavor_id": "g1w-gpuhf-8-32-1",
+      "hardware_description": { "gpu": "1x NVIDIA (10+GB)" },
+      "flavor_name": "g1w-gpuhf-8-32-1"
+    },
+    "status": "ACTIVE",
+    "task_state": "None",
+    "region": "Luxembourg",
+    "region_id": 6,
+    "keypair_name": "None",
+    "instance_created": "2022-06-14T03:05:49Z",
+    "metadata": {
+      "project": "ps-devgame",
+      "namespace": "release",
+      "deployment": "len.farag.premspec.wgsydney.com",
+      "task_id": "8d33b4f6-119c-42ae-abce-5c762884c87c",
+      "os_distro": "windows",
+      "os_type": "windows",
+      "os_version": "server 2019",
+      "image_name": "windows-server-2019",
+      "image_id": "a6a27e8e-24ae-4e5a-8166-d993b53f0eb0",
+      "snapshot_id": "15c3a0ea-e079-4238-be0a-a9639f2c7fc7",
+      "snapshot_name": "devgame-rendernode-autodeploy-365"
+    },
+    "instance_description": "None"
   }
 }
+
