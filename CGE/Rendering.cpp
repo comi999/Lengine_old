@@ -92,7 +92,7 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 			break;
 		case RenderMode::TRIANGLE:
 		{
-			DrawArraysImpl< 0 >( a_Begin, a_Count );
+			s_ArrayProcessor( a_Begin, a_Count );
 			break;
 		}
 		default:
@@ -201,6 +201,8 @@ void Rendering::Enable( RenderSetting a_RenderSetting )
 		default:
 			break;
 	}
+
+	UpdateArrayProcessor();
 }
 
 void Rendering::Disable( RenderSetting a_RenderSetting )
@@ -220,6 +222,8 @@ void Rendering::Disable( RenderSetting a_RenderSetting )
 		default:
 			break;
 	}
+
+	UpdateArrayProcessor();
 }
 
 void Rendering::CullFace( CullFaceMode a_CullFaceMode )
@@ -246,6 +250,24 @@ void Rendering::CullFace( CullFaceMode a_CullFaceMode )
 		}
 		default:
 			break;
+	}
+
+	UpdateArrayProcessor();
+}
+
+void Rendering::DepthFunc( TextureSetting a_TextureSetting )
+{
+	switch ( a_TextureSetting )
+	{
+		case TextureSetting::LEQUAL:    s_DepthCompareFunc = DepthCompare_LEQUAL;    break;
+		case TextureSetting::GEQUAL:    s_DepthCompareFunc = DepthCompare_GEQUAL;    break;
+		case TextureSetting::LESS:      s_DepthCompareFunc = DepthCompare_LESS;      break;
+		case TextureSetting::GREATER:   s_DepthCompareFunc = DepthCompare_GREATER;   break;
+		case TextureSetting::EQUAL:     s_DepthCompareFunc = DepthCompare_EQUAL;     break;
+		case TextureSetting::NOT_EQUAL: s_DepthCompareFunc = DepthCompare_NOT_EQUAL; break;
+		case TextureSetting::ALWAYS:    s_DepthCompareFunc = DepthCompare_ALWAYS;    break;
+		case TextureSetting::NEVER:     s_DepthCompareFunc = DepthCompare_NEVER;     break;
+		default: break;
 	}
 }
 

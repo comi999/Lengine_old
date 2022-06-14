@@ -44,11 +44,11 @@ DefineShader( Basic_Fragment )
 DefineShader( Basic_Textured_Vertex )
 {
 	Uniform( Matrix4, PVM );
-	Attribute( 0, Vector4, i_Position );
-	Attribute( 3, Vector2, i_Texel );
+	Attribute( 0, Vector3, i_Position );
+	Attribute( 1, Vector2, i_Texel );
 	Varying_Out( Vector2, Texel );
 
-	Rendering::Position = Math::Multiply( PVM, i_Position );
+	Rendering::Position = Math::Multiply( PVM, Vector4( i_Position, 1.0f ) );
 	Texel = i_Texel;
 }
 
@@ -177,202 +177,87 @@ ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
 void RunCubeDemo()
 {
 	PixelColourMap::Initialize();
-
-	auto landscape = Resource::GetOrLoad< Texture2D >( "wierd" );
-	auto grass = Resource::GetOrLoad< Mesh >( "grass" );
-
-	auto* window = ConsoleWindow::Create( "Title", { 92, 92 }, { 8, 8 } );
+	auto* window = ConsoleWindow::Create( "Title", { 100, 100 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( window );
 	Rendering::Init();
+
+	// Load resources
+	auto grass = Resource::GetOrLoad< Mesh >( "grass" );
+	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "grass_diffuse" );
+
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
 	Rendering::BindVertexArray( vao );
 
-	BufferHandle vbo[ 4 ];
-	Rendering::GenBuffers( 4, vbo );
+	BufferHandle vbo[ 2 ];
+	Rendering::GenBuffers( 2, vbo );
 
-	Vector4 cube_positions[] = {
-		{ +1, +1, -1, +1 },
-		{ -1, +1, -1, +1 },
-		{ -1, -1, -1, +1 },
-		{ +1, -1, -1, +1 },
-		{ +1, +1, +1, +1 },
-		{ -1, +1, +1, +1 },
-		{ -1, -1, +1, +1 },
-		{ +1, -1, +1, +1 }
-	};
+	std::vector< Vector3 > pos_;
+	std::vector< Vector2 > tex_;
 
-	const Vector4 cube_colours[] = {
-		{ 1, 0, 0, 1 },
-		{ 0, 1, 0, 1 },
-		{ 0, 0, 1, 1 },
-		{ 1, 0, 1, 1 },
-		{ 0, 0, 1, 1 },
-		{ 1, 1, 0, 1 },
-		{ 1, 1, 1, 1 },
-		{ 0, 0, 1, 1 }
-	};
+	for ( uint32_t i = 0; i < grass->GetVertexCount(); ++i )
+	{
+		pos_.push_back( grass->m_Positions[ grass->m_Vertices[ i ][ 1 ] ] );
+		tex_.push_back( grass->m_Texels[ grass->m_Vertices[ i ][ 5 ] ] );
+	}
 
-	const Vector3 cube_normals[] = {
-		{ +1, +1, -1 },
-		{ -1, +1, -1 },
-		{ -1, -1, -1 },
-		{ +1, -1, -1 },
-		{ +1, +1, +1 },
-		{ -1, +1, +1 },
-		{ -1, -1, +1 },
-		{ +1, -1, +1 }
-	};
-
-	const Vector2 cube_texels[] = {
-		{ 1, 1 },
-		{ 0, 1 },
-		{ 0, 0 },
-		{ 1, 0 },
-
-		{ 1, 1 },
-		{ 0, 1 },
-		{ 0, 0 },
-		{ 1, 0 },
-	};
-
-	Vector4 vertices_positions[] = {
-		cube_positions[ 0 ], cube_positions[ 1 ], cube_positions[ 2 ],
-		cube_positions[ 0 ], cube_positions[ 2 ], cube_positions[ 3 ],
-		cube_positions[ 1 ], cube_positions[ 5 ], cube_positions[ 6 ],
-		cube_positions[ 1 ], cube_positions[ 6 ], cube_positions[ 2 ],
-		cube_positions[ 5 ], cube_positions[ 4 ], cube_positions[ 7 ],
-		cube_positions[ 5 ], cube_positions[ 7 ], cube_positions[ 6 ],
-		cube_positions[ 4 ], cube_positions[ 0 ], cube_positions[ 3 ],
-		cube_positions[ 4 ], cube_positions[ 3 ], cube_positions[ 7 ],
-		cube_positions[ 4 ], cube_positions[ 5 ], cube_positions[ 1 ],
-		cube_positions[ 4 ], cube_positions[ 1 ], cube_positions[ 0 ],
-		cube_positions[ 3 ], cube_positions[ 2 ], cube_positions[ 6 ],
-		cube_positions[ 3 ], cube_positions[ 6 ], cube_positions[ 7 ],
-	};
-
-	Vector4 vertices_colours[] = {
-		cube_colours[ 0 ], cube_colours[ 1 ], cube_colours[ 2 ],
-		cube_colours[ 0 ], cube_colours[ 2 ], cube_colours[ 3 ],
-		cube_colours[ 1 ], cube_colours[ 5 ], cube_colours[ 6 ],
-		cube_colours[ 1 ], cube_colours[ 6 ], cube_colours[ 2 ],
-		cube_colours[ 5 ], cube_colours[ 4 ], cube_colours[ 7 ],
-		cube_colours[ 5 ], cube_colours[ 7 ], cube_colours[ 6 ],
-		cube_colours[ 4 ], cube_colours[ 0 ], cube_colours[ 3 ],
-		cube_colours[ 4 ], cube_colours[ 3 ], cube_colours[ 7 ],
-		cube_colours[ 4 ], cube_colours[ 5 ], cube_colours[ 1 ],
-		cube_colours[ 4 ], cube_colours[ 1 ], cube_colours[ 0 ],
-		cube_colours[ 3 ], cube_colours[ 2 ], cube_colours[ 6 ],
-		cube_colours[ 3 ], cube_colours[ 6 ], cube_colours[ 7 ],
-	};
-
-	Vector3 vertices_normals[] = {
-		cube_normals[ 0 ], cube_normals[ 1 ], cube_normals[ 2 ],
-		cube_normals[ 0 ], cube_normals[ 2 ], cube_normals[ 3 ],
-		cube_normals[ 1 ], cube_normals[ 5 ], cube_normals[ 6 ],
-		cube_normals[ 1 ], cube_normals[ 6 ], cube_normals[ 2 ],
-		cube_normals[ 5 ], cube_normals[ 4 ], cube_normals[ 7 ],
-		cube_normals[ 5 ], cube_normals[ 7 ], cube_normals[ 6 ],
-		cube_normals[ 4 ], cube_normals[ 0 ], cube_normals[ 3 ],
-		cube_normals[ 4 ], cube_normals[ 3 ], cube_normals[ 7 ],
-		cube_normals[ 4 ], cube_normals[ 5 ], cube_normals[ 1 ],
-		cube_normals[ 4 ], cube_normals[ 1 ], cube_normals[ 0 ],
-		cube_normals[ 3 ], cube_normals[ 2 ], cube_normals[ 6 ],
-		cube_normals[ 3 ], cube_normals[ 6 ], cube_normals[ 7 ],
-	};
-
-	Vector2 vertices_texels[] = {
-		cube_texels[ 0 ], cube_texels[ 1 ], cube_texels[ 2 ],
-		cube_texels[ 0 ], cube_texels[ 2 ], cube_texels[ 3 ],
-		cube_texels[ 1 ], cube_texels[ 5 ], cube_texels[ 6 ],
-		cube_texels[ 1 ], cube_texels[ 6 ], cube_texels[ 2 ],
-		cube_texels[ 5 ], cube_texels[ 4 ], cube_texels[ 7 ],
-		cube_texels[ 5 ], cube_texels[ 7 ], cube_texels[ 6 ],
-		cube_texels[ 4 ], cube_texels[ 0 ], cube_texels[ 3 ],
-		cube_texels[ 4 ], cube_texels[ 3 ], cube_texels[ 7 ],
-		cube_texels[ 4 ], cube_texels[ 5 ], cube_texels[ 1 ],
-		cube_texels[ 4 ], cube_texels[ 1 ], cube_texels[ 0 ],
-		cube_texels[ 3 ], cube_texels[ 2 ], cube_texels[ 6 ],
-		cube_texels[ 3 ], cube_texels[ 6 ], cube_texels[ 7 ],
-	};
-
+	// Bind positions
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_positions ), vertices_positions, DataUsage::STATIC_DRAW );
-
-	Rendering::VertexAttribPointer( 0, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, pos_.size() * sizeof( pos_[ 0 ] ), pos_.data(), DataUsage::STATIC_DRAW );
+	Rendering::VertexAttribPointer( 0, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
+	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_colours ), vertices_colours, DataUsage::STATIC_DRAW );
-
-	Rendering::VertexAttribPointer( 1, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, tex_.size() * sizeof( tex_[ 0 ] ), tex_.data(), DataUsage::STATIC_DRAW );
+	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
-
-	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_normals ), vertices_normals, DataUsage::STATIC_DRAW );
-
-	Rendering::VertexAttribPointer( 2, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
-	Rendering::EnableVertexAttribArray( 2 );
-	
-	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 3 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_texels ), vertices_texels, DataUsage::STATIC_DRAW );
-
-	Rendering::VertexAttribPointer( 3, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
-	Rendering::EnableVertexAttribArray( 3 );
 
 	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
 	Rendering::BindVertexArray( 0 );
 
 
-	ShaderProgramHandle shader = LoadShaders( nullptr, nullptr );
-	
-
+	ShaderProgramHandle shader = LoadShaders( Shader_Basic_Textured_Vertex, Shader_Basic_Textured_Fragment );
 	Rendering::UseProgram( shader );
-	
-	//Vector3 LightPosition = Vector3::Up * 5.0f + Vector3::Left * 3.0f;
-	//auto LightLocation = Rendering::GetUniformLocation( shader, "Light" );
 
-	auto RotationLocation = Rendering::GetUniformLocation( shader, "PVM" );
+	auto PVMLocation = Rendering::GetUniformLocation( shader, "PVM" );
 	auto DiffuseTextureLoc = Rendering::GetUniformLocation( shader, "DiffuseTexture" );
 
 	TextureHandle tbo[ 1 ];
-	Rendering::ActiveTexture( 0 );
 	Rendering::GenTextures( 1, tbo );
-	Rendering::BindTexture( TextureTarget::TEXTURE_2D, tbo[ 0 ] );
-	Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), landscape->GetWidth(), landscape->GetHeight(), 0, TextureFormat(0), TextureSetting( 0 ), landscape->GetData() );
 
+	Rendering::ActiveTexture( 0 );
+	Rendering::BindTexture( TextureTarget::TEXTURE_2D, tbo[ 0 ] );
+	Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), grass_diffuse->GetWidth(), grass_diffuse->GetHeight(), 0, TextureFormat( 0 ), TextureSetting( 0 ), grass_diffuse->GetData() );
 	Rendering::Uniform1i( DiffuseTextureLoc, 0 );
 
-	Rendering::ClearColour( 1.0f, 0.5f, 0.2f, 1.0f );
-	
+	Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 1.0f );
+
+	//Rendering::Disable( RenderSetting::CULL_FACE );
 	Rendering::Enable( RenderSetting::CULL_FACE );
-	//Rendering::Enable( RenderSetting::DEPTH_TEST );
+	Rendering::CullFace( CullFaceMode::BACK );
+	Rendering::Enable( RenderSetting::DEPTH_TEST );
 	Rendering::ClearDepth( 1000.0f );
 
-	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 0.1f, 1000.0f );
-	auto View = Matrix4::CreateLookAt( Vector3( 0.0f, 2.0f, -5.0f ), Vector3::Zero, Vector3::Up );
+	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 0.1f, 100.0f );
+	Vector3 CameraPos = Vector3( 0.0f, 2.0f, -5.0f );
+	auto View = Matrix4::CreateLookAt( CameraPos, Vector3::Zero, Vector3::Up );
+	//auto View = Matrix4::CreateView( CameraPos, Quaternion::ToQuaternion( Vector3::Zero ) );
 	Matrix4 PV = Math::Multiply( Proj, View );
-	float i = std::chrono::high_resolution_clock::now().time_since_epoch().count() * 0.0000000005;
-	
+	float i = 0.0f;
+
 	while ( 1 )
 	{
-		i += 0.1f;
-		auto Modl = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, i, 0.0f ) ), Vector3::One * 2.0f );
-		auto PVM = Math::Multiply( PV, Modl );
-		Rendering::UniformMatrix4fv( RotationLocation, 1, false, &PVM[ 0 ] );
-
-
-		/*LightPosition.x = 50.0f * Math::Cos( i );
-		LightPosition.z = 50.0f * Math::Sin( i );
-		LightPosition.y = 0.0f;
-		LightPosition = Math::Multiply( PV, Vector4( LightPosition ) );
-		Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );*/
+		i += 0.05f;
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( -0.4f, i, 0.0f ) ), Vector3( 2.0f, 1.0f, 2.0f ) * 1.0f );
+		auto PVM = Math::Multiply( PV, M );
+		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 
 		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
 		Rendering::BindVertexArray( vao );
-		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, 36 );
+		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, pos_.size() );
 		Rendering::BindVertexArray( 0 );
 
 		ConsoleWindow::SwapBuffers( window );
@@ -793,11 +678,10 @@ void RunOldDemo()
 	//		  } );
 }
 
-
 int main()
 {
-	//RunCubeDemo();
-	RunLitSpearDemo();
+	RunCubeDemo();
+	//RunLitSpearDemo();
 	//RunSquaresDemo();
 	//RunOldDemo();
 	

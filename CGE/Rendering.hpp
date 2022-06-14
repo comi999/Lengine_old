@@ -376,6 +376,7 @@ public:
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
+	static void DepthFunc( TextureSetting a_TextureSetting );
 
 	// Textures
 	static void ActiveTexture( uint32_t a_ActiveTexture );	
@@ -882,6 +883,8 @@ private:
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
+	typedef bool( *DepthCompareFunc )( float, float );
+	typedef void( *ArrayProcessor )( uint32_t, uint32_t );
 
 	class BufferRegistry
 	{
@@ -1100,142 +1103,6 @@ private:
 
 		ShaderLookup m_ShaderLookup;
 		UniformArray m_Uniforms;
-	};
-	
-	//remove later
-	class AttribVector
-	{
-	public:
-
-		AttribVector() = default;
-
-		AttribVector( uint32_t a_Size, float* a_Data = nullptr )
-		{
-			m_Data.resize( a_Size );
-
-			if ( !a_Data )
-			{
-				return;
-			}
-
-			for ( uint32_t i = 0; i < a_Size; ++i )
-			{
-				m_Data[ i ] = a_Data[ i ];
-			}
-		}
-
-		AttribVector( const AttribVector& a_Vector )
-		{
-			m_Data.resize( a_Vector.m_Data.size() );
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] = a_Vector.m_Data[ i ];
-			}
-		}
-
-		AttribVector( AttribVector&& a_Vector )
-		{
-			m_Data = std::move( a_Vector.m_Data );
-		}
-
-		AttribVector& operator=( const AttribVector& a_Vector )
-		{
-			m_Data.resize( a_Vector.m_Data.size() );
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] = a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator+=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] += a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator-=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] -= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator*=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator/=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] /= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator*=( float a_Scalar )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Scalar;
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator/=( float a_Scalar )
-		{
-			a_Scalar = 1.0f / a_Scalar;
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Scalar;
-			}
-
-			return *this;
-		}
-
-		float& operator[]( uint32_t a_Index )
-		{
-			return m_Data[ a_Index ];
-		}
-
-		inline float* Data()
-		{
-			return m_Data.data();
-		}
-
-		inline size_t Size() const
-		{
-			return m_Data.size();
-		}
-
-		inline void Resize( size_t a_Size )
-		{
-			m_Data.resize( a_Size );
-		}
-
-	private:
-
-		std::vector< float > m_Data;
 	};
 	
 	template < typename T = uint8_t >
@@ -1517,9 +1384,6 @@ private:
 
 		inline void Swap( AttribSpan& a_AttribSpan )
 		{
-			/*std::swap( m_Origin, a_AttribSpan.m_Origin );
-			std::swap( m_Size, a_AttribSpan.m_Size );*/
-
 			for ( uint32_t i = 0; i < a_AttribSpan.m_Size; ++i )
 			{
 				std::swap( m_Origin[ i ], a_AttribSpan.m_Origin[ i ] );
@@ -1537,22 +1401,32 @@ private:
 	public:
 
 		RenderState()
-			: BackCull( true )
+			: AlphaBlend( false )
+			, Perspective( true )
+			, Viewport( false )
+			, CullFace( true )
+			, FrontCull( false )
+			, BackCull( true )
+			, DepthTest( true )
+			, Clip( false )
 		{ }
 
-		bool AlphaBlend    : 1;
-		bool CullFace      : 1;
-		bool FrontCull     : 1;
-		bool BackCull      : 1;
-		bool DepthTest     : 1;
-		bool Clip          : 1;
+		bool AlphaBlend  : 1;
+		bool Perspective : 1;
+		bool Viewport    : 1;
+		bool CullFace    : 1;
+		bool FrontCull   : 1;
+		bool BackCull    : 1;
+		bool DepthTest   : 1;
+		bool Clip        : 1;
 	};
 	class DepthBuffer
 	{
 	public:
 
 		DepthBuffer()
-			: m_Buffer( nullptr )
+			: m_Size( 0 )
+			, m_Buffer( nullptr )
 		{ }
 
 		~DepthBuffer()
@@ -1566,23 +1440,23 @@ private:
 			m_Buffer = new float[ a_Size.x * a_Size.y ];
 		}
 
-		inline bool Test( uint32_t a_X, uint32_t a_Y, float a_W )
+		inline bool Test( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
-			return m_Buffer[ a_Y * m_Size.x + a_X ] > a_W;
+			return s_DepthCompareFunc( a_Z, m_Buffer[ a_Y * m_Size.x + a_X ] );
 		}
 
-		void Commit( uint32_t a_X, uint32_t a_Y, float a_W )
+		void Commit( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
-			m_Buffer[ a_Y * m_Size.x + a_X ] = a_W;
+			m_Buffer[ a_Y * m_Size.x + a_X ] = a_Z;
 		}
 
-		bool TestAndCommit( uint32_t a_X, uint32_t a_Y, float a_W )
+		bool TestAndCommit( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
 			float& Point = m_Buffer[ a_Y * m_Size.x + a_X ];
 			
-			if ( Point > a_W )
+			if ( s_DepthCompareFunc( a_Z, Point ) )
 			{
-				Point = a_W;
+				Point = a_Z;
 				return true;
 			}
 
@@ -1605,8 +1479,18 @@ private:
 		float*     m_Buffer;
 	};
 
+	template < uint8_t _Interface >
 	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
 	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _ViewPort    = _Interface & ( 1u << 6u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 2u );
+		static constexpr bool _FlatShade   = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused      = _Interface & ( 1u << 0u );
+
 		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
 		s_PositionStorage.Prepare( a_End - a_Begin );
 		s_AttributeRegistry = a_Begin;
@@ -1622,7 +1506,12 @@ private:
 			Position.x *= Position.w;
 			Position.y *= Position.w;
 			Position.z *= Position.w;
-			AttribView *= Position.w;
+
+			if constexpr ( _Perspective )
+			{
+				AttribView *= Position.w;
+			}
+			 
 			Position.x *= HalfWindow.x;
 			Position.y *= HalfWindow.y;
 			Position.x += HalfWindow.x;
@@ -1636,8 +1525,18 @@ private:
 		}
 	}
 
+	template < uint8_t _Interface >
 	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
 	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _ViewPort    = _Interface & ( 1u << 6u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 2u );
+		static constexpr bool _FlatShade   = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused      = _Interface & ( 1u << 0u );
+
 		static AttribSpan< Vector4 > P[ 3 ];
 		static AttribSpan< float   > V[ 3 ];
 
@@ -1665,35 +1564,49 @@ private:
 			  , V[ 2 ].Advance( 3 ) )
 		{
 			// Clipping - Improve later - Currently reject if any point outside viewport.
-			bool Reject = false;
-
-			for ( uint32_t i = 0; i < 3; ++i )
+			if constexpr ( _Clipping )
 			{
-				if ( !ViewPort.Contains( *P[ i ] ) )
+				// Implement clipping algorithm
+			}
+			else
+			{
+				bool Reject = false;
+
+				for ( uint32_t i = 0; i < 3; ++i )
 				{
-					Reject = true;
-					break;
+					if ( !ViewPort.Contains( *P[ i ] ) )
+					{
+						Reject = true;
+						break;
+					}
+				}
+
+				if ( Reject )
+				{
+					continue;
 				}
 			}
-
-			if ( Reject )
-			{
-				continue;
-			}
+			
 
 			// Culling - Improve later - if enabled and correct orientation, continue.
-			if ( s_RenderState.CullFace )
+			if constexpr ( _CullFront || _CullBack )
 			{
 				float NormalZ = Math::Cross( Vector3( *P[ 1 ] - *P[ 0 ] ), Vector3( *P[ 2 ] - *P[ 0 ] ) ).z;
 
-				if ( s_RenderState.FrontCull && NormalZ < 0.0f )
+				if constexpr ( _CullFront )
 				{
-					continue;
+					if ( NormalZ < 0.0f )
+					{
+						continue;
+					}
 				}
 
-				if ( s_RenderState.BackCull && NormalZ > 0.0f )
+				if constexpr ( _CullBack )
 				{
-					continue;
+					if ( NormalZ > 0.0f )
+					{
+						continue;
+					}
 				}
 			}
 
@@ -1811,13 +1724,21 @@ private:
 
 					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+						if constexpr ( _DepthTest )
 						{
-							continue;
+							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+							{
+								continue;
+							}
 						}
 
 						InterpolatedValues = VBegin;
-						InterpolatedValues /= PBegin->w;
+
+						if constexpr ( _Perspective )
+						{
+							InterpolatedValues /= PBegin->w;
+						}
+
 						//_FragCoord = PBegin;
 						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
@@ -1865,13 +1786,21 @@ private:
 					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
 
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+						if constexpr ( _DepthTest )
 						{
-							continue;
+							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+							{
+								continue;
+							}
+						}
+						
+						InterpolatedValues = VBegin;
+
+						if constexpr ( _Perspective )
+						{
+							InterpolatedValues /= PBegin->w;
 						}
 
-						InterpolatedValues = VBegin;
-						InterpolatedValues /= PBegin->w;
 						//_FragCoord = PBegin;
 						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
@@ -1883,13 +1812,50 @@ private:
 	}
 
 	template < uint8_t _Interface >
-	static void DrawArraysImpl( uint32_t a_Begin, uint32_t a_Count )
+	static void DrawArrays( uint32_t a_Begin, uint32_t a_Count )
 	{
 		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
 
-		ProcessVertices ( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER   ] );
-		ProcessFragments( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
+		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER   ] );
+		ProcessFragments< _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
+	}
+
+	template < size_t... Idxs >
+	static ArrayProcessor* GetArrayProcessors( std::in_place_type_t< std::index_sequence< Idxs... > > )
+	{
+		static ArrayProcessor ArrayProcessors[ 256 ] = { DrawArrays< Idxs >... };
+		return ArrayProcessors;
+	}
+
+	static ArrayProcessor GetArrayProcessor( uint8_t a_Interface )
+	{
+		return GetArrayProcessors( std::in_place_type< std::make_index_sequence< 256 > > )[ a_Interface ];
+	}
+
+	static void UpdateArrayProcessor()
+	{
+		//static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		//static constexpr bool _ViewPort = _Interface & ( 1u << 6u );
+		//static constexpr bool _Clipping = _Interface & ( 1u << 5u );
+		//static constexpr bool _CullFront = _Interface & ( 1u << 4u );
+		//static constexpr bool _CullBack = _Interface & ( 1u << 3u );
+		//static constexpr bool _DepthTest = _Interface & ( 1u << 2u );
+		//static constexpr bool _FlatShade = _Interface & ( 1u << 1u );
+		//static constexpr bool _Unused = _Interface & ( 1u << 0u );
+
+		uint8_t Interface = 0;
+
+		if ( s_RenderState.Perspective                         ) Interface |= ( 1u << 7u );
+		if ( s_RenderState.Viewport                            ) Interface |= ( 1u << 6u );
+		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 5u );
+		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 4u );
+		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 3u );
+		if ( s_RenderState.DepthTest                           ) Interface |= ( 1u << 2u );
+		if ( true                                              ) Interface |= ( 1u << 1u ); // Unimplemented
+		if ( true                                              ) Interface |= ( 1u << 0u ); // Unimplemented
+
+		s_ArrayProcessor = GetArrayProcessor( Interface );
 	}
 
 	template < typename T >
@@ -2337,6 +2303,15 @@ private:
 		}
 	}
 
+	static bool DepthCompare_LEQUAL		( float a_A, float a_B ) { return a_A <= a_B; }
+	static bool DepthCompare_GEQUAL		( float a_A, float a_B ) { return a_A >= a_B; }
+	static bool DepthCompare_LESS		( float a_A, float a_B ) { return a_A <  a_B; }
+	static bool DepthCompare_GREATER	( float a_A, float a_B ) { return a_A >  a_B; }
+	static bool DepthCompare_EQUAL		( float a_A, float a_B ) { return a_A == a_B; }
+	static bool DepthCompare_NOT_EQUAL	( float a_A, float a_B ) { return a_A != a_B; }
+	static bool DepthCompare_ALWAYS		( float a_A, float a_B ) { return true;       }
+	static bool DepthCompare_NEVER		( float a_A, float a_B ) { return false;      }
+
 	inline static BufferRegistry                  s_BufferRegistry;
 	inline static ArrayRegistry                   s_ArrayRegistry;
 	inline static TextureRegistry                 s_TextureRegistry;
@@ -2358,4 +2333,6 @@ private:
 	inline static std::array< TextureUnit, 32 >   s_TextureUnits;
 	inline static uint32_t                        s_ActiveTextureUnit;
 	inline static uint32_t                        s_ActiveTextureTarget;
+	inline static DepthCompareFunc                s_DepthCompareFunc         = DepthCompare_LESS;
+	inline static ArrayProcessor                  s_ArrayProcessor           = DrawArrays< 0b10011111 >;
 };
