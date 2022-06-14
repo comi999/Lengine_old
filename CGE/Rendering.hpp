@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <iostream>
 #include <array>
 #include <vector>
 #include <bitset>
@@ -12,6 +11,7 @@
 #include "ConsoleWindow.hpp"
 #include "Hash.hpp"
 #include "Utilities.hpp"
+#include "Rect.hpp"
 
 // broad phase filtering: remove OBJECTS that will definitely not show up on screen by using encompassing regions and frustum planes
 // vertex shader transform vertices into clip space
@@ -317,7 +317,6 @@ private:
 	std::vector< void* >        m_Uniforms;
 };
 
-// Analogous to OpenGL
 class Rendering
 {
 public:
@@ -520,13 +519,13 @@ public:
 
 		static const _Type& In()
 		{
-			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_VertexDataStorage.Interpolated().Data() ) + s_Offset );
+			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_InterpolatedStorage.Data() ) + s_Offset );
 		};
 
 		static _Type& Out()
 		{
 			static OnStart Setup = s_Setup;
-			return *reinterpret_cast< _Type* >( s_VertexDataStorage.Head() + s_Offset );
+			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_VertexStorage.Head() ) + s_Offset );
 		};
 
 	private:
@@ -677,7 +676,7 @@ private:
 			, m_Data( nullptr )
 		{ }
 
-		AttributeIterator( VertexAttribute a_VertexAttribute )
+		AttributeIterator( const VertexAttribute& a_VertexAttribute )
 		{
 			m_Output = OutputArray(
 				std::in_place_type< std::make_integer_sequence< size_t, 256 > > )[
@@ -694,19 +693,19 @@ private:
 			m_Stride = a_VertexAttribute.Stride;
 		}
 
-		inline void Rewind()
+		inline void Reset()
 		{
 			m_Data = m_Begin;
 		}
 
-		inline void Clear()
+		void Clear()
 		{
 			m_Output = nullptr;
 			m_Stride = 0;
 			m_Data = nullptr;
 		}
 
-		inline AttributeIterator& operator =( VertexAttribute a_VertexAttribute )
+		AttributeIterator& operator=( const VertexAttribute& a_VertexAttribute )
 		{
 			m_Output = OutputArray(
 				std::in_place_type< std::make_integer_sequence< size_t, 256 > > )[
@@ -725,15 +724,26 @@ private:
 			return *this;
 		}
 
+		AttributeIterator& operator=( uint32_t a_Index )
+		{
+			m_Data = m_Begin + m_Stride * a_Index;
+			return *this;
+		}
+
 		inline operator bool() const
 		{
 			return m_Data;
 		}
 
-		inline auto& operator++()
+		AttributeIterator& operator++()
 		{
 			m_Data += m_Stride;
 			return *this;
+		}
+
+		AttributeIterator& operator+=( uint32_t a_Count )
+		{
+			m_Data += m_Stride * a_Count;
 		}
 
 		inline void operator()( void* o_Output ) const
@@ -976,15 +986,8 @@ private:
 	{
 	public:
 
-		inline void Increment( uint32_t a_Position )
+		AttributeRegistry& operator++()
 		{
-			++m_VertexAttributes[ a_Position ];
-		}
-
-		inline void IncrementAll()
-		{
-			// In future, use a static incrementing function.
-
 			++m_VertexAttributes[ 0 ];
 			++m_VertexAttributes[ 1 ];
 			++m_VertexAttributes[ 2 ];
@@ -993,28 +996,59 @@ private:
 			++m_VertexAttributes[ 5 ];
 			++m_VertexAttributes[ 6 ];
 			++m_VertexAttributes[ 7 ];
+
+			return *this;
 		}
 
-		inline void Rewind( uint32_t a_Position )
+		AttributeRegistry& operator=( uint32_t a_Index )
 		{
-			m_VertexAttributes[ a_Position ].Rewind();
+			m_VertexAttributes[ 0 ] = a_Index;
+			m_VertexAttributes[ 1 ] = a_Index;
+			m_VertexAttributes[ 2 ] = a_Index;
+			m_VertexAttributes[ 3 ] = a_Index;
+			m_VertexAttributes[ 4 ] = a_Index;
+			m_VertexAttributes[ 5 ] = a_Index;
+			m_VertexAttributes[ 6 ] = a_Index;
+			m_VertexAttributes[ 7 ] = a_Index;
+
+			return *this;
 		}
 
-		inline void ResetAll()
+		AttributeRegistry& operator+=( uint32_t a_Count )
 		{
-			m_VertexAttributes[ 0 ].Rewind();
-			m_VertexAttributes[ 1 ].Rewind();
-			m_VertexAttributes[ 2 ].Rewind();
-			m_VertexAttributes[ 3 ].Rewind();
-			m_VertexAttributes[ 4 ].Rewind();
-			m_VertexAttributes[ 5 ].Rewind();
-			m_VertexAttributes[ 6 ].Rewind();
-			m_VertexAttributes[ 7 ].Rewind();
+			m_VertexAttributes[ 0 ] += a_Count;
+			m_VertexAttributes[ 1 ] += a_Count;
+			m_VertexAttributes[ 2 ] += a_Count;
+			m_VertexAttributes[ 3 ] += a_Count;
+			m_VertexAttributes[ 4 ] += a_Count;
+			m_VertexAttributes[ 5 ] += a_Count;
+			m_VertexAttributes[ 6 ] += a_Count;
+			m_VertexAttributes[ 7 ] += a_Count;
 		}
 
-		inline void Value( uint32_t a_Position, void* o_Output )
+		template < typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+		AttributeRegistry& operator=( T* a_Indices )
 		{
-			m_VertexAttributes[ a_Position ]( o_Output );
+			m_VertexAttributes[ 0 ] = static_cast< uint32_t >( a_Indices[ 0 ] );
+			m_VertexAttributes[ 1 ] = static_cast< uint32_t >( a_Indices[ 1 ] );
+			m_VertexAttributes[ 2 ] = static_cast< uint32_t >( a_Indices[ 2 ] );
+			m_VertexAttributes[ 3 ] = static_cast< uint32_t >( a_Indices[ 3 ] );
+			m_VertexAttributes[ 4 ] = static_cast< uint32_t >( a_Indices[ 4 ] );
+			m_VertexAttributes[ 5 ] = static_cast< uint32_t >( a_Indices[ 5 ] );
+			m_VertexAttributes[ 6 ] = static_cast< uint32_t >( a_Indices[ 6 ] );
+			m_VertexAttributes[ 7 ] = static_cast< uint32_t >( a_Indices[ 7 ] );
+		}
+
+		inline void Reset()
+		{
+			m_VertexAttributes[ 0 ].Reset();
+			m_VertexAttributes[ 1 ].Reset();
+			m_VertexAttributes[ 2 ].Reset();
+			m_VertexAttributes[ 3 ].Reset();
+			m_VertexAttributes[ 4 ].Reset();
+			m_VertexAttributes[ 5 ].Reset();
+			m_VertexAttributes[ 6 ].Reset();
+			m_VertexAttributes[ 7 ].Reset();
 		}
 
 		inline AttributeIterator& operator[]( uint32_t a_Position )
@@ -1054,6 +1088,8 @@ private:
 		ShaderLookup m_ShaderLookup;
 		UniformArray m_Uniforms;
 	};
+	
+	//remove later
 	class AttribVector
 	{
 	public:
@@ -1188,106 +1224,301 @@ private:
 
 		std::vector< float > m_Data;
 	};
-	class VertexDataStorage
+	
+	template < typename T = uint8_t >
+	class DataStorage
 	{
 	public:
 
-		VertexDataStorage()
-			: m_Stride( 0 )
-			, m_Head( nullptr )
+		DataStorage()
+			: m_Head( nullptr )
+			, m_Stride( sizeof( T ) )
 		{ }
 
-		void Prepare( uint32_t a_Size, uint32_t a_Stride )
+		template < typename U >
+		DataStorage( const DataStorage< U >& a_DataStorage )
 		{
-			if ( a_Size * a_Stride > m_Data.size() )
+			m_Data   = a_DataStorage.m_Data;
+			m_Head   = m_Data.data();
+			m_Stride = a_DataStorage.m_Stride;
+		}
+
+		template < typename U >
+		DataStorage( DataStorage< U >&& a_DataStorage )
+			: m_Data( std::move( a_DataStorage.m_Data ) )
+			, m_Head( a_DataStorage.m_Head )
+			, m_Stride( a_DataStorage.m_Stride )
+		{ }
+
+		DataStorage( size_t a_Size, size_t a_Stride = sizeof( T ) )
+		{
+			Prepare( a_Size, a_Stride );
+		}
+
+		void Prepare( size_t a_Size, size_t a_Stride = sizeof( T ) )
+		{
+			if ( m_Data.size() < a_Size * a_Stride )
 			{
 				m_Data.resize( a_Size * a_Stride );
 			}
 
-			if ( a_Stride / sizeof( float ) > m_Interpolated.Size() )
-			{
-				m_Interpolated.Resize( a_Stride / sizeof( float ) );
-			}
-
+			m_Head = m_Data.data();
 			m_Stride = a_Stride;
-			m_Head   = m_Data.data();
 		}
 
-		void Increment()
+		inline DataStorage& operator++()
 		{
 			m_Head += m_Stride;
+			return *this;
 		}
 
-		void Rewind()
+		DataStorage operator++( int )
+		{
+			DataStorage Temp( *this );
+			++*this;
+			return Temp;
+		}
+
+		inline DataStorage& operator=( const T& a_Value )
+		{
+			*Head() = a_Value;
+			return *this;
+		}
+
+		inline void Reset()
 		{
 			m_Head = m_Data.data();
 		}
 
-		uint8_t* Data()
+		inline uint8_t* Raw()
 		{
 			return m_Data.data();
 		}
 
-		uint8_t* Head()
+		inline const uint8_t* Raw() const
 		{
-			return m_Head;
+			return m_Data.data();
 		}
 
-		AttribVector& Interpolated()
+		T* Data()
 		{
-			return m_Interpolated;
+			return reinterpret_cast< T* >( m_Data.data() );
+		}
+
+		const T* Data() const
+		{
+			return reinterpret_cast< T* >( m_Data.data() );
+		}
+
+		T* Head()
+		{
+			return reinterpret_cast< T* >( m_Head );
+		}
+
+		const T* Head() const
+		{
+			return reinterpret_cast< T* >( m_Head );
+		}
+
+		inline operator T& ()
+		{
+			return *Head();
+		}
+
+		inline operator T& const () const
+		{
+			return *Head();
+		}
+
+		void Clear()
+		{
+			m_Data.clear();
+			m_Head = nullptr;
+			m_Stride = 0;
 		}
 
 	private:
 
-		uint32_t               m_Stride;
-		uint8_t*               m_Head;
 		std::vector< uint8_t > m_Data;
-		AttribVector           m_Interpolated;
+		uint8_t*               m_Head;
+		size_t                 m_Stride;
 	};
-	class PositionDataStorage
+	
+	template < typename T >
+	class AttribSpan
 	{
 	public:
 
-		PositionDataStorage()
-			: m_Head( nullptr )
+		AttribSpan()
+			: m_Origin( nullptr )
+			, m_Size( 0 )
 		{ }
 
-		void Prepare( uint32_t a_Size )
+		AttribSpan( T* a_Origin, size_t a_Size )
+			: m_Origin( a_Origin )
+			, m_Size( a_Size )
+		{ }
+
+		AttribSpan( AttribSpan&& a_AttribSpan )
+			: m_Origin( a_AttribSpan.m_Origin )
+			, m_Size( a_AttribSpan.m_Size )
+		{ }
+
+		AttribSpan& operator=( const AttribSpan& a_AttribSpan )
 		{
-			if ( a_Size  > m_Positions.size() )
+			for ( uint32_t i = 0; i < m_Size; ++i )
 			{
-				m_Positions.resize( a_Size );
+				m_Origin[ i ] = a_AttribSpan[ i ];
 			}
 
-			m_Head = m_Positions.data();
+			return *this;
 		}
 
-		void Increment()
+		T& operator[]( size_t a_Index )
 		{
-			++m_Head;
+			return m_Origin[ a_Index ];
 		}
 
-		void Rewind()
+		const T& operator[]( size_t a_Index ) const
 		{
-			m_Head = m_Positions.data();
+			return m_Origin[ a_Index ];
 		}
 
-		inline Vector4* Head()
+		AttribSpan& operator+=( const AttribSpan& a_AttribSpan )
 		{
-			return m_Head;
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] += a_AttribSpan[ i ];
+			}
+
+			return *this;
 		}
 
-		void operator=( const Vector4& a_Value )
+		AttribSpan& operator-=( const AttribSpan& a_AttribSpan )
 		{
-			*m_Head = a_Value;
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] -= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator*=( const AttribSpan& a_AttribSpan )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] *= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator/=( const AttribSpan& a_AttribSpan )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] /= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator+=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] += a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator-=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] -= a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator*=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] *= a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator/=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] /= a_Value;
+			}
+
+			return *this;
+		}
+
+		T& operator*()
+		{
+			return *m_Origin;
+		}
+
+		const T& operator*() const
+		{
+			return *m_Origin;
+		}
+
+		T* operator->()
+		{
+			return m_Origin;
+		}
+
+		const T* operator->() const
+		{
+			return m_Origin;
+		}
+
+		inline AttribSpan& Advance()
+		{
+			m_Origin += m_Size;
+			return *this;
+		}
+
+		inline AttribSpan& Advance( uint32_t a_Count )
+		{
+			m_Origin += m_Size * a_Count;
+			return *this;
+		}
+
+		inline void Set( T* a_Origin, size_t a_Size )
+		{
+			m_Origin = a_Origin;
+			m_Size = a_Size;
+		}
+
+		inline void Swap( AttribSpan& a_AttribSpan )
+		{
+			/*std::swap( m_Origin, a_AttribSpan.m_Origin );
+			std::swap( m_Size, a_AttribSpan.m_Size );*/
+
+			for ( uint32_t i = 0; i < a_AttribSpan.m_Size; ++i )
+			{
+				std::swap( m_Origin[ i ], a_AttribSpan.m_Origin[ i ] );
+			}
 		}
 
 	private:
 
-		Vector4*               m_Head;
-		std::vector< Vector4 > m_Positions;
+		T*     m_Origin;
+		size_t m_Size;
 	};
+	
 	class RenderState
 	{
 	public:
@@ -1361,311 +1592,291 @@ private:
 		float*     m_Buffer;
 	};
 
-	template < uint32_t _Size >
-	static void DrawArraysImpl( uint32_t a_Begin, uint32_t a_Count )
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
 	{
+		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
+		s_PositionStorage.Prepare( a_End - a_Begin );
+		s_AttributeRegistry = a_Begin;
+		AttribSpan< float > AttribView( s_VertexStorage.Data(), a_Stride );
+		Vector2 HalfWindow( ConsoleWindow::GetCurrentContext()->GetWidth(), ConsoleWindow::GetCurrentContext()->GetHeight() );
+		HalfWindow *= 0.5f;
 
-	}
-	
-	template <>
-	static void DrawArraysImpl< 3 >( uint32_t a_Begin, uint32_t a_Count )
-	{
-		float minDepth = 1000.0f;
-		float maxDepth = -1000.0f;
-
-
-		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
-		auto& ActiveArray   = s_ArrayRegistry[ s_ActiveArray ];
-		
-		// Setup vertex data storage.
-		void( *VertexShader )( ) = ActiveProgram[ ShaderType::VERTEX_SHADER ];
-		void( *FragmentShader )( ) = ActiveProgram[ ShaderType::FRAGMENT_SHADER ];
-		uint32_t VertexStride = s_VaryingStrides[ VertexShader ];
-		uint32_t AttribStride = VertexStride / sizeof( float );
-		s_VertexDataStorage.Prepare( a_Count, VertexStride );
-
-		// Setup position data storage.
-		s_PositionDataStorage.Prepare( a_Count );
-
-		for ( uint32_t Begin = a_Begin, End = a_Begin + a_Count; Begin < End; ++Begin, s_AttributeRegistry.IncrementAll(), s_VertexDataStorage.Increment(), s_PositionDataStorage.Increment() )
+		for ( ; a_Begin < a_End; ++a_Begin )
 		{
-			VertexShader();
+			a_VertexShader();
 
-			float w = Position.w;
-			Position /= Position.w;
-			Position.w = 1.0f / w;
+			Position.w = 1.0f / Position.w;
+			Position.x *= Position.w;
+			Position.y *= Position.w;
+			Position.z *= Position.w;
+			AttribView *= Position.w;
+			Position.x *= HalfWindow.x;
+			Position.y *= HalfWindow.y;
+			Position.x += HalfWindow.x;
+			Position.y += HalfWindow.y;
+			s_PositionStorage = Position;
 
-			float* VertexData = ( float* )s_VertexDataStorage.Head();
-
-			for ( uint32_t i = 0; i < AttribStride; ++i )
-			{
-				VertexData[ i ] /= w;
-			}
-			
-			Position.x *= 0.5f * ConsoleWindow::GetCurrentContext()->GetWidth();
-			Position.y *= 0.5f * ConsoleWindow::GetCurrentContext()->GetHeight();
-			Position.x += 0.5f * ConsoleWindow::GetCurrentContext()->GetWidth();
-			Position.y += 0.5f * ConsoleWindow::GetCurrentContext()->GetHeight();
-			s_PositionDataStorage = Position;
+			++s_AttributeRegistry;
+			++s_VertexStorage;
+			++s_PositionStorage;
+			AttribView.Advance();
 		}
-		
+	}
+
+	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
+	{
+		static AttribSpan< Vector4 > P[ 3 ];
+		static AttribSpan< float   > V[ 3 ];
+
+		auto& ActiveArray = s_ArrayRegistry[ s_ActiveArray ];
+		Rect ViewPort = ConsoleWindow::GetCurrentContext()->GetScreenBuffer().GetBufferRect();
+
 		// Reset position and vertex storage.
-		s_PositionDataStorage.Rewind();
-		s_VertexDataStorage.Rewind();
+		s_VertexStorage.Reset();
+		s_PositionStorage.Reset();
+		s_InterpolatedStorage.Prepare( a_Stride );
 
-		Vector4* Positions[ 3 ];
-		float*   Vertices[ 3 ];
+		P[ 0 ].Set( s_PositionStorage.Head() + 0, 1 );
+		P[ 1 ].Set( s_PositionStorage.Head() + 1, 1 );
+		P[ 2 ].Set( s_PositionStorage.Head() + 2, 1 );
+		V[ 0 ].Set( s_VertexStorage  .Head() + 0 * a_Stride, a_Stride );
+		V[ 1 ].Set( s_VertexStorage  .Head() + 1 * a_Stride, a_Stride );
+		V[ 2 ].Set( s_VertexStorage  .Head() + 2 * a_Stride, a_Stride );
 
-		for ( uint32_t Begin = a_Begin, End = a_Begin + a_Count; Begin < End; )
+		for ( ; a_Begin < a_End; a_Begin += 3
+			  , P[ 0 ].Advance( 3 )
+			  , P[ 1 ].Advance( 3 )
+			  , P[ 2 ].Advance( 3 )
+			  , V[ 0 ].Advance( 3 )
+			  , V[ 1 ].Advance( 3 )
+			  , V[ 2 ].Advance( 3 ) )
 		{
-			for ( uint32_t i = 0; i < 3; ++i, ++Begin, s_PositionDataStorage.Increment(), s_VertexDataStorage.Increment() )
-			{
-				Positions[ i ] = s_PositionDataStorage.Head();
-				Vertices[ i ] = reinterpret_cast< float* >( s_VertexDataStorage.Head() );
-			}
-
-			Vector4 
-				*a_P0 = Positions[ 0 ],
-				*a_P1 = Positions[ 1 ],
-				*a_P2 = Positions[ 2 ];
-
-			// Check if any point lay outside of viewport, basic clipping.
-			bool TriangleOutside = false;
+			// Clipping - Improve later - Currently reject if any point outside viewport.
+			bool Reject = false;
 
 			for ( uint32_t i = 0; i < 3; ++i )
 			{
-				Vector4* pos = Positions[ i ];
-
-				if ( pos->x < 0 || pos->x >= ConsoleWindow::GetCurrentContext()->GetWidth() ||
-					 pos->y < 0 || pos->y >= ConsoleWindow::GetCurrentContext()->GetHeight() )
+				if ( !ViewPort.Contains( *P[ i ] ) )
 				{
-					TriangleOutside = true;
+					Reject = true;
 					break;
 				}
 			}
 
-			if ( TriangleOutside )
+			if ( Reject )
 			{
 				continue;
 			}
 
-			// Move this out into Rendering settings for backface culling
-
-			bool FacingForward = Math::Cross( Vector3( *a_P1 - *a_P0 ), Vector3( *a_P2 - *a_P0 ) ).z > 0.0f;
-
+			// Culling - Improve later - if enabled and correct orientation, continue.
 			if ( s_RenderState.CullFace )
 			{
-				if ( s_RenderState.FrontCull && FacingForward )
+				float NormalZ = Math::Cross( Vector3( *P[ 1 ] - *P[ 0 ] ), Vector3( *P[ 2 ] - *P[ 0 ] ) ).z;
+
+				if ( s_RenderState.FrontCull && NormalZ < 0.0f )
 				{
 					continue;
 				}
 
-				if ( s_RenderState.BackCull && !FacingForward )
+				if ( s_RenderState.BackCull && NormalZ > 0.0f )
 				{
 					continue;
 				}
 			}
 
-			AttribVector
-				a_C0( AttribStride, Vertices[ 0 ] ),
-				a_C1( AttribStride, Vertices[ 1 ] ),
-				a_C2( AttribStride, Vertices[ 2 ] );
-			
 			// Correct Y
-			a_P0->y = -a_P0->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			a_P1->y = -a_P1->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			a_P2->y = -a_P2->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 0 ]->y = -P[ 0 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 1 ]->y = -P[ 1 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 2 ]->y = -P[ 2 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
 
 			// Sort corners.
-			if ( a_P0->y < a_P1->y )
+			if ( P[ 0 ]->y < P[ 1 ]->y )
 			{
-				std::swap( a_P0, a_P1 );
-				std::swap( a_C0, a_C1 );
+				P[ 0 ].Swap( P[ 1 ] );
+				V[ 0 ].Swap( V[ 1 ] );
 			}
 
-			if ( a_P0->y < a_P2->y )
+			if ( P[ 0 ]->y < P[ 2 ]->y )
 			{
-				std::swap( a_P0, a_P2 );
-				std::swap( a_C0, a_C2 );
+				P[ 0 ].Swap( P[ 2 ] );
+				V[ 0 ].Swap( V[ 2 ] );
 			}
 
-			if ( a_P1->y < a_P2->y )
+			if ( P[ 1 ]->y < P[ 2 ]->y )
 			{
-				std::swap( a_P1, a_P2 );
-				std::swap( a_C1, a_C2 );
+				P[ 1 ].Swap( P[ 2 ] );
+				V[ 1 ].Swap( V[ 2 ] );
 			}
 
 			// Align y.
-			a_P0->y = static_cast< int >( a_P0->y );
-			a_P1->y = static_cast< int >( a_P1->y );
-			a_P2->y = static_cast< int >( a_P2->y );
+			P[ 0 ]->y = static_cast< int >( P[ 0 ]->y );
+			P[ 1 ]->y = static_cast< int >( P[ 1 ]->y );
+			P[ 2 ]->y = static_cast< int >( P[ 2 ]->y );
 
-			if ( a_P0->y == a_P2->y )
+			if ( P[ 0 ]->y == P[ 2 ]->y )
 			{
 				continue;
 			}
 
-			// Find M
-			float L = ( a_P1->y - a_P2->y ) / ( a_P0->y - a_P2->y );
-			Vector4 PM = Math::Lerp( L, *a_P2, *a_P0 );
-			PM.y = static_cast< int >( PM.y );
+			// Setup Position and Attribute values.
+			float SpanX, SpanY, Y;
+			static DataStorage< Vector4 > Positions;
+			static AttribSpan < Vector4 > PMid, PStep, PStepL, PStepR, PBegin, PL, PR; // 7
+			static DataStorage< float >   Attributes;
+			static AttribSpan < float >   VMid, VStep, VStepL, VStepR, VBegin, VL, VR; // 7
+			static AttribSpan < float >   InterpolatedValues;
 
-			AttribVector CM( AttribStride );
+			Positions.Prepare( 7 );
+			Attributes.Prepare( 7, a_Stride * sizeof( float ) ); 
+			InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
 
-			for ( uint32_t i = 0; i < AttribStride; ++i )
+			PMid  .Set( Positions .Head() + 0, 1                   );
+			PStep .Set( Positions .Head() + 1, 1                   );
+			PStepL.Set( Positions .Head() + 2, 1                   );
+			PStepR.Set( Positions .Head() + 3, 1                   );
+			PBegin.Set( Positions .Head() + 4, 1                   );
+			PL    .Set( Positions .Head() + 5, 1                   );
+			PR    .Set( Positions .Head() + 6, 1                   );
+			VMid  .Set( Attributes.Head() + 0 * a_Stride, a_Stride );
+			VStep .Set( Attributes.Head() + 1 * a_Stride, a_Stride );
+			VStepL.Set( Attributes.Head() + 2 * a_Stride, a_Stride );
+			VStepR.Set( Attributes.Head() + 3 * a_Stride, a_Stride );
+			VBegin.Set( Attributes.Head() + 4 * a_Stride, a_Stride );
+			VL    .Set( Attributes.Head() + 5 * a_Stride, a_Stride );
+			VR    .Set( Attributes.Head() + 6 * a_Stride, a_Stride );
+
+			// Find Mid point in screen space.
+			float L = ( P[ 1 ]->y - P[ 2 ]->y ) / ( P[ 0 ]->y - P[ 2 ]->y );
+			*PMid = Math::Lerp( L, *P[ 2 ], *P[ 0 ] );
+			PMid->y = static_cast< int >( PMid->y );
+
+			// Calculate Vertex attributes mid point.
+			for ( uint32_t i = 0; i < a_Stride; ++i )
 			{
-				CM[ i ] = Math::Lerp( L, a_C2[ i ], a_C0[ i ] );
+				VMid[ i ] = Math::Lerp( L, V[ 2 ][ i ], V[ 0 ][ i ] );
 			}
 
-			// Swap P1 and M if M is not on right.
-			if ( PM.x < a_P1->x )
+			// Swap  vertex 1 and Mid if Mid is not on right.
+			if ( PMid->x < P[ 1 ]->x )
 			{
-				std::swap( PM, *a_P1 );
-				std::swap( CM, a_C1 );
+				PMid.Swap( P[ 1 ] );
+				VMid.Swap( V[ 1 ] );
 			}
 
-			float SpanX, SpanY, y;
-			Vector4 PStepL, PStepR, PBegin, PStep, PL, PR;
-			//Vector4 CStepL, CStepR, CBegin, CStep, CL, CR;
-			AttribVector 
-				CStepL( AttribStride ), 
-				CStepR( AttribStride ), 
-				CBegin( AttribStride ), 
-				CStep( AttribStride ), 
-				CL( AttribStride ), 
-				CR( AttribStride );
-
-			if ( a_P2->y != a_P1->y )
+			if ( P[ 2 ]->y != P[ 1 ]->y )
 			{
-				SpanY = 1.0f / ( a_P1->y - a_P2->y );
+				SpanY = 1.0f / ( P[ 1 ]->y - P[ 2 ]->y );
+				*PStepL = *P[ 1 ] - *P[ 2 ];
+				*PStepL *= SpanY;
+				*PStepR = *PMid - *P[ 2 ];
+				*PStepR *= SpanY;
+				*PL = *P[ 2 ];
+				*PR = *P[ 2 ];
+				VStepL = V[ 1 ];
+				VStepL -= V[ 2 ];
+				VStepL *= SpanY;
+				VStepR = VMid;
+				VStepR -= V[ 2 ];
+				VStepR *= SpanY;
+				VL = V[ 2 ];
+				VR = V[ 2 ];
+				Y = P[ 2 ]->y;
 
-				PStepL = *a_P1 - *a_P2; 
-				PStepL *= SpanY;
-				PStepR = PM - *a_P2; 
-				PStepR *= SpanY;
-				PL = *a_P2;
-				PR = *a_P2;
-
-				CStepL = a_C1;
-				CStepL -= a_C2; 
-				CStepL *= SpanY;
-				CStepR = CM;
-				CStepR -= a_C2; 
-				CStepR *= SpanY;
-				CL = a_C2;
-				CR = a_C2;
-
-				y = a_P2->y;
-
-				for ( ; y < a_P1->y; ++y )
+				for ( ; Y < P[ 1 ]->y; ++Y )
 				{
-					PL += PStepL;
-					PR += PStepR;
-					CL += CStepL;
-					CR += CStepR;
+					*PL += *PStepL;
+					*PR += *PStepR;
+					VL += VStepL;
+					VR += VStepR;
+					SpanX = 1.0f / ( PR->x - PL->x );
+					*PBegin = *PL;
+					*PStep = ( *PR - *PL ) * SpanX;
+					VBegin = VL;
+					VStep  = VR;
+					VStep -= VL;
+					VStep *= SpanX;
 
-					SpanX = 1.0f / ( PR.x - PL.x );
-					PBegin = PL;
-					PStep = ( PR - PL ) * SpanX;
-					CBegin = CL;
-					CStep = CR;
-					CStep -= CL; 
-					CStep *= SpanX;
-
-					for ( ; PBegin.x < static_cast< int >( PR.x ); PBegin += PStep, CBegin += CStep )
+					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
-						if ( PBegin.z / PBegin.w < minDepth )
-						{
-							minDepth = PBegin.z;
-						}
-
-						if ( PBegin.z / PBegin.w > maxDepth )
-						{
-							maxDepth = PBegin.z;
-						}
-
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin.x, PBegin.y, PBegin.z / PBegin.w ) )
+						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
 						{
 							continue;
 						}
 
-						s_VertexDataStorage.Interpolated() = CBegin;
-						s_VertexDataStorage.Interpolated() /= PBegin.w;
-						_FragCoord = PBegin;
-						FragmentShader();
+						InterpolatedValues = VBegin;
+						InterpolatedValues /= PBegin->w;
+						//_FragCoord = PBegin;
+						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin.x, y }, Fragment );
+						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
 					}
 				}
 			}
 			else
 			{
-				y = a_P1->y;
-				PL = *a_P1;
-				PR = PM;
-				CL = a_C1;
-				CR = CM;
+				Y = P[ 1 ]->y;
+				*PL = *P[ 1 ];
+				*PR = *PMid;
+				VL = V[ 1 ];
+				VR = VMid;
 			}
 
-			if ( a_P1->y != a_P0->y )
+			if ( P[ 1 ]->y != P[ 0 ]->y )
 			{
-				SpanY = 1.0f / ( a_P0->y - a_P1->y );
+				SpanY = 1.0f / ( P[ 0 ]->y - P[ 1 ]->y );
+				*PStepL = *P[ 0 ] - *P[ 1 ]; 
+				*PStepL *= SpanY;
+				*PStepR = *P[ 0 ] - *PMid; 
+				*PStepR *= SpanY;
+				VStepL = V[ 0 ];
+				VStepL -= V[ 1 ];
+				VStepL *= SpanY;
+				VStepR = V[ 0 ];
+				VStepR -= VMid;
+				VStepR *= SpanY;
 
-				PStepL = *a_P0 - *a_P1; PStepL *= SpanY;
-				PStepR = *a_P0 - PM; PStepR *= SpanY;
-
-				CStepL = a_C0;
-				CStepL -= a_C1; 
-				CStepL *= SpanY;
-				CStepR = a_C0;
-				CStepR -= CM; 
-				CStepR *= SpanY;
-
-				for ( ; y < a_P0->y; ++y )
+				for ( ; Y < P[ 0 ]->y; ++Y )
 				{
-					PL += PStepL;
-					PR += PStepR;
-					CL += CStepL;
-					CR += CStepR;
+					*PL += *PStepL;
+					*PR += *PStepR;
+					VL += VStepL;
+					VR += VStepR;
+					SpanX = 1.0f / ( PR->x - PL->x );
+					*PBegin = *PL;
+					*PStep = ( *PR - *PL ) * SpanX;
+					VBegin = VL;
+					VStep = VR;
+					VStep -= VL;
+					VStep *= SpanX;
 
-					SpanX = 1.0f / ( PR.x - PL.x );
-					PBegin = PL;
-					PStep = ( PR - PL ) * SpanX;
-					CBegin = CL;
-					CStep = CR;
-					CStep -= CL;
-					CStep *= SpanX;
-
-					for ( ; PBegin.x < static_cast< int >( PR.x ); PBegin += PStep, CBegin += CStep )
+					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
-						if ( PBegin.z / PBegin.w < minDepth )
-						{
-							minDepth = PBegin.z;
-						}
 
-						if ( PBegin.z / PBegin.w > maxDepth )
-						{
-							maxDepth = PBegin.z;
-						}
-
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin.x, PBegin.y, PBegin.z / PBegin.w ) )
+						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
 						{
 							continue;
 						}
 
-						s_VertexDataStorage.Interpolated() = CBegin;
-						s_VertexDataStorage.Interpolated() /= PBegin.w;
-						_FragCoord = PBegin;
-						FragmentShader();
+						InterpolatedValues = VBegin;
+						InterpolatedValues /= PBegin->w;
+						//_FragCoord = PBegin;
+						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin.x, y }, Fragment );
+						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
 					}
 				}
 			}
 		}
+	}
 
-		float _min = minDepth;
-		float _max = maxDepth;
+	template < uint8_t _Interface >
+	static void DrawArraysImpl( uint32_t a_Begin, uint32_t a_Count )
+	{
+		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
+		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
+
+		ProcessVertices ( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER   ] );
+		ProcessFragments( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
 	}
 
 	template < typename T >
@@ -2123,8 +2334,9 @@ private:
 	inline static ShaderProgramHandle             s_ActiveShaderProgram;
 	inline static std::array< BufferHandle, 14 >  s_BufferTargets;
 	inline static UniformMap                      s_UniformMap;
-	inline static VertexDataStorage               s_VertexDataStorage;
-	inline static PositionDataStorage             s_PositionDataStorage;
+	inline static DataStorage< float >            s_VertexStorage;
+	inline static DataStorage< Vector4 >          s_PositionStorage;
+	inline static DataStorage< float >            s_InterpolatedStorage;
 	inline static StrideRegistry                  s_VaryingStrides;
 	inline static RenderState                     s_RenderState;
 	inline static DepthBuffer                     s_DepthBuffer;

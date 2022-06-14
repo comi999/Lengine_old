@@ -1,28 +1,62 @@
 #pragma once
 #include "Math.hpp"
 
-struct Rect
+template < typename T >
+struct TRect
 {
-	Vector2Int Origin;
-	Vector2Int Size;
+	Vector< T, 2 > Origin;
+	Vector< T, 2 > Size;
 
-	inline int GetLeft() const
+	inline T GetLeft() const
 	{
 		return Origin.x;
 	}
 
-	inline int GetRight() const
+	inline T GetRight() const
 	{
-		return Origin.x + Size.x - 1;
+		if constexpr ( std::is_integral_v< T > ) 
+		{
+			return Origin.x + Size.x - 1;
+		}
+		else                         
+		{
+			return Origin.x + Size.x;
+		}
 	}
 
-	inline int GetBottom() const
-	{
-		return Origin.y + Size.y - 1;
-	}
-
-	inline int GetTop() const
+	inline T GetBottom() const
 	{
 		return Origin.y;
 	}
+
+	inline T GetTop() const
+	{
+		if constexpr ( std::is_integral_v< T > )
+		{
+			return Origin.y + Size.y - 1;
+		}
+		else
+		{
+			return Origin.y + Size.y;
+		}
+	}
+
+	template < typename U, size_t S >
+	bool Contains( const Vector< U, S >& a_Position ) const
+	{
+		if ( 
+			a_Position[ 0 ] < GetLeft() ||
+			a_Position[ 0 ] > GetRight() ||
+			a_Position[ 1 ] < GetBottom() ||
+			a_Position[ 1 ] > GetTop() )
+		{
+			return false;
+		}
+
+		return true;
+	}
 };
+
+typedef TRect< float    > Rect;
+typedef TRect< int32_t  > RectInt;
+typedef TRect< uint32_t > RectUInt;

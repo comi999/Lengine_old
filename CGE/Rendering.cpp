@@ -92,7 +92,7 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 			break;
 		case RenderMode::TRIANGLE:
 		{
-			DrawArraysImpl< 3 >( a_Begin, a_Count );
+			DrawArraysImpl< 0 >( a_Begin, a_Count );
 			break;
 		}
 		default:

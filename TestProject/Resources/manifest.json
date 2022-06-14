@@ -25,7 +25,7 @@
       "Type": "mesh"
     },
     "spear": {
-      "Path": "./Spear/soulspear.obj",
+      "Path": "./Spear/soulspear_downscaled.obj",
       "Type": "mesh"
     },
     "spear_diffuse": {

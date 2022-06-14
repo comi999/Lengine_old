@@ -325,7 +325,7 @@ void RunCubeDemo()
 	Rendering::BindVertexArray( 0 );
 
 
-	ShaderProgramHandle shader = LoadShaders( Shader_Lit_Test_Vertex, Shader_Lit_Test_Fragment );
+	ShaderProgramHandle shader = LoadShaders( nullptr, nullptr );
 	
 
 	Rendering::UseProgram( shader );
@@ -363,11 +363,11 @@ void RunCubeDemo()
 		Rendering::UniformMatrix4fv( RotationLocation, 1, false, &PVM[ 0 ] );
 
 
-		LightPosition.x = 50.0f * Math::Cos( i );
+		/*LightPosition.x = 50.0f * Math::Cos( i );
 		LightPosition.z = 50.0f * Math::Sin( i );
 		LightPosition.y = 0.0f;
 		LightPosition = Math::Multiply( PV, Vector4( LightPosition ) );
-		Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );
+		Rendering::Uniform3f( LightLocation, LightPosition.x, LightPosition.y, LightPosition.z );*/
 
 		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
@@ -576,7 +576,7 @@ void RunLitSpearDemo()
 
 	// Set light colour
 	Rendering::Uniform4f( LightColourLoc, 1.0f, 1.0f, 1.0f, 1.0f );
-	Rendering::Uniform4f( AmbientLightLoc, 0.3f, 0.3f, 0.3f, 1.0f );
+	Rendering::Uniform4f( AmbientLightLoc, 0.0f, 0.0f, 0.0f, 1.0f );
 
 	TextureHandle tbo[ 3 ];
 	Rendering::GenTextures( 3, tbo );
@@ -599,7 +599,7 @@ void RunLitSpearDemo()
 	Rendering::ClearColour( 0.0f, 0.0f, 0.0f, 1.0f );
 
 	Rendering::Enable( RenderSetting::CULL_FACE );
-	Rendering::CullFace( CullFaceMode::FRONT );
+	Rendering::CullFace( CullFaceMode::BACK );
 	//Rendering::Enable( RenderSetting::DEPTH_TEST );
 	Rendering::ClearDepth( 1000.0f );
 
@@ -607,8 +607,9 @@ void RunLitSpearDemo()
 	Vector3 LightObject( 0.0f );
 	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 0.1f, 100.0f );
 
-	Vector3 CameraPos = Vector3( 0.0f, 2.0f, -5.0f );
-	auto View = Matrix4::CreateLookAt( CameraPos, Vector3::Zero, Vector3::Up );
+	Vector3 CameraPos = Vector3( 0.0f, 0.0f, -5.0f );
+	//auto View = Matrix4::CreateLookAt( CameraPos, Vector3::Zero, Vector3::Up );
+	auto View = Matrix4::CreateView( CameraPos, Quaternion::ToQuaternion( Vector3::Zero ) );
 	Rendering::Uniform3f( CameraObjectLoc, CameraPos.x, CameraPos.y, CameraPos.z );
 	Matrix4 PV = Math::Multiply( Proj, View );
 	float i = 0.0f;
@@ -616,18 +617,19 @@ void RunLitSpearDemo()
 	while ( 1 )
 	{
 		i += 0.1f;
-		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 2.0f * Math::Sin( i ) - 3.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, 0.0f, 0.0f ) ), Vector3::One * 2.0f );
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, -i, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, 0.0f, 0.0f ) ), Vector3::One * 2.0f );
 		auto PVM = Math::Multiply( PV, M );
 		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 		Rendering::UniformMatrix4fv( PVLocation, 1, false, &PV[ 0 ] );
 		Rendering::UniformMatrix4fv( MLocation, 1, false, &M[ 0 ] );
 
-		LightObject.x = Math::Cos( i );
+		LightObject.x = 1.0f;//Math::Cos( i );
 		LightObject.y = 0.0f;
-		LightObject.z = Math::Sin( i );
+		LightObject.z = 0.0;//Math::Sin( i );
+		LightObject = Math::Multiply( M, Vector4( LightObject, 1.0f ) );
 		Rendering::Uniform3f( LightObjectLoc, LightObject.x, LightObject.y, LightObject.z );
 
-		Sleep( 1 );
+		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
 		Rendering::BindVertexArray( vao );
 		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, pos_.size() );
@@ -790,6 +792,7 @@ void RunOldDemo()
 	//			  //CameraObject.GetTransform()->SetGlobalForward( Math::Normalize( Vector3::Zero - CameraObject.GetTransform()->GetGlobalPosition() ) );
 	//		  } );
 }
+
 
 int main()
 {
