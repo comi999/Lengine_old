@@ -372,7 +372,7 @@ public:
 	static void EnableVertexAttribArray( uint32_t a_Position );
 	static void DisableVertexAttribArray( uint32_t a_Position );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
-	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, size_t a_Offset );
+	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void*  a_Indices );
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
@@ -884,7 +884,7 @@ private:
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
 	typedef bool( *DepthCompareFunc )( float, float );
-	typedef void( *ArrayProcessor )( uint32_t, uint32_t );
+	typedef void( *DrawProcessorFunc )( uint32_t, uint32_t, const void* );
 
 	class BufferRegistry
 	{
@@ -1073,6 +1073,8 @@ private:
 		}
 
 	private:
+
+		
 
 		AttributeIterator m_VertexAttributes[ 8 ];
 	};
@@ -1413,6 +1415,7 @@ private:
 
 		bool AlphaBlend  : 1;
 		bool Perspective : 1;
+		bool Indices     : 1;
 		bool Viewport    : 1;
 		bool CullFace    : 1;
 		bool FrontCull   : 1;
@@ -1480,10 +1483,10 @@ private:
 	};
 
 	template < uint8_t _Interface >
-	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, const void* a_Indices, void( *a_VertexShader )() )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _ViewPort    = _Interface & ( 1u << 6u );
+		static constexpr bool _Indices     = _Interface & ( 1u << 6u );
 		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
 		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
 		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
@@ -1493,6 +1496,11 @@ private:
 
 		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
 		s_PositionStorage.Prepare( a_End - a_Begin );
+
+		if constexpr ( _Indices )
+		{
+
+		}
 		s_AttributeRegistry = a_Begin;
 		AttribSpan< float > AttribView( s_VertexStorage.Data(), a_Stride );
 		Vector2 HalfWindow( ConsoleWindow::GetCurrentContext()->GetWidth(), ConsoleWindow::GetCurrentContext()->GetHeight() );
@@ -1529,7 +1537,7 @@ private:
 	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _ViewPort    = _Interface & ( 1u << 6u );
+		static constexpr bool _Indices     = _Interface & ( 1u << 6u );
 		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
 		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
 		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
@@ -1812,31 +1820,31 @@ private:
 	}
 
 	template < uint8_t _Interface >
-	static void DrawArrays( uint32_t a_Begin, uint32_t a_Count )
+	static void DrawProcessor( uint32_t a_Begin, uint32_t a_Count, const void* a_Indices )
 	{
 		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
 
-		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER   ] );
+		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, nullptr, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
 		ProcessFragments< _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
 	}
 
 	template < size_t... Idxs >
-	static ArrayProcessor* GetArrayProcessors( std::in_place_type_t< std::index_sequence< Idxs... > > )
+	static DrawProcessorFunc* GetDrawProcessors( std::in_place_type_t< std::index_sequence< Idxs... > > )
 	{
-		static ArrayProcessor ArrayProcessors[ 256 ] = { DrawArrays< Idxs >... };
-		return ArrayProcessors;
+		static DrawProcessorFunc DrawProcessors[ 256 ] = { DrawProcessor< Idxs >... };
+		return DrawProcessors;
 	}
 
-	static ArrayProcessor GetArrayProcessor( uint8_t a_Interface )
+	static DrawProcessorFunc GetDrawProcessor( uint8_t a_Interface )
 	{
-		return GetArrayProcessors( std::in_place_type< std::make_index_sequence< 256 > > )[ a_Interface ];
+		return GetDrawProcessors( std::in_place_type< std::make_index_sequence< 256 > > )[ a_Interface ];
 	}
 
-	static void UpdateArrayProcessor()
+	static void UpdateDrawProcessor()
 	{
 		//static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		//static constexpr bool _ViewPort = _Interface & ( 1u << 6u );
+		//static constexpr bool _Indices = _Interface & ( 1u << 6u );
 		//static constexpr bool _Clipping = _Interface & ( 1u << 5u );
 		//static constexpr bool _CullFront = _Interface & ( 1u << 4u );
 		//static constexpr bool _CullBack = _Interface & ( 1u << 3u );
@@ -1847,7 +1855,7 @@ private:
 		uint8_t Interface = 0;
 
 		if ( s_RenderState.Perspective                         ) Interface |= ( 1u << 7u );
-		if ( s_RenderState.Viewport                            ) Interface |= ( 1u << 6u );
+		if ( s_RenderState.Indices                             ) Interface |= ( 1u << 6u );
 		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 5u );
 		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 4u );
 		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 3u );
@@ -1855,7 +1863,7 @@ private:
 		if ( true                                              ) Interface |= ( 1u << 1u ); // Unimplemented
 		if ( true                                              ) Interface |= ( 1u << 0u ); // Unimplemented
 
-		s_ArrayProcessor = GetArrayProcessor( Interface );
+		s_DrawProcessorFunc = GetDrawProcessor( Interface );
 	}
 
 	template < typename T >
@@ -2334,5 +2342,5 @@ private:
 	inline static uint32_t                        s_ActiveTextureUnit;
 	inline static uint32_t                        s_ActiveTextureTarget;
 	inline static DepthCompareFunc                s_DepthCompareFunc         = DepthCompare_LESS;
-	inline static ArrayProcessor                  s_ArrayProcessor           = DrawArrays< 0b10011111 >;
+	inline static DrawProcessorFunc               s_DrawProcessorFunc        = DrawProcessor< 0b10011111 >;
 };

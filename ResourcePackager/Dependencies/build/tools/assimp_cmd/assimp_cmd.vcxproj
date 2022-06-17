@@ -1,0 +1,397 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D66696F2-5188-3EF7-BBE2-D8E545230539}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>assimp_cmd</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimp_cmd.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp_cmd.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp_cmd.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp_cmd.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/Debug/assimp-vc140-mt.dll" "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Debug"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\code\Debug\assimp-vc140-mt.lib;..\..\contrib\zlib\Debug\zlibstaticd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/$(Configuration);C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Debug/assimp.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Debug/assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/Release/assimp-vc140-mt.dll" "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Release"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\code\Release\assimp-vc140-mt.lib;..\..\contrib\zlib\Release\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/$(Configuration);C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Release/assimp.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/Release/assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/MinSizeRel/assimp-vc140-mt.dll" "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/MinSizeRel"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\code\MinSizeRel\assimp-vc140-mt.lib;..\..\contrib\zlib\MinSizeRel\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/$(Configuration);C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/MinSizeRel/assimp.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/MinSizeRel/assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;OPENDDL_NO_USE_CPP11;ASSIMP_BUILD_NO_C4D_IMPORTER;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\.;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\include;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib;C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/RelWithDebInfo/assimp-vc140-mt.dll" "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/RelWithDebInfo"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\code\RelWithDebInfo\assimp-vc140-mt.lib;..\..\contrib\zlib\RelWithDebInfo\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/$(Configuration);C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib;C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/RelWithDebInfo/assimp.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/RelWithDebInfo/assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1/tools/assimp_cmd/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1" "-BC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build" --check-stamp-file "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1/tools/assimp_cmd/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1" "-BC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build" --check-stamp-file "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1/tools/assimp_cmd/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1" "-BC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build" --check-stamp-file "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1/tools/assimp_cmd/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/assimp-3.3.1/assimp-3.3.1" "-BC:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build" --check-stamp-file "C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\tools\assimp_cmd\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\assimp_cmd.rc" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\CompareDump.cpp" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\ImageExtractor.cpp" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\Main.cpp" />
+    <ClInclude Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\Main.h" />
+    <ClInclude Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\resource.h" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\WriteDumb.cpp" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\Info.cpp" />
+    <ClCompile Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\assimp-3.3.1\assimp-3.3.1\tools\assimp_cmd\Export.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\ZERO_CHECK.proj">
+      <Project>{BD2E201B-9D0B-3288-B216-2EA27BFF55BE}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\code\assimp.vcxproj">
+      <Project>{D0B52CD2-92EC-376F-B927-9AB04374EBDA}</Project>
+      <Name>assimp</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Glizz\Desktop\Programming\Miscellaneous Projects\Console-Game-Engine\ResourcePackager\Dependencies\build\contrib\zlib\zlibstatic.vcxproj">
+      <Project>{2CDCEE6F-8A09-3AC2-A8A3-F61D8521001E}</Project>
+      <Name>zlibstatic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -182,8 +182,8 @@ void RunCubeDemo()
 	Rendering::Init();
 
 	// Load resources
-	auto grass = Resource::GetOrLoad< Mesh >( "grass" );
-	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "grass_diffuse" );
+	auto grass = Resource::GetOrLoad< Mesh >( "spear" );
+	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "len" );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );

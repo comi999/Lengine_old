@@ -17,7 +17,7 @@
 bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 {
 	Directory ThisDir;
-
+	
 	if ( !ThisDir.ContainsFile( "manifest.json" ) )
 	{
 		return false;

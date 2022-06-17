@@ -1,0 +1,16 @@
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/CMakeFiles/uninstall.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/CMakeFiles/INSTALL.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/CMakeFiles/assimp.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/code/CMakeFiles/INSTALL.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/assimp_cmd.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/tools/assimp_cmd/CMakeFiles/INSTALL.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/test/CMakeFiles/gtest.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/test/CMakeFiles/unit.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/test/CMakeFiles/INSTALL.dir
+C:/Users/Glizz/Desktop/Programming/Miscellaneous Projects/Console-Game-Engine/ResourcePackager/Dependencies/build/test/headercheck/CMakeFiles/INSTALL.dir

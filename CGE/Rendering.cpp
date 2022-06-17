@@ -84,6 +84,9 @@ void Rendering::ClearDepth( float a_ClearDepth )
 
 void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Count )
 {
+	s_RenderState.Indices = false;
+	UpdateDrawProcessor();
+
 	switch ( a_Mode )
 	{
 		case RenderMode::POINT:
@@ -92,7 +95,7 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 			break;
 		case RenderMode::TRIANGLE:
 		{
-			s_ArrayProcessor( a_Begin, a_Count );
+			s_DrawProcessorFunc( a_Begin, a_Count, nullptr );
 			break;
 		}
 		default:
@@ -184,6 +187,14 @@ void Rendering::VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType
 	Attributes.Offset = ( uint32_t )a_Offset;
 }
 
+void Rendering::DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void* a_Indices )
+{
+	s_RenderState.Indices = true;
+	UpdateDrawProcessor();
+
+	s_DrawProcessorFunc( 0, a_Count, nullptr );
+}
+
 void Rendering::Enable( RenderSetting a_RenderSetting )
 {
 	switch ( a_RenderSetting )
@@ -201,8 +212,6 @@ void Rendering::Enable( RenderSetting a_RenderSetting )
 		default:
 			break;
 	}
-
-	UpdateArrayProcessor();
 }
 
 void Rendering::Disable( RenderSetting a_RenderSetting )
@@ -222,8 +231,6 @@ void Rendering::Disable( RenderSetting a_RenderSetting )
 		default:
 			break;
 	}
-
-	UpdateArrayProcessor();
 }
 
 void Rendering::CullFace( CullFaceMode a_CullFaceMode )
@@ -251,8 +258,6 @@ void Rendering::CullFace( CullFaceMode a_CullFaceMode )
 		default:
 			break;
 	}
-
-	UpdateArrayProcessor();
 }
 
 void Rendering::DepthFunc( TextureSetting a_TextureSetting )
