@@ -4,6 +4,8 @@
 #include "Colour.hpp"
 #include "Vertex.hpp"
 
+
+
 class Mesh
 {
 public:
@@ -14,21 +16,21 @@ public:
 
 	void GetVertex( size_t a_Index, Vertex& o_Vertex ) const
 	{
-		auto& Vertex = m_Vertices[ a_Index ];
+		uint32_t Index = m_Indices[ a_Index ];
 		o_Vertex = 
 		{
-			m_Colours   [ Vertex[ 0 ] ],
-			m_Positions [ Vertex[ 1 ] ],
-			m_Normals   [ Vertex[ 2 ] ],
-			m_Tangents  [ Vertex[ 3 ] ],
-			m_Bitangents[ Vertex[ 4 ] ],
-			m_Texels    [ Vertex[ 5 ] ]
+			m_Colours   [ Index ],
+			m_Positions [ Index ],
+			m_Normals   [ Index ],
+			m_Tangents  [ Index ],
+			m_Bitangents[ Index ],
+			m_Texels    [ Index ]
 		};
 	}
 
 	inline size_t GetVertexCount() const
 	{
-		return m_Vertices.size();
+		return m_Indices.size();
 	}
 
 	inline float GetRadius() const
@@ -63,27 +65,27 @@ public:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
-		a_Serializer << m_Vertices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
+		a_Serializer << m_Indices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		a_Deserializer >> m_Vertices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
+		a_Deserializer >> m_Indices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
 	}
 
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
-		a_Sizer & m_Vertices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
+		a_Sizer & m_Indices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
 	}
 
-	std::vector< Vector< uint32_t, 6 > > m_Vertices;
-	std::vector< Vector4 >               m_Colours;
-	std::vector< Vector3 >               m_Positions;
-	std::vector< Vector3 >               m_Normals;
-	std::vector< Vector3 >               m_Tangents;
-	std::vector< Vector3 >               m_Bitangents;
-	std::vector< Vector2 >               m_Texels;
-	size_t                               m_Outermost;
+	std::vector< uint32_t > m_Indices;
+	std::vector< Vector4  > m_Colours;
+	std::vector< Vector3  > m_Positions;
+	std::vector< Vector3  > m_Normals;
+	std::vector< Vector3  > m_Tangents;
+	std::vector< Vector3  > m_Bitangents;
+	std::vector< Vector2  > m_Texels;
+	size_t                  m_Outermost;
 };

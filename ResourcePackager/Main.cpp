@@ -6,11 +6,7 @@
 
 int main( int argc, char** argv )
 {
-    if ( argc != 2 )
-    {
-        return 1;
-    }
-
     ResourcePackager Packager;
-    Packager.BuildPackage( Directory( argv[ 1 ] ).GetAbsolute() );
+    if ( argc == 1 )      Packager.BuildPackage( Directory().GetAbsolute() );
+    else if ( argc == 2 ) Packager.BuildPackage( Directory( argv[ 1 ] ).GetAbsolute() );
 }

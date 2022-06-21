@@ -6,7 +6,6 @@
 #include <type_traits>
 #include <map>
 #include "Math.hpp"
-#include "RenderMode.hpp"
 #include "Colour.hpp"
 #include "ConsoleWindow.hpp"
 #include "Hash.hpp"
@@ -239,9 +238,17 @@ enum class CullFaceMode
 	FRONT_AND_BACK,
 };
 
+enum class RenderMode : uint8_t
+{
+	POINT,
+	LINE,
+	TRIANGLE
+};
+
 #define DefineShader( Name ) \
 void Shader_##Name ();       \
-template <> void* ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
+template <> void* Internal::ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
+namespace Internal { bool _ShaderRegistered_##Name = RegisterShader< "Shader_"#Name##_H >::Registered; }; \
 void Shader_##Name ()
 
 #define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value()
@@ -250,8 +257,24 @@ void Shader_##Name ()
 #define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out()
 #define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
 
+
+namespace Internal {
 template < Hash _ShaderName >
 void* ShaderAddress = nullptr;
+
+static std::map< Hash, void* > ShaderFuncLookup;
+
+template < Hash _ShaderName >
+struct RegisterShader
+{
+	inline static bool Registered = [](){
+		ShaderFuncLookup[ _ShaderName ] = ShaderAddress< _ShaderName >;
+		return true;
+	}();
+};
+
+} // namespace Internal
+
 
 typedef uint32_t BufferHandle;
 typedef uint32_t ArrayHandle;
@@ -269,7 +292,7 @@ struct Sampler2D
 
 class Rendering;
 
-struct Shader
+struct ShaderObject
 {
 public:
 
@@ -396,10 +419,10 @@ public:
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, const uint32_t* a_Value );
 	// Need to look into the Tex/ture/ParameterI* variants.
 	
-	static void TexImage1D( /*something*/ );
+	//static void TexImage1D( /*something*/ );
 	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data );
-	static void TexImage3D( /*something*/ );
-	static void GenerateMipmap( TextureTarget a_TextureTarget );
+	//static void TexImage3D( /*something*/ );
+	//static void GenerateMipmap( TextureTarget a_TextureTarget );
 
 	// Uniform access
 	static int32_t GetUniformLocation( ShaderProgramHandle a_ShaderProgramHandle, const char* a_Name );
@@ -474,7 +497,7 @@ private:
 			static uint32_t Offset = 0;
 			uint32_t OriginalOffset = Offset;
 			Offset += a_size;
-			s_VaryingStrides[ ShaderAddress< _Shader > ] = Offset;
+			s_VaryingStrides[ Internal::ShaderAddress< _Shader > ] = Offset;
 			return OriginalOffset;
 		}
 
@@ -557,7 +580,7 @@ public:
 		static void Setup()
 		{
 			UniformCommon< _Type, _Name >::Setup();
-			s_UniformMap.Register( ShaderAddress< _Shader >, _Name );
+			s_UniformMap.Register( Internal::ShaderAddress< _Shader >, _Name );
 		}
 
 		inline static OnStart s_Setup = Setup;
@@ -610,7 +633,7 @@ private:
 			m_Shaders[ a_Handle - 1 ].Type = ShaderType::INVALID;
 		}
 
-		inline Shader& operator[]( ShaderHandle a_Handle )
+		inline ShaderObject& operator[]( ShaderHandle a_Handle )
 		{
 			return m_Shaders[ a_Handle - 1 ];
 		}
@@ -623,7 +646,7 @@ private:
 	private:
 
 		std::bitset< 32 >        m_Availability;
-		std::array< Shader, 32 > m_Shaders;
+		std::array< ShaderObject, 32 > m_Shaders;
 	};
 
 	class ShaderProgramRegistry
@@ -884,7 +907,7 @@ private:
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
 	typedef bool( *DepthCompareFunc )( float, float );
-	typedef void( *DrawProcessorFunc )( uint32_t, uint32_t, const void* );
+	typedef void( *DrawProcessorFunc )( uint32_t, uint32_t );
 
 	class BufferRegistry
 	{
@@ -1004,67 +1027,38 @@ private:
 
 		AttributeRegistry& operator++()
 		{
-			++m_VertexAttributes[ 0 ];
-			++m_VertexAttributes[ 1 ];
-			++m_VertexAttributes[ 2 ];
-			++m_VertexAttributes[ 3 ];
-			++m_VertexAttributes[ 4 ];
-			++m_VertexAttributes[ 5 ];
-			++m_VertexAttributes[ 6 ];
-			++m_VertexAttributes[ 7 ];
-
+			m_SeekFunction( this, m_Position + 1 );
 			return *this;
 		}
 
 		AttributeRegistry& operator=( uint32_t a_Index )
 		{
-			m_VertexAttributes[ 0 ] = a_Index;
-			m_VertexAttributes[ 1 ] = a_Index;
-			m_VertexAttributes[ 2 ] = a_Index;
-			m_VertexAttributes[ 3 ] = a_Index;
-			m_VertexAttributes[ 4 ] = a_Index;
-			m_VertexAttributes[ 5 ] = a_Index;
-			m_VertexAttributes[ 6 ] = a_Index;
-			m_VertexAttributes[ 7 ] = a_Index;
-
+			m_SeekFunction( this, a_Index );
 			return *this;
 		}
 
 		AttributeRegistry& operator+=( uint32_t a_Count )
 		{
-			m_VertexAttributes[ 0 ] += a_Count;
-			m_VertexAttributes[ 1 ] += a_Count;
-			m_VertexAttributes[ 2 ] += a_Count;
-			m_VertexAttributes[ 3 ] += a_Count;
-			m_VertexAttributes[ 4 ] += a_Count;
-			m_VertexAttributes[ 5 ] += a_Count;
-			m_VertexAttributes[ 6 ] += a_Count;
-			m_VertexAttributes[ 7 ] += a_Count;
+			m_SeekFunction( this, m_Position + a_Count );
+			return *this;
 		}
 
-		template < typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
-		AttributeRegistry& operator=( T* a_Indices )
+		template < typename T >
+		void SetIndices( T* a_Indices )
 		{
-			m_VertexAttributes[ 0 ] = static_cast< uint32_t >( a_Indices[ 0 ] );
-			m_VertexAttributes[ 1 ] = static_cast< uint32_t >( a_Indices[ 1 ] );
-			m_VertexAttributes[ 2 ] = static_cast< uint32_t >( a_Indices[ 2 ] );
-			m_VertexAttributes[ 3 ] = static_cast< uint32_t >( a_Indices[ 3 ] );
-			m_VertexAttributes[ 4 ] = static_cast< uint32_t >( a_Indices[ 4 ] );
-			m_VertexAttributes[ 5 ] = static_cast< uint32_t >( a_Indices[ 5 ] );
-			m_VertexAttributes[ 6 ] = static_cast< uint32_t >( a_Indices[ 6 ] );
-			m_VertexAttributes[ 7 ] = static_cast< uint32_t >( a_Indices[ 7 ] );
+			m_Indices = a_Indices;
+			m_Position = 0;
+			m_SeekFunction = Seek< T >;
+		}
+
+		void UnsetIndices()
+		{
+			m_SeekFunction = Seek< void >;
 		}
 
 		inline void Reset()
 		{
-			m_VertexAttributes[ 0 ].Reset();
-			m_VertexAttributes[ 1 ].Reset();
-			m_VertexAttributes[ 2 ].Reset();
-			m_VertexAttributes[ 3 ].Reset();
-			m_VertexAttributes[ 4 ].Reset();
-			m_VertexAttributes[ 5 ].Reset();
-			m_VertexAttributes[ 6 ].Reset();
-			m_VertexAttributes[ 7 ].Reset();
+			*this = 0u;
 		}
 
 		inline AttributeIterator& operator[]( uint32_t a_Position )
@@ -1074,8 +1068,36 @@ private:
 
 	private:
 
-		
+		typedef void( *SeekFunction )( AttributeRegistry*, uint32_t );
 
+		template < typename T >
+		static void Seek( AttributeRegistry* a_AttributeRegistry, uint32_t a_Index )
+		{
+			uint32_t Index;
+
+			if constexpr ( std::is_void_v< T > )
+			{
+				Index = a_Index;
+			}
+			else
+			{
+				Index = static_cast< uint32_t >( reinterpret_cast< T* >( a_AttributeRegistry->m_Indices )[ a_Index ] );
+			}
+
+			a_AttributeRegistry->m_Position = a_Index;
+			a_AttributeRegistry->m_VertexAttributes[ 0 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 1 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 2 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 3 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 4 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 5 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 6 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 7 ] = Index;
+		}
+
+		const void*       m_Indices;
+		uint32_t          m_Position;
+		SeekFunction      m_SeekFunction;
 		AttributeIterator m_VertexAttributes[ 8 ];
 	};
 	class UniformMap
@@ -1415,7 +1437,6 @@ private:
 
 		bool AlphaBlend  : 1;
 		bool Perspective : 1;
-		bool Indices     : 1;
 		bool Viewport    : 1;
 		bool CullFace    : 1;
 		bool FrontCull   : 1;
@@ -1483,24 +1504,19 @@ private:
 	};
 
 	template < uint8_t _Interface >
-	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, const void* a_Indices, void( *a_VertexShader )() )
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Indices     = _Interface & ( 1u << 6u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 2u );
-		static constexpr bool _FlatShade   = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused      = _Interface & ( 1u << 0u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0	   = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
 
 		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
 		s_PositionStorage.Prepare( a_End - a_Begin );
-
-		if constexpr ( _Indices )
-		{
-
-		}
 		s_AttributeRegistry = a_Begin;
 		AttribSpan< float > AttribView( s_VertexStorage.Data(), a_Stride );
 		Vector2 HalfWindow( ConsoleWindow::GetCurrentContext()->GetWidth(), ConsoleWindow::GetCurrentContext()->GetHeight() );
@@ -1534,16 +1550,29 @@ private:
 	}
 
 	template < uint8_t _Interface >
+	static void ProcessTriangles( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_TriangleProcessor )() )
+	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+	}
+
+	template < uint8_t _Interface >
 	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Indices     = _Interface & ( 1u << 6u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 5u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 4u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 3u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 2u );
-		static constexpr bool _FlatShade   = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused      = _Interface & ( 1u << 0u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
 
 		static AttribSpan< Vector4 > P[ 3 ];
 		static AttribSpan< float   > V[ 3 ];
@@ -1820,12 +1849,12 @@ private:
 	}
 
 	template < uint8_t _Interface >
-	static void DrawProcessor( uint32_t a_Begin, uint32_t a_Count, const void* a_Indices )
+	static void DrawProcessor( uint32_t a_Begin, uint32_t a_Count )
 	{
 		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
 
-		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, nullptr, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
+		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
 		ProcessFragments< _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
 	}
 
@@ -1844,24 +1873,24 @@ private:
 	static void UpdateDrawProcessor()
 	{
 		//static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		//static constexpr bool _Indices = _Interface & ( 1u << 6u );
-		//static constexpr bool _Clipping = _Interface & ( 1u << 5u );
-		//static constexpr bool _CullFront = _Interface & ( 1u << 4u );
-		//static constexpr bool _CullBack = _Interface & ( 1u << 3u );
-		//static constexpr bool _DepthTest = _Interface & ( 1u << 2u );
-		//static constexpr bool _FlatShade = _Interface & ( 1u << 1u );
-		//static constexpr bool _Unused = _Interface & ( 1u << 0u );
+		//static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		//static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		//static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		//static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		//static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		//static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		//static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
 
 		uint8_t Interface = 0;
 
 		if ( s_RenderState.Perspective                         ) Interface |= ( 1u << 7u );
-		if ( s_RenderState.Indices                             ) Interface |= ( 1u << 6u );
-		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 5u );
-		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 4u );
-		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 3u );
-		if ( s_RenderState.DepthTest                           ) Interface |= ( 1u << 2u );
-		if ( true                                              ) Interface |= ( 1u << 1u ); // Unimplemented
-		if ( true                                              ) Interface |= ( 1u << 0u ); // Unimplemented
+		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 6u );
+		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 5u );
+		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 4u );
+		if ( s_RenderState.DepthTest                           ) Interface |= ( 1u << 3u );
+		if ( true                                              ) Interface |= ( 1u << 2u ); // Unused
+		if ( true                                              ) Interface |= ( 1u << 1u ); // Unused
+		if ( true                                              ) Interface |= ( 1u << 0u ); // Unused
 
 		s_DrawProcessorFunc = GetDrawProcessor( Interface );
 	}

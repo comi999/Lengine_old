@@ -3318,8 +3318,6 @@ struct Quaternion : public IVector< float, 4 >
 	}
 };
 
-struct Point : public Vector3 { };
-
 struct Line : public Vector4 { };
 
 struct Plane
@@ -3353,7 +3351,11 @@ struct Plane
 		, d( a_Vector.w )
 	{ }
 
-	float a, b, c, d;
+	union
+	{
+		struct { float a, b, c, d; };
+		struct { Vector3 normal; float distance; };
+	};
 };
 
 class Geometry
@@ -3366,7 +3368,7 @@ public:
 		return { a_Plane.a * InvMagnitude, a_Plane.b * InvMagnitude, a_Plane.c * InvMagnitude, a_Plane.d * InvMagnitude };
 	}
 
-	inline static float DistanceFromPlane( const Plane& a_Plane, const Point& a_Point )
+	inline static float DistanceFromPlane( const Plane& a_Plane, const Vector3& a_Point )
 	{
 		return a_Plane.a * a_Point.x + a_Plane.b * a_Point.y + a_Plane.c * a_Point.z + a_Plane.d;
 	}

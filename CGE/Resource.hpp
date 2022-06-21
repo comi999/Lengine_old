@@ -158,6 +158,6 @@ private:
 	friend class CGE;
 	template < typename > friend class ResourceLoader;
 
-	static ResourcePackage    s_ResourcePackage;
-	static ResourceRepository s_ResourceRepository;
+	inline static ResourcePackage    s_ResourcePackage = File( "./Resources/resource.package" );
+	inline static ResourceRepository s_ResourceRepository;
 };

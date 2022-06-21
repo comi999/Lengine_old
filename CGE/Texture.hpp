@@ -2,8 +2,9 @@
 #include "Math.hpp"
 #include "File.hpp"
 #include "Colour.hpp"
+#include "Resource.hpp"
 
-class Texture2D
+class Texture2D : public Resource
 {
 public:
 
