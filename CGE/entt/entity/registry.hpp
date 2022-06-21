@@ -137,6 +137,8 @@ namespace entt
 			return static_cast< storage_type<Component>* >( pools[ index ].pool.get() );
 		}
 
+	private:
+
 		template<typename Component>
 		[[nodiscard]] const storage_type<Component>* pool_if_exists() const
 		{

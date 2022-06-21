@@ -6,8 +6,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "STBI.hpp"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "TOBJ.hpp"
+//#define TINYOBJLOADER_IMPLEMENTATION
+//#include "TOBJ.hpp"
+
 
 // Resource types
 #include "Texture.hpp"
@@ -129,116 +130,105 @@ bool ResourcePackager::Load( Mesh& o_Mesh, File& a_File ) const
 {
 	if ( a_File.GetExtension() == ".obj" )
 	{
-		tinyobj::attrib_t Attributes;
-		std::vector< tinyobj::shape_t > Shapes;
-		std::string Warning;
-		std::string Error;
-		a_File.Open();
-		std::ifstream FileStream = a_File;
-		bool Success = tinyobj::LoadObj( &Attributes, &Shapes, nullptr, &Warning, &Error, &FileStream );
+		Assimp::Importer Importer;
+		auto Scene = Importer.ReadFile( a_File, aiPostProcessSteps::aiProcess_CalcTangentSpace | aiPostProcessSteps::aiProcess_Triangulate | aiPostProcessSteps::aiProcess_JoinIdenticalVertices );
 		
-		o_Mesh.m_Vertices.resize( Shapes[ 0 ].mesh.indices.size() );
-		for ( size_t i = 0; i < Shapes[ 0 ].mesh.indices.size(); ++i )
+		if ( !Scene->HasMeshes() )
 		{
-			o_Mesh.m_Vertices[ i ] = {
-				Shapes[ 0 ].mesh.indices[ i ].texcoord_index,
-				Shapes[ 0 ].mesh.indices[ i ].vertex_index,
-				Shapes[ 0 ].mesh.indices[ i ].normal_index,
-				0,
-				0,
-				Shapes[ 0 ].mesh.indices[ i ].texcoord_index
-			};
+			return false;
 		}
 
-		o_Mesh.m_Colours.resize( Attributes.colors.size() / 3 );
-		for ( size_t i = 0; i < Attributes.colors.size(); i += 3 )
-		{
-			o_Mesh.m_Colours[ i / 3 ] = {
-				Attributes.colors[ i + 0 ],
-				Attributes.colors[ i + 1 ],
-				Attributes.colors[ i + 2 ],
-				1.0f
-			};
-		}
+		auto Mesh = Scene->mMeshes[ 0 ];
 
-		o_Mesh.m_Positions.resize( Attributes.vertices.size() / 3 );
-		for ( size_t i = 0; i < Attributes.vertices.size(); i += 3 )
+		if ( Mesh->HasFaces() )
 		{
-			o_Mesh.m_Positions[ i / 3 ] = { 
-				Attributes.vertices[ i + 0 ], 
-				Attributes.vertices[ i + 1 ], 
-				Attributes.vertices[ i + 2 ] 
-			};
-		}
+			uint32_t IndexCount = Mesh->mNumFaces * 3u;
+			o_Mesh.m_Indices.resize( IndexCount );
+			aiFace* Face = Mesh->mFaces;
 
-		o_Mesh.m_Normals.resize( Attributes.normals.size() / 3 );
-		for ( size_t i = 0; i < Attributes.normals.size(); i += 3 )
-		{
-			o_Mesh.m_Normals[ i / 3 ] = {
-				Attributes.normals[ i + 0 ],
-				Attributes.normals[ i + 1 ],
-				Attributes.normals[ i + 2 ]
-			};
-		}
-
-		o_Mesh.m_Texels.resize( Attributes.texcoords.size() / 2 );
-		for ( size_t i = 0; i < Attributes.texcoords.size(); i += 2 )
-		{
-			o_Mesh.m_Texels[ i / 2 ] = {
-				Attributes.texcoords[ i + 0 ],
-				Attributes.texcoords[ i + 1 ]
-			};
-		}
-
-		if ( o_Mesh.m_Normals.size() > 0 && o_Mesh.m_Texels.size() > 0 )
-		{
-			Vector3* Tangents = new Vector3[ o_Mesh.m_Vertices.size() * 2 ];
-			Vector3* Bitangents = Tangents + o_Mesh.m_Vertices.size();
-			memset( Tangents, 0, sizeof( Vector3 ) * o_Mesh.m_Vertices.size() * 2 );
-
-			for ( size_t i = 0; i < o_Mesh.m_Vertices.size(); i += 3 )
+			for ( uint32_t i = 0, *Begin = o_Mesh.m_Indices.data(), *End = Begin + IndexCount; Begin != End; ++i, Begin += 3, ++Face )
 			{
-				auto* Vertices = o_Mesh.m_Vertices.data() + i;
-				auto& P0 = o_Mesh.m_Positions[ Vertices[ 0 ][ 1 ] ];
-				auto& P1 = o_Mesh.m_Positions[ Vertices[ 1 ][ 1 ] ];
-				auto& P2 = o_Mesh.m_Positions[ Vertices[ 2 ][ 1 ] ];
-				auto& V0 = o_Mesh.m_Texels[ Vertices[ 0 ][ 5 ] ];
-				auto& V1 = o_Mesh.m_Texels[ Vertices[ 1 ][ 5 ] ];
-				auto& V2 = o_Mesh.m_Texels[ Vertices[ 2 ][ 5 ] ];
-				auto PA = P1 - P0;
-				auto PB = P2 - P0;
-				auto VA = V1 - V0;
-				auto VB = V2 - V0;
-				float R = 1.0f / ( VA.x * VB.y - VA.y * VB.x );
-
-				Vector3 SDir( ( VB.y * PA.x - VA.y * PB.x ) * R, ( VB.y * PA.y - VA.y * PB.y ) * R, ( VB.y * PA.z - VA.y * PB.z ) * R );
-				Vector3 TDir( ( VA.x * PB.x - VB.x * PA.x ) * R, ( VA.x * PB.y - VB.x * PA.y ) * R, ( VA.x * PB.z - VB.x * PA.z ) * R );
-
-				Tangents[ i + 0 ] += SDir;
-				Tangents[ i + 1 ] += SDir;
-				Tangents[ i + 2 ] += SDir;
-				Bitangents[ i + 0 ] += TDir;
-				Bitangents[ i + 1 ] += TDir;
-				Bitangents[ i + 2 ] += TDir;
+				Begin[ 0 ] = Face->mIndices[ 0 ];
+				Begin[ 1 ] = Face->mIndices[ 1 ];
+				Begin[ 2 ] = Face->mIndices[ 2 ];
 			}
+		}
 
-			o_Mesh.m_Tangents.resize( o_Mesh.m_Vertices.size() );
-			o_Mesh.m_Bitangents.resize( o_Mesh.m_Vertices.size() );
+		if ( Mesh->HasVertexColors( 0 ) )
+		{
+			o_Mesh.m_Colours.resize( Mesh->mNumVertices );
 
-			for ( uint32_t i = 0; i < o_Mesh.m_Vertices.size(); ++i )
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
 			{
-				auto&    Vertex  = o_Mesh.m_Vertices[ i ];
-				Vector3& Normal  = o_Mesh.m_Normals[ Vertex[ 2 ] ];
-				Vector3& Tangent = Tangents[ i ];
+				o_Mesh.m_Colours[ i ] = {
+					Mesh->mColors[ 0 ][ i ].r,
+					Mesh->mColors[ 0 ][ i ].g,
+					Mesh->mColors[ 0 ][ i ].b,
+					Mesh->mColors[ 0 ][ i ].a 
+				};
+			};
+		}
 
-				Vertex[ 3 ] = i;
-				Vertex[ 4 ] = i;
+		if ( Mesh->HasPositions() )
+		{
+			o_Mesh.m_Positions.resize( Mesh->mNumVertices );
 
-				o_Mesh.m_Tangents  [ i ] = Math::Normalize( Tangent - Normal * Math::Dot( Normal, Tangent ) );
-				o_Mesh.m_Bitangents[ i ] = Math::Cross( Normal, Math::Normalize( Tangent ) ) * ( ( Math::Dot( Math::Cross( Normal, Tangent ), Bitangents[ i ] ) < 0.0f ) ? 1.0f : -1.0f );
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Positions[ i ] = {
+					Mesh->mVertices[ i ][ 0 ],
+					Mesh->mVertices[ i ][ 1 ],
+					Mesh->mVertices[ i ][ 2 ]
+				};
 			}
+		}
 
-			delete[] Tangents;
+		if ( Mesh->HasNormals() )
+		{
+			o_Mesh.m_Normals.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Normals[ i ] = {
+					Mesh->mNormals[ i ][ 0 ],
+					Mesh->mNormals[ i ][ 1 ],
+					Mesh->mNormals[ i ][ 2 ]
+				};
+			}
+		}
+
+		if ( Mesh->HasTangentsAndBitangents() )
+		{
+			o_Mesh.m_Tangents.resize( Mesh->mNumVertices );
+			o_Mesh.m_Bitangents.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Tangents[ i ] = {
+					Mesh->mTangents[ i ][ 0 ],
+					Mesh->mTangents[ i ][ 1 ],
+					Mesh->mTangents[ i ][ 2 ]
+				};
+
+				o_Mesh.m_Bitangents[ i ] = {
+					Mesh->mBitangents[ i ][ 0 ],
+					Mesh->mBitangents[ i ][ 1 ],
+					Mesh->mBitangents[ i ][ 2 ]
+				};
+			}
+		}
+
+		if ( Mesh->HasTextureCoords( 0 ) )
+		{
+			o_Mesh.m_Texels.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Texels[ i ] = {
+					Mesh->mTextureCoords[ 0 ][ i ][ 0 ],
+					Mesh->mTextureCoords[ 0 ][ i ][ 1 ]
+				};
+			}
 		}
 	}
 

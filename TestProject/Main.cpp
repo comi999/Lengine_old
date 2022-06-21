@@ -107,7 +107,7 @@ DefineShader( Basic_Lit_Fragment )
 	Vector4 normalFrag   = Rendering::Sample( NormalTexture, texel );
 	Vector4 specularFrag = Rendering::Sample( SpecularTexture, texel );
 	Matrix4 TBN( Vector4( Math::Normalize( normal ), 0.0f ), Vector4( Math::Normalize( tangent ), 0.0f ), Vector4( Math::Normalize( bitangent ), 0.0f ), Vector4( 0.0f, 0.0f, 0.0f, 1.0f ) );
-	Vector4 Normal = Math::Multiply( TBN, Vector4( normal, 0.0f ) * 2 - Vector4::One );
+	Vector4 Normal = Math::Multiply( Math::Transpose( TBN ), Vector4( Math::Normalize( normal ) * 2 - Vector3::One, 0.0f )  );
 	Vector3 R = Math::Reflect( LightObject, Vector3( Normal ) );
 	Vector3 V = Math::Normalize( CameraObject - LightObject );
 	float LambertTerm = Math::Clamp( Math::Dot( Vector3( Normal ), -LightObject ), 0.0f, 1.0f );
@@ -182,41 +182,34 @@ void RunCubeDemo()
 	Rendering::Init();
 
 	// Load resources
-	auto grass = Resource::GetOrLoad< Mesh >( "spear" );
+	auto grass = Resource::GetOrLoad< Mesh >( "plane" );
 	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "len" );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
 	Rendering::BindVertexArray( vao );
 
-	BufferHandle vbo[ 2 ];
-	Rendering::GenBuffers( 2, vbo );
-
-	std::vector< Vector3 > pos_;
-	std::vector< Vector2 > tex_;
-
-	for ( uint32_t i = 0; i < grass->GetVertexCount(); ++i )
-	{
-		pos_.push_back( grass->m_Positions[ grass->m_Vertices[ i ][ 1 ] ] );
-		tex_.push_back( grass->m_Texels[ grass->m_Vertices[ i ][ 5 ] ] );
-	}
+	BufferHandle vbo[ 3 ];
+	Rendering::GenBuffers( 3, vbo );
 
 	// Bind positions
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, pos_.size() * sizeof( pos_[ 0 ] ), pos_.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Positions.size() * sizeof( Vector3 ), grass->m_Positions.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 0, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, tex_.size() * sizeof( tex_[ 0 ] ), tex_.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Texels.size() * sizeof( Vector2 ), grass->m_Texels.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
+
+	Rendering::BindBuffer( BufferTarget::ELEMENT_ARRAY_BUFFER, vbo[ 2 ] );
+	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, grass->m_Indices.size() * sizeof( uint32_t ), grass->m_Indices.data(), DataUsage::STATIC_DRAW );
 
 	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
 	Rendering::BindVertexArray( 0 );
-
 
 	ShaderProgramHandle shader = LoadShaders( Shader_Basic_Textured_Vertex, Shader_Basic_Textured_Fragment );
 	Rendering::UseProgram( shader );
@@ -257,7 +250,8 @@ void RunCubeDemo()
 		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
 		Rendering::BindVertexArray( vao );
-		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, pos_.size() );
+		//Rendering::DrawArrays( RenderMode::TRIANGLE, 0, grass->m_Positions.size() );
+		Rendering::DrawElements( RenderMode::TRIANGLE, grass->m_Indices.size(), DataType::UNSIGNED_INT, ( void* )0 );
 		Rendering::BindVertexArray( 0 );
 
 		ConsoleWindow::SwapBuffers( window );
@@ -396,49 +390,42 @@ void RunLitSpearDemo()
 	Rendering::GenVertexArrays( 1, &vao );
 	Rendering::BindVertexArray( vao );
 
-	BufferHandle vbo[ 5 ];
-	Rendering::GenBuffers( 5, vbo );
-
-	std::vector< Vector3 > pos_;
-	std::vector< Vector2 > tex_;
-	std::vector< Vector3 > nor_;
-
-	for ( uint32_t i = 0; i < spear->GetVertexCount(); ++i )
-	{
-		pos_.push_back( spear->m_Positions[ spear->m_Vertices[ i ][ 1 ] ] );
-		tex_.push_back( spear->m_Texels[ spear->m_Vertices[ i ][ 5 ] ] );
-		nor_.push_back( spear->m_Normals[ spear->m_Vertices[ i ][ 2 ] ] );
-	}
+	BufferHandle vbo[ 6 ];
+	Rendering::GenBuffers( 6, vbo );
 
 	// Bind positions
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, pos_.size() * sizeof( pos_[ 0 ] ), pos_.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Positions.size() * sizeof( spear->m_Positions[ 0 ] ), spear->m_Positions.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 0, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, tex_.size() * sizeof( tex_[ 0 ] ), tex_.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Texels.size() * sizeof( spear->m_Texels[ 0 ] ), spear->m_Texels.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
 	// Bind normals
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, nor_.size() * sizeof( nor_[ 0 ] ), nor_.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Normals.size() * sizeof( spear->m_Normals[ 0 ] ), spear->m_Normals.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 2, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 2 );
 
 	// Bind tangents
-	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 3 ] );
 	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Tangents.size() * sizeof( spear->m_Tangents[ 0 ] ), spear->m_Tangents.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 3, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 3 );
 
 	// Bind bitangents
-	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
+	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 4 ] );
 	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Bitangents.size() * sizeof( spear->m_Bitangents[ 0 ] ), spear->m_Bitangents.data(), DataUsage::STATIC_DRAW );
 	Rendering::VertexAttribPointer( 4, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 4 );
+
+	// Bind indices
+	Rendering::BindBuffer( BufferTarget::ELEMENT_ARRAY_BUFFER, vbo[ 5 ] );
+	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, spear->m_Indices.size() * sizeof( spear->m_Indices[ 0 ] ), spear->m_Indices.data(), DataUsage::STATIC_DRAW );
 
 	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
@@ -488,7 +475,6 @@ void RunLitSpearDemo()
 	Rendering::Enable( RenderSetting::DEPTH_TEST );
 	Rendering::ClearDepth( 1000.0f );
 
-
 	Vector3 LightObject( 0.0f );
 	auto Proj = Matrix4::CreateProjection( Math::Radians( 75.0f ), 1.0f, 0.1f, 100.0f );
 
@@ -502,22 +488,22 @@ void RunLitSpearDemo()
 	while ( 1 )
 	{
 		i += 0.05f;
-		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 2.0f * Math::Sin( i ) - 3.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, i, 0.0f ) ), Vector3::One * 2.0f );
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 2.0f * Math::Sin( i ) - 3.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( 0.0f, 0.0f, 0.0f ) ), Vector3::One * 2.0f );
 		auto PVM = Math::Multiply( PV, M );
 		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 		Rendering::UniformMatrix4fv( PVLocation, 1, false, &PV[ 0 ] );
 		Rendering::UniformMatrix4fv( MLocation, 1, false, &M[ 0 ] );
 
-		LightObject.x = Math::Cos( i );
+		LightObject.x = -1;// Math::Cos( i );
 		LightObject.y = 0.0f;
-		LightObject.z = Math::Sin( i );
+		LightObject.z = 0;//Math::Sin( i );
 		LightObject = Math::Multiply( M, Vector4( LightObject, 1.0f ) );
 		Rendering::Uniform3f( LightObjectLoc, LightObject.x, LightObject.y, LightObject.z );
 
 		Sleep( 33 );
 		Rendering::Clear( BufferFlag::COLOUR_BUFFER_BIT | BufferFlag::DEPTH_BUFFER_BIT );
 		Rendering::BindVertexArray( vao );
-		Rendering::DrawArrays( RenderMode::TRIANGLE, 0, pos_.size() );
+		Rendering::DrawElements( RenderMode::TRIANGLE, spear->m_Indices.size(), DataType::UNSIGNED_INT, ( void* )0 );
 		Rendering::BindVertexArray( 0 );
 
 		ConsoleWindow::SwapBuffers( window );

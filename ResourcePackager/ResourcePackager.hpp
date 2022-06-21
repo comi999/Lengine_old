@@ -2,6 +2,11 @@
 #include <string>
 #include "File.hpp"
 
+#include <assimp/config.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 class Texture2D;
 class Mesh;
 class Material;

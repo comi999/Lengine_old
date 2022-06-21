@@ -1,5 +1,4 @@
 #pragma once
-#include "CGE.hpp"
 #include "Component.hpp"
 #include "Math.hpp"
 #include "ScreenBuffer.hpp"
@@ -20,8 +19,7 @@ public:
 	{
 		if ( m_Dirty )
 		{
-			float AspectRatio = static_cast< float >( ConsoleWindow::GetCurrentContext()->GetWidth() ) / ConsoleWindow::GetCurrentContext()->GetHeight();
-			const_cast< Camera* >( this )->m_Projection = Matrix4::CreateProjection( m_FOV, AspectRatio, m_NearZ, m_FarZ );
+			const_cast< Camera* >( this )->m_Projection = Matrix4::CreateProjection( m_FOV, m_Aspect, m_NearZ, m_FarZ );
 			const_cast< Camera* >( this )->m_Dirty = false;
 		}
 
@@ -47,6 +45,17 @@ public:
 	inline void SetFOV( float a_Degrees )
 	{
 		m_FOV = Math::Radians( a_Degrees );
+		m_Dirty = true;
+	}
+
+	inline float GetAspect() const
+	{
+		return m_Aspect;
+	}
+
+	inline void SetAspect( float a_Aspect )
+	{
+		m_Aspect = a_Aspect;
 		m_Dirty = true;
 	}
 
@@ -86,6 +95,7 @@ private:
 
 	Matrix4 m_Projection;
 	float   m_FOV;
+	float   m_Aspect;
 	float   m_NearZ;
 	float   m_FarZ;
 	bool    m_Dirty;

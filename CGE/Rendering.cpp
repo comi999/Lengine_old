@@ -84,7 +84,7 @@ void Rendering::ClearDepth( float a_ClearDepth )
 
 void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Count )
 {
-	s_RenderState.Indices = false;
+	s_AttributeRegistry.UnsetIndices();
 	UpdateDrawProcessor();
 
 	switch ( a_Mode )
@@ -95,7 +95,7 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 			break;
 		case RenderMode::TRIANGLE:
 		{
-			s_DrawProcessorFunc( a_Begin, a_Count, nullptr );
+			s_DrawProcessorFunc( a_Begin, a_Count );
 			break;
 		}
 		default:
@@ -189,10 +189,21 @@ void Rendering::VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType
 
 void Rendering::DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void* a_Indices )
 {
-	s_RenderState.Indices = true;
+	const void* Indices = nullptr;
+	auto Handle = s_BufferTargets[ ( uint32_t )BufferTarget::ELEMENT_ARRAY_BUFFER ];
+	Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ].data() + ( uint32_t )a_Indices ) : a_Indices; 
+
+	switch ( a_DataType )
+	{
+		case DataType::UNSIGNED_BYTE:  s_AttributeRegistry.SetIndices( reinterpret_cast< const uint8_t*  >( Indices ) ); break;
+		case DataType::UNSIGNED_SHORT: s_AttributeRegistry.SetIndices( reinterpret_cast< const uint16_t* >( Indices ) ); break;
+		case DataType::UNSIGNED_INT:   s_AttributeRegistry.SetIndices( reinterpret_cast< const uint32_t* >( Indices ) ); break;
+		default: break;
+	}
+
 	UpdateDrawProcessor();
 
-	s_DrawProcessorFunc( 0, a_Count, nullptr );
+	s_DrawProcessorFunc( 0, a_Count );
 }
 
 void Rendering::Enable( RenderSetting a_RenderSetting )
@@ -678,11 +689,11 @@ void Rendering::ShaderSource( ShaderHandle a_ShaderHandle, uint32_t a_Count, con
 
 void Rendering::CompileShader( ShaderHandle a_ShaderHandle )
 {
-	Shader& ActiveShader = s_ShaderRegistry[ a_ShaderHandle ];
+	ShaderObject& ActiveShader = s_ShaderRegistry[ a_ShaderHandle ];
 
 	if ( !ActiveShader.Callback )
 	{
-		ActiveShader.Callback = Shader::Empty;
+		ActiveShader.Callback = ShaderObject::Empty;
 	}
 }
 
@@ -712,9 +723,9 @@ ShaderProgramHandle Rendering::CreateProgram()
 void Rendering::AttachShader( ShaderProgramHandle a_ShaderProgramHandle, ShaderHandle a_ShaderHandle )
 {
 	auto& Program = s_ShaderProgramRegistry[ a_ShaderProgramHandle ];
-	auto& Shader  = s_ShaderRegistry[ a_ShaderHandle ];
-	Program.m_Shaders[ ( uint32_t )Shader.Type ].Handle = a_ShaderHandle;
-	Program.m_Shaders[ ( uint32_t )Shader.Type ].Set = true;
+	auto& ShaderObject  = s_ShaderRegistry[ a_ShaderHandle ];
+	Program.m_Shaders[ ( uint32_t )ShaderObject.Type ].Handle = a_ShaderHandle;
+	Program.m_Shaders[ ( uint32_t )ShaderObject.Type ].Set = true;
 }
 
 void Rendering::LinkProgram( ShaderProgramHandle a_ShaderProgramHandle )
@@ -727,7 +738,7 @@ void Rendering::LinkProgram( ShaderProgramHandle a_ShaderProgramHandle )
 
 		if ( !Entry.Set )
 		{
-			Entry.Callback = Shader::Empty;
+			Entry.Callback = ShaderObject::Empty;
 			continue;
 		}
 
@@ -761,8 +772,8 @@ void Rendering::GetProgramInfoLog( ShaderProgramHandle a_ShaderProgramHandle, si
 void Rendering::DetachShader( ShaderProgramHandle a_ShaderProgramHandle, ShaderHandle a_ShaderHandle )
 {
 	auto& Program = s_ShaderProgramRegistry[ a_ShaderProgramHandle ];
-	auto& Shader  = s_ShaderRegistry[ a_ShaderHandle ];
-	auto& Entry   = Program.m_Shaders[ ( uint32_t )Shader.Type ];
+	auto& ShaderObject  = s_ShaderRegistry[ a_ShaderHandle ];
+	auto& Entry   = Program.m_Shaders[ ( uint32_t )ShaderObject.Type ];
 	Entry.Handle = 0;
 	Entry.Set = false;
 }

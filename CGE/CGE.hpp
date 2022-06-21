@@ -6,6 +6,8 @@
 #include "Input.hpp"
 #include "Time.hpp"
 #include "Resource.hpp"
+#include "ECS.hpp"
+#include "MeshRenderer.hpp"
 
 class CGE
 {
@@ -26,22 +28,11 @@ public:
             Time::Tick();
             
             // Draw calls.
+            Draw();
             ConsoleWindow::SwapBuffers( ConsoleWindow::GetCurrentContext() );
-
-            // Console Window
-            if ( s_ShowFPS )
-            {
-                //float FPS = Time::GetFPS();
-                //ConsoleWindow::SetTitle( std::to_string((int)FPS).c_str() );
-            }
         }
 
         Input::Deinitialize();
-    }
-
-    static bool SetLockedFPS( float a_LockedFPS )
-    {
-        //s_LockedFPS = 1000.0f / a_LockedFPS;
     }
 
     static bool Quit()
@@ -60,40 +51,22 @@ public:
         return s_Running;
     }
 
-    /*inline static void ShowFPS( bool a_Value )
-    {
-        s_ShowFPS = a_Value;
-    }
-
-    inline static void SetTargetFPS( float a_Value )
-    {
-        s_TargetFPS = Math::Max( a_Value, 0.0f );
-
-        if ( s_TargetFPS )
-        {
-            s_TargetDeltaTime = 1.0f / s_TargetFPS;
-        }
-    }
-
-    inline static float GetTargetFPS()
-    {
-        return s_TargetFPS;
-    }*/
-
 private:
 
-    /*static void PadDeltaTime()
+    static void Draw()
     {
-        if ( s_TargetFPS )
-        {
-            float RealDeltaTime = Time::GetRealDeltaTime();
+        // Change this to deal with all generic renderers in the future.
+        //auto Renderers = ECS::GetComponents< MeshRenderer >();
 
-            if ( RealDeltaTime < s_TargetDeltaTime )
-            {
-                Sleep( 1000.0f * ( s_TargetDeltaTime - RealDeltaTime ) );
-            }
-        }
-    }*/
+        //// This system needs to be upgraded to do batch rendering. Right now, it's extremely inneficient to call draw on each renderer.
+        //for ( auto& RendererType : Renderers )
+        //{
+        //    for ( size_t i = 0; i < RendererType.second; ++i )
+        //    {
+        //        RendererType.first[ i ].OnDraw();
+        //    }
+        //}
+    }
 
     static bool  s_Running;
     static bool  s_ShowFPS;
