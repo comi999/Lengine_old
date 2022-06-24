@@ -3,10 +3,9 @@
 #include "Math.hpp"
 #include "Colour.hpp"
 #include "Vertex.hpp"
+#include "Resource.hpp"
 
-
-
-class Mesh
+class Mesh : public Resource
 {
 public:
 
@@ -65,18 +64,21 @@ public:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
+		a_Serializer << *static_cast< const Resource* >( this );
 		a_Serializer << m_Indices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
+		a_Deserializer >> *static_cast< Resource* >( this );
 		a_Deserializer >> m_Indices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
 	}
 
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
+		a_Sizer & *static_cast< const Resource* >( this );
 		a_Sizer & m_Indices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
 	}
 

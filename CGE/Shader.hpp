@@ -3,9 +3,68 @@
 #include "Resource.hpp"
 #include "Hash.hpp"
 
+DefineShader( Default_Vertex )
+{
+	Uniform( Matrix4, u_PVM );
+	Attribute( 0, Vector4, a_Position );
+	Rendering::Position = Math::Multiply( u_PVM, a_Position );
+}
+
+DefineShader( Default_Fragment )
+{
+	Rendering::FragColour = Vector4::One;
+}
+
 class Shader : public Resource
 {
 public:
+
+	Shader()
+		: m_VertexShaderSource( "Shader_Default_Vertex" )
+		, m_FragmentShaderSource( "Shader_Default_Fragment" )
+	{ }
+
+	Shader( const std::string& a_VertexShaderSource, const std::string& a_FragmentShaderSource )
+		: m_VertexShaderSource( a_VertexShaderSource )
+		, m_FragmentShaderSource( a_FragmentShaderSource )
+	{ }
+
+	void SetSource( ShaderType a_ShaderType, const char* a_Source )
+	{
+		std::string* Source = nullptr;
+
+		switch ( a_ShaderType )
+		{
+			case ShaderType::VERTEX_SHADER:   Source = &m_VertexShaderSource;   break;
+			case ShaderType::FRAGMENT_SHADER: Source = &m_FragmentShaderSource; break;
+		}
+
+		if ( !Source )
+		{
+			return;
+		}
+
+		*Source = a_Source;
+
+		if ( !m_ShaderProgramHandle )
+		{
+			return;
+		}
+
+		Decompile();
+		Compile();
+	}
+
+	const char* GetSource( ShaderType a_ShaderType )
+	{
+		switch ( a_ShaderType )
+		{
+			case ShaderType::VERTEX_SHADER: return m_VertexShaderSource.c_str();
+			case ShaderType::FRAGMENT_SHADER: return m_FragmentShaderSource.c_str();
+		}
+
+		return nullptr;
+	}
 
 	void SetColour( const char* a_Name, Colour a_Colour )
 	{
@@ -75,18 +134,22 @@ private:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
-		VertexShader >> a_Serializer;
-		FragmentShader >> a_Serializer;
+		a_Serializer << m_VertexShaderSource;
+		a_Serializer << m_FragmentShaderSource;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		m_VertexShaderSource << a_Deserializer;
-		m_FragmentShaderSource << a_Deserializer;
+		a_Deserializer >> m_VertexShaderSource;
+		a_Deserializer >> m_FragmentShaderSource;
 	}
 
 	ShaderProgramHandle m_ShaderProgramHandle;
 	std::string         m_VertexShaderSource;
 	std::string         m_FragmentShaderSource;
+
+public:
+
+	static Shader Default;
 };

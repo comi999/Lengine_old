@@ -252,7 +252,7 @@ namespace Internal { bool _ShaderRegistered_##Name = RegisterShader< "Shader_"#N
 void Shader_##Name ()
 
 #define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value()
-#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Attribute< Location, Type >::Value()
+#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Property< Location, Type >::Value()
 #define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In()
 #define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out()
 #define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
@@ -438,27 +438,27 @@ public:
 	static void Uniform2ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1 );
 	static void Uniform3ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2 );
 	static void Uniform4ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2, uint32_t a_V3 );
-	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
+	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
 
 	//----------SHADER_ACCESS--------------
 
@@ -525,7 +525,7 @@ private:
 public:
 
 	template < uint32_t _Location, typename _Type >
-	class Attribute
+	class Property
 	{
 	public:
 

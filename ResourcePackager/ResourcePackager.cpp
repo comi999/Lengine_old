@@ -42,7 +42,8 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 		ThisDir.GetDirectory( "Temp" ) :
 		ThisDir.CreateDirectory( "Temp" );
 
-	std::vector< std::pair< std::string, size_t > > ResourceHeader;
+	//std::vector< std::pair< std::string, size_t > > ResourceHeader;
+	std::vector< std::pair< Name, size_t > > ResourceHeader;
 	std::vector< File > ResourceFiles;
 
 	size_t HeaderSize = 0;
@@ -50,7 +51,8 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 
 	for ( auto Begin = Resources.begin(), End = Resources.end(); Begin != End; ++Begin )
 	{
-		std::string Key = Begin.key();
+		//std::string Key = Begin.key();
+		Name Key = Begin.key();
 		Json Value = *Begin;
 
 		if ( !( Value.contains( "Path" ) && Value.contains( "Type" ) ) )
@@ -62,17 +64,17 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 		std::string FileType = Value[ "Type" ].get< std::string >();
 
 		File ResourceFile( FilePath.c_str() );
-
 		ResourceHeader.emplace_back( Key, ResourcesSize );
 
 		HeaderSize += Serialization::GetSizeOf( Key );
 		HeaderSize += sizeof( size_t );
 
-		std::string TempFile = Key + "." + FileType;
+		std::string KeyName = Key;
+		std::string TempFile = KeyName + "." + FileType;
 
-		if      ( FileType == "texture2d"  ) ResourcesSize += CreateTemp< Texture2D  >( TempFile, TempDirectory, ResourceFile );
-		else if ( FileType == "mesh"       ) ResourcesSize += CreateTemp< Mesh       >( TempFile, TempDirectory, ResourceFile );
-		else if ( FileType == "material"   ) ResourcesSize += CreateTemp< Material   >( TempFile, TempDirectory, ResourceFile );
+		if      ( FileType == "texture2d"  ) ResourcesSize += CreateTemp< Texture2D  >( Key, TempFile, TempDirectory, ResourceFile );
+		else if ( FileType == "mesh"       ) ResourcesSize += CreateTemp< Mesh       >( Key, TempFile, TempDirectory, ResourceFile );
+		else if ( FileType == "material"   ) ResourcesSize += CreateTemp< Material   >( Key, TempFile, TempDirectory, ResourceFile );
 
 		ResourceFiles.push_back( TempDirectory.GetFile( TempFile.c_str() ) );
 	}
@@ -237,5 +239,16 @@ bool ResourcePackager::Load( Mesh& o_Mesh, File& a_File ) const
 
 bool ResourcePackager::Load( Material& o_Material, File& a_File ) const
 {
+	Assimp::Importer Importer;
+	auto Scene = Importer.ReadFile( a_File, 0 );
+	
+	if ( !Scene->HasMaterials() )
+	{
+		return false;
+	}
+
+	auto Material = Scene->mMaterials[ 1 ];
+
+	//Material->
 	return true;
 }

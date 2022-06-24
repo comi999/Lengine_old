@@ -182,8 +182,9 @@ void RunCubeDemo()
 	Rendering::Init();
 
 	// Load resources
-	auto grass = Resource::GetOrLoad< Mesh >( "plane" );
-	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "len" );
+	Resource::Init( "./Resources/resource.package" );
+	auto grass = Resource::Load< Mesh >( "plane"_H );
+	auto grass_diffuse = Resource::Load< Texture2D >( "landscape"_H );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
@@ -243,7 +244,7 @@ void RunCubeDemo()
 	while ( 1 )
 	{
 		i += 0.05f;
-		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( -0.4f, i, 0.0f ) ), Vector3( 2.0f, 1.0f, 2.0f ) * 1.0f );
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( -0.4f, i, 0.0f ) ), Vector3( 1.0f, 1.0f, 1.0f ) * 1.0f );
 		auto PVM = Math::Multiply( PV, M );
 		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 
@@ -381,10 +382,10 @@ void RunLitSpearDemo()
 	Rendering::Init();
 
 	// Load resources
-	auto spear = Resource::GetOrLoad< Mesh >( "spear" );
-	auto spear_diffuse = Resource::GetOrLoad< Texture2D >( "spear_diffuse" );
-	auto spear_normal = Resource::GetOrLoad< Texture2D >( "spear_normal" );
-	auto spear_specular = Resource::GetOrLoad< Texture2D >( "spear_specular" );
+	auto spear = Resource::Load< Mesh >( "spear"_H );
+	auto spear_diffuse = Resource::Load< Texture2D >( "spear_diffuse"_H );
+	auto spear_normal = Resource::Load< Texture2D >( "spear_normal"_H );
+	auto spear_specular = Resource::Load< Texture2D >( "spear_specular"_H );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );

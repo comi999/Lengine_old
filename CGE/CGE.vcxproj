@@ -169,13 +169,13 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Name.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />
     <ClCompile Include="RenderPipeline.hpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />

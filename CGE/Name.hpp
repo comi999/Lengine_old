@@ -1,13 +1,8 @@
 #pragma once
 #include <string>
 #include <list>
-
 #include "Hash.hpp"
 
-#ifdef _DEBUG
-// Force name strings to stick around for human-friendly debugging purposes.
-#define ENABLE_NAME_STORAGE
-#endif
 
 struct Name
 {
@@ -37,13 +32,11 @@ public:
         , m_Length( a_String ? ( int32_t( strlen( a_String ) ) ) : 0 )
         , m_Hash( a_String ? crc32_impl< sizeof( const char* ) >( a_String ) : 0 )
     {
-#ifdef ENABLE_NAME_STORAGE
         if ( a_String )
         {
             s_NameStorage.push_back( a_String );
             m_String = s_NameStorage.back().c_str();
         }
-#endif
     }
 
     Name( char* a_String, size_t a_Length )
@@ -51,20 +44,16 @@ public:
         , m_Length( int32_t( a_Length ) )
         , m_Hash( crc32_impl< sizeof( const char* ) >( a_String ) )
     {
-#ifdef ENABLE_NAME_STORAGE
         s_NameStorage.push_back( a_String );
         m_String = s_NameStorage.back().c_str();
-#endif
     }
 
     Name( const std::string& a_String )
         : m_String( a_String.c_str() ), m_Length( int32_t( a_String.length() ) ),
         m_Hash( crc32_impl< sizeof( const char* ) >( m_String ) )
     {
-#ifdef ENABLE_NAME_STORAGE
         s_NameStorage.push_back( a_String );
         m_String = s_NameStorage.back().c_str();
-#endif
     }
 
     operator std::string() const { return std::string( m_String, m_Length ); }
@@ -98,10 +87,33 @@ public:
 
 private:
 
-#ifdef ENABLE_NAME_STORAGE
-    static std::list< std::string > s_NameStorage;
-#endif
+    friend class Serialization;
 
+    template < typename T >
+    void Serialize( T& a_Serializer ) const
+    {
+        a_Serializer << m_Hash << m_Length;
+        a_Serializer.Stream().Write( m_String, sizeof( const char ) * m_Length );
+    }
+
+    template < typename T >
+    void Deserialize( T& a_Deserializer )
+    {
+        a_Deserializer >> m_Hash >> m_Length;
+        s_NameStorage.emplace_back();
+        auto& String = s_NameStorage.back();
+        String.resize( m_Length );
+        a_Deserializer.Stream().Read( String.data(), sizeof( const char ) * m_Length );
+        m_String = String.data();
+    }
+
+    template < typename T >
+    void SizeOf( T& a_Sizer ) const
+    {
+        a_Sizer & m_Hash & m_Length += sizeof( const char ) * m_Length;
+    }
+
+    inline static std::list< std::string > s_NameStorage;
     const char* m_String;
     int32_t m_Length;
     Hash m_Hash;

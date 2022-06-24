@@ -1,8 +1,49 @@
 {
   "Resources": {
-    "model": {
-      "Path": "./Resources/soulspear.obj",
+    "len": {
+      "Path": "./SomeFolder/len.jfif",
+      "Type": "texture2d"
+    },
+    "landscape": {
+      "Path": "./SomeFolder/landscape.bmp",
+      "Type": "texture2d"
+    },
+    "wierd": {
+      "Path": "./SomeFolder/test2.jpg",
+      "Type": "texture2d"
+    },
+    "grass": {
+      "Path": "./SomeFolder/grass.obj",
+      "Type": "mesh"
+    },
+    "grass_diffuse": {
+      "Path": "./SomeFolder/grass.png",
+      "Type": "texture2d"
+    },
+    "stanford": {
+      "Path": "./SomeFolder/stanford_downscaled.obj",
+      "Type": "mesh"
+    },
+    "spear": {
+      "Path": "./Spear/soulspear_downscaled.obj",
+      "Type": "mesh"
+    },
+    "spear_diffuse": {
+      "Path": "./Spear/soulspear_diffuse.tga",
+      "Type": "texture2d"
+    },
+    "spear_normal": {
+      "Path": "./Spear/soulspear_normal.tga",
+      "Type": "texture2d"
+    },
+    "spear_specular": {
+      "Path": "./Spear/soulspear_specular.tga",
+      "Type": "texture2d"
+    },
+    "plane": {
+      "Path": "./Primitives/plane.obj",
       "Type": "mesh"
     }
   }
 }
+
