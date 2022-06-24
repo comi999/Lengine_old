@@ -1,4 +1,5 @@
 #pragma once
+#include "Math.hpp"
 
 struct Colour
 {
@@ -102,6 +103,12 @@ struct Colour
 	bool operator !=( Colour a_RHS ) const
 	{
 		return !operator==( a_RHS );
+	}
+
+	Vector4 Normalized()
+	{
+		static constexpr float Denom = 1.0f / 255;
+		return Vector4( Denom * R, Denom * G, Denom * B, Denom * A );
 	}
 
 	Channel R;

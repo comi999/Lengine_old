@@ -3,8 +3,9 @@
 #include "Math.hpp"
 #include "Colour.hpp"
 #include "Vertex.hpp"
+#include "Resource.hpp"
 
-class Mesh
+class Mesh : public Resource
 {
 public:
 
@@ -12,50 +13,23 @@ public:
 		: m_Outermost( size_t( -1 ) )
 	{ }
 
-	void GetTriangle( size_t a_Index, Vertex( &o_Triangle )[ 3 ] ) const
-	{
-		const Vector< size_t, 4 >* Vertex = &m_Vertices[ a_Index * 3 ];
-
-		o_Triangle[ 0 ] =
-		{
-			Colour::WHITE, //m_Colours  [ Vertex[ 0 ][ 0 ] ],
-			m_Positions[ Vertex[ 0 ][ 1 ] ],
-			m_Normals  [ Vertex[ 0 ][ 2 ] ],
-			m_Texels.size() ? m_Texels[ Vertex[ 0 ][ 3 ] ] : Vector2::Zero
-		};
-
-		o_Triangle[ 1 ] =
-		{
-			Colour::WHITE, //m_Colours  [ Vertex[ 1 ][ 0 ] ],
-			m_Positions[ Vertex[ 1 ][ 1 ] ],
-			m_Normals  [ Vertex[ 1 ][ 2 ] ],
-			m_Texels.size() ? m_Texels[ Vertex[ 1 ][ 3 ] ] : Vector2::Zero
-		};
-
-		o_Triangle[ 2 ] =
-		{
-			Colour::WHITE, //m_Colours  [ Vertex[ 2 ][ 0 ] ],
-			m_Positions[ Vertex[ 2 ][ 1 ] ],
-			m_Normals  [ Vertex[ 2 ][ 2 ] ],
-			m_Texels.size() ? m_Texels   [ Vertex[ 2 ][ 3 ] ] : Vector2::Zero
-		};
-	}
-
 	void GetVertex( size_t a_Index, Vertex& o_Vertex ) const
 	{
-		auto& Vertex = m_Vertices[ a_Index ];
+		uint32_t Index = m_Indices[ a_Index ];
 		o_Vertex = 
 		{
-			m_Colours  [ Vertex[ 0 ] ],
-			m_Positions[ Vertex[ 1 ] ],
-			m_Normals  [ Vertex[ 2 ] ],
-			m_Texels   [ Vertex[ 3 ] ]
+			m_Colours   [ Index ],
+			m_Positions [ Index ],
+			m_Normals   [ Index ],
+			m_Tangents  [ Index ],
+			m_Bitangents[ Index ],
+			m_Texels    [ Index ]
 		};
 	}
 
 	inline size_t GetVertexCount() const
 	{
-		return m_Vertices.size();
+		return m_Indices.size();
 	}
 
 	inline float GetRadius() const
@@ -82,7 +56,7 @@ public:
 		return Math::LengthSqrd( m_Positions[ m_Outermost ] );
 	}
 
-private:
+//private:
 
 	friend class ResourcePackager;
 	friend class Serialization;
@@ -90,25 +64,30 @@ private:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
-		a_Serializer << m_Vertices << m_Colours << m_Positions << m_Normals << m_Texels;
+		a_Serializer << *static_cast< const Resource* >( this );
+		a_Serializer << m_Indices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		a_Deserializer >> m_Vertices >> m_Colours >> m_Positions >> m_Normals >> m_Texels;
+		a_Deserializer >> *static_cast< Resource* >( this );
+		a_Deserializer >> m_Indices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
 	}
 
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
-		a_Sizer & m_Vertices & m_Colours & m_Positions & m_Normals & m_Texels;
+		a_Sizer & *static_cast< const Resource* >( this );
+		a_Sizer & m_Indices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
 	}
 
-	std::vector< Vector< size_t, 4 > > m_Vertices;
-	std::vector< Colour  >             m_Colours;
-	std::vector< Vector3 >             m_Positions;
-	std::vector< Vector3 >             m_Normals;
-	std::vector< Vector2 >             m_Texels;
-	size_t                             m_Outermost;
+	std::vector< uint32_t > m_Indices;
+	std::vector< Vector4  > m_Colours;
+	std::vector< Vector3  > m_Positions;
+	std::vector< Vector3  > m_Normals;
+	std::vector< Vector3  > m_Tangents;
+	std::vector< Vector3  > m_Bitangents;
+	std::vector< Vector2  > m_Texels;
+	size_t                  m_Outermost;
 };

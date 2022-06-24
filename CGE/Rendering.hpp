@@ -6,11 +6,11 @@
 #include <type_traits>
 #include <map>
 #include "Math.hpp"
-#include "RenderMode.hpp"
 #include "Colour.hpp"
 #include "ConsoleWindow.hpp"
 #include "Hash.hpp"
 #include "Utilities.hpp"
+#include "Rect.hpp"
 
 // broad phase filtering: remove OBJECTS that will definitely not show up on screen by using encompassing regions and frustum planes
 // vertex shader transform vertices into clip space
@@ -171,10 +171,19 @@ enum class TextureSetting : uint32_t
 	ALPHA,
 	ZERO,
 	ONE,
+
+	// Texture data format
+	UNSIGNED_BYTE, 
+	UNSIGNED_SHORT_5_6_5, 
+	UNSIGNED_SHORT_4_4_4_4, 
+	UNSIGNED_SHORT_5_5_5_1,
 };
 
 enum class TextureFormat : uint8_t
 {
+	ALPHA,
+	LUMINANCE,
+	LUMINANCE_ALPHA,
 	RGB,
 	RGBA
 };
@@ -229,18 +238,43 @@ enum class CullFaceMode
 	FRONT_AND_BACK,
 };
 
+enum class RenderMode : uint8_t
+{
+	POINT,
+	LINE,
+	TRIANGLE
+};
+
 #define DefineShader( Name ) \
 void Shader_##Name ();       \
-template <> void* ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
+template <> void* Internal::ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
+namespace Internal { bool _ShaderRegistered_##Name = RegisterShader< "Shader_"#Name##_H >::Registered; }; \
 void Shader_##Name ()
 
-#define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value();
-#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Attribute< Location, Type >::Value();
-#define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In();
-#define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out();
+#define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value()
+#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Property< Location, Type >::Value()
+#define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In()
+#define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out()
+#define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
 
+
+namespace Internal {
 template < Hash _ShaderName >
 void* ShaderAddress = nullptr;
+
+static std::map< Hash, void* > ShaderFuncLookup;
+
+template < Hash _ShaderName >
+struct RegisterShader
+{
+	inline static bool Registered = [](){
+		ShaderFuncLookup[ _ShaderName ] = ShaderAddress< _ShaderName >;
+		return true;
+	}();
+};
+
+} // namespace Internal
+
 
 typedef uint32_t BufferHandle;
 typedef uint32_t ArrayHandle;
@@ -248,9 +282,17 @@ typedef uint32_t TextureHandle;
 typedef uint32_t ShaderHandle;
 typedef uint32_t ShaderProgramHandle;
 
+struct Sampler2D
+{
+	typedef Vector4 Output;
+	typedef Vector2 Input;
+	static constexpr TextureTarget Target = TextureTarget::TEXTURE_2D;
+	uint32_t Location;
+};
+
 class Rendering;
 
-struct Shader
+struct ShaderObject
 {
 public:
 
@@ -299,7 +341,6 @@ private:
 	std::vector< void* >        m_Uniforms;
 };
 
-// Analogous to OpenGL
 class Rendering
 {
 public:
@@ -354,13 +395,16 @@ public:
 	static void EnableVertexAttribArray( uint32_t a_Position );
 	static void DisableVertexAttribArray( uint32_t a_Position );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
-	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, size_t a_Offset );
+	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void*  a_Indices );
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
+	static void DepthFunc( TextureSetting a_TextureSetting );
 
 	// Textures
-	static void ActiveTexture( uint32_t a_ActiveTexture );
+	static void ActiveTexture( uint32_t a_ActiveTexture );	
+	static void GenTextures( size_t a_Count, TextureHandle* a_Handles );
+	static void BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle );
 	static void TexParameterf( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, float a_Value );
 	static void TexParameterfv( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, const float* a_Value );
 	static void TexParameteri( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, int32_t a_Value );
@@ -373,12 +417,12 @@ public:
 	static void TextureParameteri( TextureHandle a_Handle, TextureParameter a_TextureParameter, const int32_t* a_Value );
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, uint32_t a_Value );
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, const uint32_t* a_Value );
-	static void GenTextures( size_t a_Count, TextureHandle* a_Handles );
-	static void BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle );
-	static void TexImage1D( /*something*/ );
-	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, DataType a_DataType, void* a_Data );
-	static void TexImage3D( /*something*/ );
-	static void GenerateMipmap( TextureTarget a_TextureTarget );
+	// Need to look into the Tex/ture/ParameterI* variants.
+	
+	//static void TexImage1D( /*something*/ );
+	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data );
+	//static void TexImage3D( /*something*/ );
+	//static void GenerateMipmap( TextureTarget a_TextureTarget );
 
 	// Uniform access
 	static int32_t GetUniformLocation( ShaderProgramHandle a_ShaderProgramHandle, const char* a_Name );
@@ -394,28 +438,27 @@ public:
 	static void Uniform2ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1 );
 	static void Uniform3ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2 );
 	static void Uniform4ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2, uint32_t a_V3 );
-	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	//static void Uniform
+	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
 
 	//----------SHADER_ACCESS--------------
 
@@ -454,7 +497,7 @@ private:
 			static uint32_t Offset = 0;
 			uint32_t OriginalOffset = Offset;
 			Offset += a_size;
-			s_VaryingStrides[ ShaderAddress< _Shader > ] = Offset;
+			s_VaryingStrides[ Internal::ShaderAddress< _Shader > ] = Offset;
 			return OriginalOffset;
 		}
 
@@ -482,7 +525,7 @@ private:
 public:
 
 	template < uint32_t _Location, typename _Type >
-	class Attribute
+	class Property
 	{
 	public:
 
@@ -501,13 +544,13 @@ public:
 
 		static const _Type& In()
 		{
-			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_VertexDataStorage.Interpolated().Data() ) + s_Offset );
+			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_InterpolatedStorage.Data() ) + s_Offset );
 		};
 
 		static _Type& Out()
 		{
 			static OnStart Setup = s_Setup;
-			return *reinterpret_cast< _Type* >( s_VertexDataStorage.Head() + s_Offset );
+			return *reinterpret_cast< _Type* >( reinterpret_cast< uint8_t* >( s_VertexStorage.Head() ) + s_Offset );
 		};
 
 	private:
@@ -537,11 +580,37 @@ public:
 		static void Setup()
 		{
 			UniformCommon< _Type, _Name >::Setup();
-			s_UniformMap.Register( ShaderAddress< _Shader >, _Name );
+			s_UniformMap.Register( Internal::ShaderAddress< _Shader >, _Name );
 		}
 
 		inline static OnStart s_Setup = Setup;
 	};
+
+	template < typename _Type, Hash _Name >
+	class InOut
+	{
+	public:
+
+		static _Type& Value()
+		{
+			static _Type Value;
+			return Value;
+		}
+	};
+
+	template < typename _Type >
+	static typename _Type::Output Sample( _Type a_Sampler, const typename _Type::Input& a_Input )
+	{
+		auto Handle = s_TextureUnits[ a_Sampler.Location ][ ( uint32_t )_Type::Target ];
+		auto& Target = s_TextureRegistry[ Handle ];
+		auto& Dimensions = Target.Dimensions;
+		auto r = Vector2Int( ( Dimensions.x - 1 ) * a_Input.x, ( Dimensions.y - 1 ) * a_Input.y );
+		uint32_t Position = r.y * Dimensions.x + r.x;
+		const Colour* Data = reinterpret_cast< const Colour* >( Target.Data ) + Position;
+
+		static constexpr float Denom = 1.0f / 255;
+		return { Denom * Data->R, Denom * Data->G, Denom * Data->B, Denom * Data->A };
+	}
 
 private:
 
@@ -564,7 +633,7 @@ private:
 			m_Shaders[ a_Handle - 1 ].Type = ShaderType::INVALID;
 		}
 
-		inline Shader& operator[]( ShaderHandle a_Handle )
+		inline ShaderObject& operator[]( ShaderHandle a_Handle )
 		{
 			return m_Shaders[ a_Handle - 1 ];
 		}
@@ -577,7 +646,7 @@ private:
 	private:
 
 		std::bitset< 32 >        m_Availability;
-		std::array< Shader, 32 > m_Shaders;
+		std::array< ShaderObject, 32 > m_Shaders;
 	};
 
 	class ShaderProgramRegistry
@@ -644,7 +713,7 @@ private:
 			, m_Data( nullptr )
 		{ }
 
-		AttributeIterator( VertexAttribute a_VertexAttribute )
+		AttributeIterator( const VertexAttribute& a_VertexAttribute )
 		{
 			m_Output = OutputArray(
 				std::in_place_type< std::make_integer_sequence< size_t, 256 > > )[
@@ -661,19 +730,19 @@ private:
 			m_Stride = a_VertexAttribute.Stride;
 		}
 
-		inline void Rewind()
+		inline void Reset()
 		{
 			m_Data = m_Begin;
 		}
 
-		inline void Clear()
+		void Clear()
 		{
 			m_Output = nullptr;
 			m_Stride = 0;
 			m_Data = nullptr;
 		}
 
-		inline AttributeIterator& operator =( VertexAttribute a_VertexAttribute )
+		AttributeIterator& operator=( const VertexAttribute& a_VertexAttribute )
 		{
 			m_Output = OutputArray(
 				std::in_place_type< std::make_integer_sequence< size_t, 256 > > )[
@@ -692,15 +761,26 @@ private:
 			return *this;
 		}
 
+		AttributeIterator& operator=( uint32_t a_Index )
+		{
+			m_Data = m_Begin + m_Stride * a_Index;
+			return *this;
+		}
+
 		inline operator bool() const
 		{
 			return m_Data;
 		}
 
-		inline auto& operator++()
+		AttributeIterator& operator++()
 		{
 			m_Data += m_Stride;
 			return *this;
+		}
+
+		AttributeIterator& operator+=( uint32_t a_Count )
+		{
+			m_Data += m_Stride * a_Count;
 		}
 
 		inline void operator()( void* o_Output ) const
@@ -783,11 +863,11 @@ private:
 		uint8_t*   m_Begin;
 		uint8_t*   m_Data;
 	};
-	class TextureBuffer
+	class Texture
 	{
 	public:
 
-		TextureBuffer()
+		Texture()
 			: TextureMinLOD( -1000 )
 			, TextureMaxLOD( 1000 )
 			, TextureMaxLevel( 1000 )
@@ -795,32 +875,39 @@ private:
 			, TextureSwizzleG( 1 )
 			, TextureSwizzleB( 2 )
 			, TextureSwizzleA( 3 )
+			, Data( nullptr )
+			, Dimensions( 0 )
 		{ }
 
-		uint8_t DepthStencilTextureMode : 1;
-		int32_t TextureBaseLevel;
-		Vector4 TextureBorderColour;
-		uint8_t TextureCompareFunc      : 3;
-		uint8_t TextureCompareMode      : 1;
-		float   TextureLODBias;
-		int8_t  TextureMagFilter        : 1;
-		int8_t  TextureMinFilter        : 3;
-		float   TextureMinLOD;
-		float   TextureMaxLOD;
-		int32_t TextureMaxLevel;
-		int8_t  TextureSwizzleR         : 3;
-		int8_t  TextureSwizzleG         : 3;
-		int8_t  TextureSwizzleB         : 3;
-		int8_t  TextureSwizzleA         : 3;
-		uint8_t TextureWrapS            : 3;
-		uint8_t TextureWrapT            : 3;
-		uint8_t TextureWrapR            : 3;
-
+		uint8_t     DepthStencilTextureMode : 1;
+		int32_t     TextureBaseLevel;
+		Vector4     TextureBorderColour;
+		uint8_t     TextureCompareFunc      : 3;
+		uint8_t     TextureCompareMode      : 1;
+		float       TextureLODBias;
+		int8_t      TextureMagFilter        : 1;
+		int8_t      TextureMinFilter        : 3;
+		float       TextureMinLOD;
+		float       TextureMaxLOD;
+		int32_t     TextureMaxLevel;
+		int8_t      TextureSwizzleR         : 3;
+		int8_t      TextureSwizzleG         : 3;
+		int8_t      TextureSwizzleB         : 3;
+		int8_t      TextureSwizzleA         : 3;
+		uint8_t     TextureWrapS            : 3;
+		uint8_t     TextureWrapT            : 3;
+		uint8_t     TextureWrapR            : 3;
+		const void* Data;
+		Vector2Int  Dimensions;
+		uint8_t     Format;
 	};
 
 	typedef std::vector< uint8_t >           Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
+	typedef std::array< TextureHandle, 10  > TextureUnit;
+	typedef bool( *DepthCompareFunc )( float, float );
+	typedef void( *DrawProcessorFunc )( uint32_t, uint32_t );
 
 	class BufferRegistry
 	{
@@ -896,18 +983,31 @@ private:
 			size_t Index = 0;
 			while ( m_Availability[ Index++ ] );
 			m_Availability[ Index - 1 ] = true;
+			m_Targets[ Index - 1 ] = -1;
 			return Index;
 		}
 
-		void Destroy( BufferHandle a_Handle )
+		bool Bind( TextureTarget a_Target, TextureHandle a_Handle )
 		{
-			m_Availability[ a_Handle - 1 ] = false;
-			//m_Buffers[ a_Handle - 1 ];
+			if ( m_Targets[ a_Handle - 1 ] != -1 )
+			{
+				return false;
+			}
+
+			m_Targets[ a_Handle - 1 ] = ( int8_t )a_Target;
+			return true;
 		}
 
-		inline TextureBuffer& operator[]( BufferHandle a_Handle )
+		void Destroy( TextureHandle a_Handle )
 		{
-			return m_Buffers[ a_Handle - 1 ];
+			m_Availability[ a_Handle - 1 ] = false;
+			// m_Textures[ a_Handle - 1 ] reset this
+			m_Targets[ a_Handle - 1 ] = -1;
+		}
+
+		inline Texture& operator[]( BufferHandle a_Handle )
+		{
+			return m_Textures[ a_Handle - 1 ];
 		}
 
 		inline bool Valid( TextureHandle a_Handle )
@@ -917,52 +1017,48 @@ private:
 
 	private:
 
-		std::bitset< 32 >               m_Availability;
-		std::array< TextureBuffer, 32 > m_Buffers;
+		std::array< int8_t, 32 >  m_Targets;
+		std::bitset< 32 >         m_Availability;
+		std::array< Texture, 32 > m_Textures;
 	};
 	class AttributeRegistry
 	{
 	public:
 
-		inline void Increment( uint32_t a_Position )
+		AttributeRegistry& operator++()
 		{
-			++m_VertexAttributes[ a_Position ];
+			m_SeekFunction( this, m_Position + 1 );
+			return *this;
 		}
 
-		inline void IncrementAll()
+		AttributeRegistry& operator=( uint32_t a_Index )
 		{
-			// In future, use a static incrementing function.
-
-			++m_VertexAttributes[ 0 ];
-			++m_VertexAttributes[ 1 ];
-			++m_VertexAttributes[ 2 ];
-			++m_VertexAttributes[ 3 ];
-			++m_VertexAttributes[ 4 ];
-			++m_VertexAttributes[ 5 ];
-			++m_VertexAttributes[ 6 ];
-			++m_VertexAttributes[ 7 ];
+			m_SeekFunction( this, a_Index );
+			return *this;
 		}
 
-		inline void Rewind( uint32_t a_Position )
+		AttributeRegistry& operator+=( uint32_t a_Count )
 		{
-			m_VertexAttributes[ a_Position ].Rewind();
+			m_SeekFunction( this, m_Position + a_Count );
+			return *this;
 		}
 
-		inline void ResetAll()
+		template < typename T >
+		void SetIndices( T* a_Indices )
 		{
-			m_VertexAttributes[ 0 ].Rewind();
-			m_VertexAttributes[ 1 ].Rewind();
-			m_VertexAttributes[ 2 ].Rewind();
-			m_VertexAttributes[ 3 ].Rewind();
-			m_VertexAttributes[ 4 ].Rewind();
-			m_VertexAttributes[ 5 ].Rewind();
-			m_VertexAttributes[ 6 ].Rewind();
-			m_VertexAttributes[ 7 ].Rewind();
+			m_Indices = a_Indices;
+			m_Position = 0;
+			m_SeekFunction = Seek< T >;
 		}
 
-		inline void Value( uint32_t a_Position, void* o_Output )
+		void UnsetIndices()
 		{
-			m_VertexAttributes[ a_Position ]( o_Output );
+			m_SeekFunction = Seek< void >;
+		}
+
+		inline void Reset()
+		{
+			*this = 0u;
 		}
 
 		inline AttributeIterator& operator[]( uint32_t a_Position )
@@ -972,6 +1068,36 @@ private:
 
 	private:
 
+		typedef void( *SeekFunction )( AttributeRegistry*, uint32_t );
+
+		template < typename T >
+		static void Seek( AttributeRegistry* a_AttributeRegistry, uint32_t a_Index )
+		{
+			uint32_t Index;
+
+			if constexpr ( std::is_void_v< T > )
+			{
+				Index = a_Index;
+			}
+			else
+			{
+				Index = static_cast< uint32_t >( reinterpret_cast< T* >( a_AttributeRegistry->m_Indices )[ a_Index ] );
+			}
+
+			a_AttributeRegistry->m_Position = a_Index;
+			a_AttributeRegistry->m_VertexAttributes[ 0 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 1 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 2 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 3 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 4 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 5 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 6 ] = Index;
+			a_AttributeRegistry->m_VertexAttributes[ 7 ] = Index;
+		}
+
+		const void*       m_Indices;
+		uint32_t          m_Position;
+		SeekFunction      m_SeekFunction;
 		AttributeIterator m_VertexAttributes[ 8 ];
 	};
 	class UniformMap
@@ -1002,261 +1128,329 @@ private:
 		ShaderLookup m_ShaderLookup;
 		UniformArray m_Uniforms;
 	};
-	class AttribVector
+	
+	template < typename T = uint8_t >
+	class DataStorage
 	{
 	public:
 
-		AttribVector() = default;
-
-		AttribVector( uint32_t a_Size, float* a_Data = nullptr )
-		{
-			m_Data.resize( a_Size );
-
-			if ( !a_Data )
-			{
-				return;
-			}
-
-			for ( uint32_t i = 0; i < a_Size; ++i )
-			{
-				m_Data[ i ] = a_Data[ i ];
-			}
-		}
-
-		AttribVector( const AttribVector& a_Vector )
-		{
-			m_Data.resize( a_Vector.m_Data.size() );
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] = a_Vector.m_Data[ i ];
-			}
-		}
-
-		AttribVector( AttribVector&& a_Vector )
-		{
-			m_Data = std::move( a_Vector.m_Data );
-		}
-
-		AttribVector& operator=( const AttribVector& a_Vector )
-		{
-			m_Data.resize( a_Vector.m_Data.size() );
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] = a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator+=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] += a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator-=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] -= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator*=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator/=( const AttribVector& a_Vector )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] /= a_Vector.m_Data[ i ];
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator*=( float a_Scalar )
-		{
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Scalar;
-			}
-
-			return *this;
-		}
-
-		AttribVector& operator/=( float a_Scalar )
-		{
-			a_Scalar = 1.0f / a_Scalar;
-
-			for ( uint32_t i = 0; i < m_Data.size(); ++i )
-			{
-				m_Data[ i ] *= a_Scalar;
-			}
-
-			return *this;
-		}
-
-		float& operator[]( uint32_t a_Index )
-		{
-			return m_Data[ a_Index ];
-		}
-
-		inline float* Data()
-		{
-			return m_Data.data();
-		}
-
-		inline size_t Size() const
-		{
-			return m_Data.size();
-		}
-
-		inline void Resize( size_t a_Size )
-		{
-			m_Data.resize( a_Size );
-		}
-
-	private:
-
-		std::vector< float > m_Data;
-	};
-	class VertexDataStorage
-	{
-	public:
-
-		VertexDataStorage()
-			: m_Stride( 0 )
-			, m_Head( nullptr )
+		DataStorage()
+			: m_Head( nullptr )
+			, m_Stride( sizeof( T ) )
 		{ }
 
-		void Prepare( uint32_t a_Size, uint32_t a_Stride )
+		template < typename U >
+		DataStorage( const DataStorage< U >& a_DataStorage )
 		{
-			if ( a_Size * a_Stride > m_Data.size() )
+			m_Data   = a_DataStorage.m_Data;
+			m_Head   = m_Data.data();
+			m_Stride = a_DataStorage.m_Stride;
+		}
+
+		template < typename U >
+		DataStorage( DataStorage< U >&& a_DataStorage )
+			: m_Data( std::move( a_DataStorage.m_Data ) )
+			, m_Head( a_DataStorage.m_Head )
+			, m_Stride( a_DataStorage.m_Stride )
+		{ }
+
+		DataStorage( size_t a_Size, size_t a_Stride = sizeof( T ) )
+		{
+			Prepare( a_Size, a_Stride );
+		}
+
+		void Prepare( size_t a_Size, size_t a_Stride = sizeof( T ) )
+		{
+			if ( m_Data.size() < a_Size * a_Stride )
 			{
 				m_Data.resize( a_Size * a_Stride );
 			}
 
-			if ( a_Stride / sizeof( float ) > m_Interpolated.Size() )
-			{
-				m_Interpolated.Resize( a_Stride / sizeof( float ) );
-			}
-
+			m_Head = m_Data.data();
 			m_Stride = a_Stride;
-			m_Head   = m_Data.data();
 		}
 
-		void Increment()
+		inline DataStorage& operator++()
 		{
 			m_Head += m_Stride;
+			return *this;
 		}
 
-		void Rewind()
+		DataStorage operator++( int )
+		{
+			DataStorage Temp( *this );
+			++*this;
+			return Temp;
+		}
+
+		inline DataStorage& operator=( const T& a_Value )
+		{
+			*Head() = a_Value;
+			return *this;
+		}
+
+		inline void Reset()
 		{
 			m_Head = m_Data.data();
 		}
 
-		uint8_t* Data()
+		inline uint8_t* Raw()
 		{
 			return m_Data.data();
 		}
 
-		uint8_t* Head()
+		inline const uint8_t* Raw() const
 		{
-			return m_Head;
+			return m_Data.data();
 		}
 
-		AttribVector& Interpolated()
+		T* Data()
 		{
-			return m_Interpolated;
+			return reinterpret_cast< T* >( m_Data.data() );
+		}
+
+		const T* Data() const
+		{
+			return reinterpret_cast< T* >( m_Data.data() );
+		}
+
+		T* Head()
+		{
+			return reinterpret_cast< T* >( m_Head );
+		}
+
+		const T* Head() const
+		{
+			return reinterpret_cast< T* >( m_Head );
+		}
+
+		inline operator T& ()
+		{
+			return *Head();
+		}
+
+		inline operator T& const () const
+		{
+			return *Head();
+		}
+
+		void Clear()
+		{
+			m_Data.clear();
+			m_Head = nullptr;
+			m_Stride = 0;
 		}
 
 	private:
 
-		uint32_t               m_Stride;
-		uint8_t*               m_Head;
 		std::vector< uint8_t > m_Data;
-		AttribVector           m_Interpolated;
+		uint8_t*               m_Head;
+		size_t                 m_Stride;
 	};
-	class PositionDataStorage
+	
+	template < typename T >
+	class AttribSpan
 	{
 	public:
 
-		PositionDataStorage()
-			: m_Head( nullptr )
+		AttribSpan()
+			: m_Origin( nullptr )
+			, m_Size( 0 )
 		{ }
 
-		void Prepare( uint32_t a_Size )
+		AttribSpan( T* a_Origin, size_t a_Size )
+			: m_Origin( a_Origin )
+			, m_Size( a_Size )
+		{ }
+
+		AttribSpan( AttribSpan&& a_AttribSpan )
+			: m_Origin( a_AttribSpan.m_Origin )
+			, m_Size( a_AttribSpan.m_Size )
+		{ }
+
+		AttribSpan& operator=( const AttribSpan& a_AttribSpan )
 		{
-			if ( a_Size  > m_Positions.size() )
+			for ( uint32_t i = 0; i < m_Size; ++i )
 			{
-				m_Positions.resize( a_Size );
+				m_Origin[ i ] = a_AttribSpan[ i ];
 			}
 
-			m_Head = m_Positions.data();
+			return *this;
 		}
 
-		void Increment()
+		T& operator[]( size_t a_Index )
 		{
-			++m_Head;
+			return m_Origin[ a_Index ];
 		}
 
-		void Rewind()
+		const T& operator[]( size_t a_Index ) const
 		{
-			m_Head = m_Positions.data();
+			return m_Origin[ a_Index ];
 		}
 
-		inline Vector4* Head()
+		AttribSpan& operator+=( const AttribSpan& a_AttribSpan )
 		{
-			return m_Head;
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] += a_AttribSpan[ i ];
+			}
+
+			return *this;
 		}
 
-		void operator=( const Vector4& a_Value )
+		AttribSpan& operator-=( const AttribSpan& a_AttribSpan )
 		{
-			*m_Head = a_Value;
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] -= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator*=( const AttribSpan& a_AttribSpan )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] *= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator/=( const AttribSpan& a_AttribSpan )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] /= a_AttribSpan[ i ];
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator+=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] += a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator-=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] -= a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator*=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] *= a_Value;
+			}
+
+			return *this;
+		}
+
+		AttribSpan& operator/=( T a_Value )
+		{
+			for ( size_t i = 0; i < m_Size; ++i )
+			{
+				m_Origin[ i ] /= a_Value;
+			}
+
+			return *this;
+		}
+
+		T& operator*()
+		{
+			return *m_Origin;
+		}
+
+		const T& operator*() const
+		{
+			return *m_Origin;
+		}
+
+		T* operator->()
+		{
+			return m_Origin;
+		}
+
+		const T* operator->() const
+		{
+			return m_Origin;
+		}
+
+		inline AttribSpan& Advance()
+		{
+			m_Origin += m_Size;
+			return *this;
+		}
+
+		inline AttribSpan& Advance( uint32_t a_Count )
+		{
+			m_Origin += m_Size * a_Count;
+			return *this;
+		}
+
+		inline void Set( T* a_Origin, size_t a_Size )
+		{
+			m_Origin = a_Origin;
+			m_Size = a_Size;
+		}
+
+		inline void Swap( AttribSpan& a_AttribSpan )
+		{
+			for ( uint32_t i = 0; i < a_AttribSpan.m_Size; ++i )
+			{
+				std::swap( m_Origin[ i ], a_AttribSpan.m_Origin[ i ] );
+			}
 		}
 
 	private:
 
-		Vector4*               m_Head;
-		std::vector< Vector4 > m_Positions;
+		T*     m_Origin;
+		size_t m_Size;
 	};
+	
 	class RenderState
 	{
 	public:
 
 		RenderState()
-			: BackCull( true )
+			: AlphaBlend( false )
+			, Perspective( true )
+			, Viewport( false )
+			, CullFace( true )
+			, FrontCull( false )
+			, BackCull( true )
+			, DepthTest( true )
+			, Clip( false )
 		{ }
 
-		bool AlphaBlend    : 1;
-		bool CullFace      : 1;
-		bool FrontCull     : 1;
-		bool BackCull      : 1;
-		bool DepthTest     : 1;
-		bool Clip          : 1;
+		bool AlphaBlend  : 1;
+		bool Perspective : 1;
+		bool Viewport    : 1;
+		bool CullFace    : 1;
+		bool FrontCull   : 1;
+		bool BackCull    : 1;
+		bool DepthTest   : 1;
+		bool Clip        : 1;
 	};
 	class DepthBuffer
 	{
 	public:
 
 		DepthBuffer()
-			: m_Buffer( nullptr )
+			: m_Size( 0 )
+			, m_Buffer( nullptr )
 		{ }
 
 		~DepthBuffer()
@@ -1270,23 +1464,23 @@ private:
 			m_Buffer = new float[ a_Size.x * a_Size.y ];
 		}
 
-		inline bool Test( uint32_t a_X, uint32_t a_Y, float a_W )
+		inline bool Test( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
-			return m_Buffer[ a_Y * m_Size.x + a_X ] > a_W;
+			return s_DepthCompareFunc( a_Z, m_Buffer[ a_Y * m_Size.x + a_X ] );
 		}
 
-		void Commit( uint32_t a_X, uint32_t a_Y, float a_W )
+		void Commit( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
-			m_Buffer[ a_Y * m_Size.x + a_X ] = a_W;
+			m_Buffer[ a_Y * m_Size.x + a_X ] = a_Z;
 		}
 
-		bool TestAndCommit( uint32_t a_X, uint32_t a_Y, float a_W )
+		bool TestAndCommit( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
 			float& Point = m_Buffer[ a_Y * m_Size.x + a_X ];
 			
-			if ( Point > a_W )
+			if ( s_DepthCompareFunc( a_Z, Point ) )
 			{
-				Point = a_W;
+				Point = a_Z;
 				return true;
 			}
 
@@ -1309,297 +1503,403 @@ private:
 		float*     m_Buffer;
 	};
 
-	template < uint32_t _Size >
-	static void DrawArraysImpl( uint32_t a_Begin, uint32_t a_Count )
+	template < uint8_t _Interface >
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
 	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0	   = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
 
+		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
+		s_PositionStorage.Prepare( a_End - a_Begin );
+		s_AttributeRegistry = a_Begin;
+		AttribSpan< float > AttribView( s_VertexStorage.Data(), a_Stride );
+		Vector2 HalfWindow( ConsoleWindow::GetCurrentContext()->GetWidth(), ConsoleWindow::GetCurrentContext()->GetHeight() );
+		HalfWindow *= 0.5f;
+
+		for ( ; a_Begin < a_End; ++a_Begin )
+		{
+			a_VertexShader();
+
+			Position.w = 1.0f / Position.w;
+			Position.x *= Position.w;
+			Position.y *= Position.w;
+			Position.z *= Position.w;
+
+			if constexpr ( _Perspective )
+			{
+				AttribView *= Position.w;
+			}
+			 
+			Position.x *= HalfWindow.x;
+			Position.y *= HalfWindow.y;
+			Position.x += HalfWindow.x;
+			Position.y += HalfWindow.y;
+			s_PositionStorage = Position;
+
+			++s_AttributeRegistry;
+			++s_VertexStorage;
+			++s_PositionStorage;
+			AttribView.Advance();
+		}
 	}
 
-	template <>
-	static void DrawArraysImpl< 3 >( uint32_t a_Begin, uint32_t a_Count )
+	template < uint8_t _Interface >
+	static void ProcessTriangles( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_TriangleProcessor )() )
 	{
-		float minDepth = 1000.0f;
-		float maxDepth = -1000.0f;
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+	}
 
+	template < uint8_t _Interface >
+	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
+	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
 
-		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
-		auto& ActiveArray   = s_ArrayRegistry[ s_ActiveArray ];
-		
-		// Setup vertex data storage.
-		void( *VertexShader )( ) = ActiveProgram[ ShaderType::VERTEX_SHADER ];
-		void( *FragmentShader )( ) = ActiveProgram[ ShaderType::FRAGMENT_SHADER ];
-		uint32_t VertexStride = s_VaryingStrides[ VertexShader ];
-		uint32_t AttribStride = VertexStride / sizeof( float );
-		s_VertexDataStorage.Prepare( a_Count, VertexStride );
+		static AttribSpan< Vector4 > P[ 3 ];
+		static AttribSpan< float   > V[ 3 ];
 
-		// Setup position data storage.
-		s_PositionDataStorage.Prepare( a_Count );
+		auto& ActiveArray = s_ArrayRegistry[ s_ActiveArray ];
+		Rect ViewPort = ConsoleWindow::GetCurrentContext()->GetScreenBuffer().GetBufferRect();
 
-		for ( uint32_t Begin = a_Begin, End = a_Begin + a_Count; Begin < End; ++Begin, s_AttributeRegistry.IncrementAll(), s_VertexDataStorage.Increment(), s_PositionDataStorage.Increment() )
-		{
-			VertexShader();
-
-			float w = Position.w;
-			Position /= Position.w;
-			Position.w = 1.0f / w;
-
-			float* VertexData = ( float* )s_VertexDataStorage.Head();
-
-			for ( uint32_t i = 0; i < AttribStride; ++i )
-			{
-				VertexData[ i ] /= w;
-			}
-			
-			Position.x *= 0.5f * ConsoleWindow::GetCurrentContext()->GetWidth();
-			Position.y *= 0.5f * ConsoleWindow::GetCurrentContext()->GetHeight();
-			Position.x += 0.5f * ConsoleWindow::GetCurrentContext()->GetWidth();
-			Position.y += 0.5f * ConsoleWindow::GetCurrentContext()->GetHeight();
-			s_PositionDataStorage = Position;
-		}
-		
 		// Reset position and vertex storage.
-		s_PositionDataStorage.Rewind();
-		s_VertexDataStorage.Rewind();
+		s_VertexStorage.Reset();
+		s_PositionStorage.Reset();
+		s_InterpolatedStorage.Prepare( a_Stride );
 
-		Vector4* Positions[ 3 ];
-		float*   Vertices[ 3 ];
+		P[ 0 ].Set( s_PositionStorage.Head() + 0ul, 1 );
+		P[ 1 ].Set( s_PositionStorage.Head() + 1ul, 1 );
+		P[ 2 ].Set( s_PositionStorage.Head() + 2ul, 1 );
+		V[ 0 ].Set( s_VertexStorage  .Head() + 0ul * a_Stride, a_Stride );
+		V[ 1 ].Set( s_VertexStorage  .Head() + 1ul * a_Stride, a_Stride );
+		V[ 2 ].Set( s_VertexStorage  .Head() + 2ul * a_Stride, a_Stride );
 
-		for ( uint32_t Begin = a_Begin, End = a_Begin + a_Count; Begin < End; )
+		for ( ; a_Begin < a_End; a_Begin += 3
+			  , P[ 0 ].Advance( 3 )
+			  , P[ 1 ].Advance( 3 )
+			  , P[ 2 ].Advance( 3 )
+			  , V[ 0 ].Advance( 3 )
+			  , V[ 1 ].Advance( 3 )
+			  , V[ 2 ].Advance( 3 ) )
 		{
-			for ( uint32_t i = 0; i < 3; ++i, ++Begin, s_PositionDataStorage.Increment(), s_VertexDataStorage.Increment() )
+			// Clipping - Improve later - Currently reject if any point outside viewport.
+			if constexpr ( _Clipping )
 			{
-				Positions[ i ] = s_PositionDataStorage.Head();
-				Vertices[ i ] = reinterpret_cast< float* >( s_VertexDataStorage.Head() );
+				// Implement clipping algorithm
 			}
-
-			Vector4 
-				*a_P0 = Positions[ 0 ],
-				*a_P1 = Positions[ 1 ],
-				*a_P2 = Positions[ 2 ];
-
-			// Move this out into Rendering settings for backface culling
-
-			bool FacingForward = Math::Cross( Vector3( *a_P1 - *a_P0 ), Vector3( *a_P2 - *a_P0 ) ).z > 0.0f;
-
-			if ( s_RenderState.CullFace )
+			else
 			{
-				if ( s_RenderState.FrontCull && FacingForward )
+				bool Reject = false;
+
+				for ( uint32_t i = 0; i < 3; ++i )
 				{
-					continue;
+					if ( !ViewPort.Contains( *P[ i ] ) )
+					{
+						Reject = true;
+						break;
+					}
 				}
 
-				if ( s_RenderState.BackCull && !FacingForward )
+				if ( Reject )
 				{
 					continue;
 				}
 			}
-
-			AttribVector
-				a_C0( AttribStride, Vertices[ 0 ] ),
-				a_C1( AttribStride, Vertices[ 1 ] ),
-				a_C2( AttribStride, Vertices[ 2 ] );
 			
+
+			// Culling - Improve later - if enabled and correct orientation, continue.
+			if constexpr ( _CullFront || _CullBack )
+			{
+				float NormalZ = Math::Cross( Vector3( *P[ 1 ] - *P[ 0 ] ), Vector3( *P[ 2 ] - *P[ 0 ] ) ).z;
+
+				if constexpr ( _CullFront )
+				{
+					if ( NormalZ < 0.0f )
+					{
+						continue;
+					}
+				}
+
+				if constexpr ( _CullBack )
+				{
+					if ( NormalZ > 0.0f )
+					{
+						continue;
+					}
+				}
+			}
+
 			// Correct Y
-			a_P0->y = -a_P0->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			a_P1->y = -a_P1->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			a_P2->y = -a_P2->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 0 ]->y = -P[ 0 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 1 ]->y = -P[ 1 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
+			P[ 2 ]->y = -P[ 2 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
 
 			// Sort corners.
-			if ( a_P0->y < a_P1->y )
+			if ( P[ 0 ]->y < P[ 1 ]->y )
 			{
-				std::swap( a_P0, a_P1 );
-				std::swap( a_C0, a_C1 );
+				P[ 0 ].Swap( P[ 1 ] );
+				V[ 0 ].Swap( V[ 1 ] );
 			}
 
-			if ( a_P0->y < a_P2->y )
+			if ( P[ 0 ]->y < P[ 2 ]->y )
 			{
-				std::swap( a_P0, a_P2 );
-				std::swap( a_C0, a_C2 );
+				P[ 0 ].Swap( P[ 2 ] );
+				V[ 0 ].Swap( V[ 2 ] );
 			}
 
-			if ( a_P1->y < a_P2->y )
+			if ( P[ 1 ]->y < P[ 2 ]->y )
 			{
-				std::swap( a_P1, a_P2 );
-				std::swap( a_C1, a_C2 );
+				P[ 1 ].Swap( P[ 2 ] );
+				V[ 1 ].Swap( V[ 2 ] );
 			}
 
 			// Align y.
-			a_P0->y = static_cast< int >( a_P0->y );
-			a_P1->y = static_cast< int >( a_P1->y );
-			a_P2->y = static_cast< int >( a_P2->y );
+			P[ 0 ]->y = static_cast< int >( P[ 0 ]->y );
+			P[ 1 ]->y = static_cast< int >( P[ 1 ]->y );
+			P[ 2 ]->y = static_cast< int >( P[ 2 ]->y );
 
-			if ( a_P0->y == a_P2->y )
+			if ( P[ 0 ]->y == P[ 2 ]->y )
 			{
-				return;
+				continue;
 			}
 
-			// Find M
-			float L = ( a_P1->y - a_P2->y ) / ( a_P0->y - a_P2->y );
-			Vector4 PM = Math::Lerp( L, *a_P2, *a_P0 );
-			PM.y = static_cast< int >( PM.y );
+			// Setup Position and Attribute values.
+			float SpanX, SpanY, Y;
+			static DataStorage< Vector4 > Positions;
+			static AttribSpan < Vector4 > PMid, PStep, PStepL, PStepR, PBegin, PL, PR; // 7
+			static DataStorage< float >   Attributes;
+			static AttribSpan < float >   VMid, VStep, VStepL, VStepR, VBegin, VL, VR; // 7
+			static AttribSpan < float >   InterpolatedValues;
 
-			AttribVector CM( AttribStride );
+			Positions.Prepare( 7 );
+			Attributes.Prepare( 7, a_Stride * sizeof( float ) ); 
+			InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
 
-			for ( uint32_t i = 0; i < AttribStride; ++i )
+			PMid  .Set( Positions .Head() + 0ul, 1                   );
+			PStep .Set( Positions .Head() + 1ul, 1                   );
+			PStepL.Set( Positions .Head() + 2ul, 1                   );
+			PStepR.Set( Positions .Head() + 3ul, 1                   );
+			PBegin.Set( Positions .Head() + 4ul, 1                   );
+			PL    .Set( Positions .Head() + 5ul, 1                   );
+			PR    .Set( Positions .Head() + 6ul, 1                   );
+			VMid  .Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
+			VStep .Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
+			VStepL.Set( Attributes.Head() + 2ul * a_Stride, a_Stride );
+			VStepR.Set( Attributes.Head() + 3ul * a_Stride, a_Stride );
+			VBegin.Set( Attributes.Head() + 4ul * a_Stride, a_Stride );
+			VL    .Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
+			VR    .Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
+
+			// Find Mid point in screen space.
+			float L = ( P[ 1 ]->y - P[ 2 ]->y ) / ( P[ 0 ]->y - P[ 2 ]->y );
+			*PMid = Math::Lerp( L, *P[ 2 ], *P[ 0 ] );
+			PMid->y = static_cast< int >( PMid->y );
+
+			// Calculate Vertex attributes mid point.
+			for ( uint32_t i = 0; i < a_Stride; ++i )
 			{
-				CM[ i ] = Math::Lerp( L, a_C2[ i ], a_C0[ i ] );
+				VMid[ i ] = Math::Lerp( L, V[ 2 ][ i ], V[ 0 ][ i ] );
 			}
 
-			// Swap P1 and M if M is not on right.
-			if ( PM.x < a_P1->x )
+			// Swap  vertex 1 and Mid if Mid is not on right.
+			if ( PMid->x < P[ 1 ]->x )
 			{
-				std::swap( PM, *a_P1 );
-				std::swap( CM, a_C1 );
+				PMid.Swap( P[ 1 ] );
+				VMid.Swap( V[ 1 ] );
 			}
 
-			float SpanX, SpanY, y;
-			Vector4 PStepL, PStepR, PBegin, PStep, PL, PR;
-			//Vector4 CStepL, CStepR, CBegin, CStep, CL, CR;
-			AttribVector 
-				CStepL( AttribStride ), 
-				CStepR( AttribStride ), 
-				CBegin( AttribStride ), 
-				CStep( AttribStride ), 
-				CL( AttribStride ), 
-				CR( AttribStride );
-
-			if ( a_P2->y != a_P1->y )
+			if ( P[ 2 ]->y != P[ 1 ]->y )
 			{
-				SpanY = 1.0f / ( a_P1->y - a_P2->y );
+				SpanY = 1.0f / ( P[ 1 ]->y - P[ 2 ]->y );
+				*PStepL = *P[ 1 ] - *P[ 2 ];
+				*PStepL *= SpanY;
+				*PStepR = *PMid - *P[ 2 ];
+				*PStepR *= SpanY;
+				*PL = *P[ 2 ];
+				*PR = *P[ 2 ];
+				VStepL = V[ 1 ];
+				VStepL -= V[ 2 ];
+				VStepL *= SpanY;
+				VStepR = VMid;
+				VStepR -= V[ 2 ];
+				VStepR *= SpanY;
+				VL = V[ 2 ];
+				VR = V[ 2 ];
+				Y = P[ 2 ]->y;
 
-				PStepL = *a_P1 - *a_P2; 
-				PStepL *= SpanY;
-				PStepR = PM - *a_P2; 
-				PStepR *= SpanY;
-				PL = *a_P2;
-				PR = *a_P2;
-
-				CStepL = a_C1;
-				CStepL -= a_C2; 
-				CStepL *= SpanY;
-				CStepR = CM;
-				CStepR -= a_C2; 
-				CStepR *= SpanY;
-				CL = a_C2;
-				CR = a_C2;
-
-				y = a_P2->y;
-
-				for ( ; y < a_P1->y; ++y )
+				for ( ; Y < P[ 1 ]->y; ++Y )
 				{
-					PL += PStepL;
-					PR += PStepR;
-					CL += CStepL;
-					CR += CStepR;
+					*PL += *PStepL;
+					*PR += *PStepR;
+					VL += VStepL;
+					VR += VStepR;
+					SpanX = 1.0f / ( PR->x - PL->x );
+					*PBegin = *PL;
+					*PStep = ( *PR - *PL ) * SpanX;
+					VBegin = VL;
+					VStep  = VR;
+					VStep -= VL;
+					VStep *= SpanX;
 
-					SpanX = 1.0f / ( PR.x - PL.x );
-					PBegin = PL;
-					PStep = ( PR - PL ) * SpanX;
-					CBegin = CL;
-					CStep = CR;
-					CStep -= CL; 
-					CStep *= SpanX;
-
-					for ( ; PBegin.x < static_cast< int >( PR.x ); PBegin += PStep, CBegin += CStep )
+					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
-						if ( PBegin.z / PBegin.w < minDepth )
+						if constexpr ( _DepthTest )
 						{
-							minDepth = PBegin.z;
+							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+							{
+								continue;
+							}
 						}
 
-						if ( PBegin.z / PBegin.w > maxDepth )
+						InterpolatedValues = VBegin;
+
+						if constexpr ( _Perspective )
 						{
-							maxDepth = PBegin.z;
+							InterpolatedValues /= PBegin->w;
 						}
 
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin.x, PBegin.y, PBegin.z / PBegin.w ) )
-						{
-							continue;
-						}
-
-						s_VertexDataStorage.Interpolated() = CBegin;
-						s_VertexDataStorage.Interpolated() /= PBegin.w;
-						_FragCoord = PBegin;
-						FragmentShader();
+						//_FragCoord = PBegin;
+						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin.x, y }, Fragment );
+						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
 					}
 				}
 			}
 			else
 			{
-				y = a_P1->y;
-				PL = *a_P1;
-				PR = PM;
-				CL = a_C1;
-				CR = CM;
+				Y = P[ 1 ]->y;
+				*PL = *P[ 1 ];
+				*PR = *PMid;
+				VL = V[ 1 ];
+				VR = VMid;
 			}
 
-			if ( a_P1->y != a_P0->y )
+			if ( P[ 1 ]->y != P[ 0 ]->y )
 			{
-				SpanY = 1.0f / ( a_P0->y - a_P1->y );
+				SpanY = 1.0f / ( P[ 0 ]->y - P[ 1 ]->y );
+				*PStepL = *P[ 0 ] - *P[ 1 ]; 
+				*PStepL *= SpanY;
+				*PStepR = *P[ 0 ] - *PMid; 
+				*PStepR *= SpanY;
+				VStepL = V[ 0 ];
+				VStepL -= V[ 1 ];
+				VStepL *= SpanY;
+				VStepR = V[ 0 ];
+				VStepR -= VMid;
+				VStepR *= SpanY;
 
-				PStepL = *a_P0 - *a_P1; PStepL *= SpanY;
-				PStepR = *a_P0 - PM; PStepR *= SpanY;
-
-				CStepL = a_C0;
-				CStepL -= a_C1; 
-				CStepL *= SpanY;
-				CStepR = a_C0;
-				CStepR -= CM; 
-				CStepR *= SpanY;
-
-				for ( ; y < a_P0->y; ++y )
+				for ( ; Y < P[ 0 ]->y; ++Y )
 				{
-					PL += PStepL;
-					PR += PStepR;
-					CL += CStepL;
-					CR += CStepR;
+					*PL += *PStepL;
+					*PR += *PStepR;
+					VL += VStepL;
+					VR += VStepR;
+					SpanX = 1.0f / ( PR->x - PL->x );
+					*PBegin = *PL;
+					*PStep = ( *PR - *PL ) * SpanX;
+					VBegin = VL;
+					VStep = VR;
+					VStep -= VL;
+					VStep *= SpanX;
 
-					SpanX = 1.0f / ( PR.x - PL.x );
-					PBegin = PL;
-					PStep = ( PR - PL ) * SpanX;
-					CBegin = CL;
-					CStep = CR;
-					CStep -= CL;
-					CStep *= SpanX;
-
-					for ( ; PBegin.x < static_cast< int >( PR.x ); PBegin += PStep, CBegin += CStep )
+					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
 					{
-						if ( PBegin.z / PBegin.w < minDepth )
+
+						if constexpr ( _DepthTest )
 						{
-							minDepth = PBegin.z;
+							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+							{
+								continue;
+							}
+						}
+						
+						InterpolatedValues = VBegin;
+
+						if constexpr ( _Perspective )
+						{
+							InterpolatedValues /= PBegin->w;
 						}
 
-						if ( PBegin.z / PBegin.w > maxDepth )
-						{
-							maxDepth = PBegin.z;
-						}
-
-						if ( s_RenderState.DepthTest && !s_DepthBuffer.TestAndCommit( PBegin.x, PBegin.y, PBegin.z / PBegin.w ) )
-						{
-							continue;
-						}
-
-						s_VertexDataStorage.Interpolated() = CBegin;
-						s_VertexDataStorage.Interpolated() /= PBegin.w;
-						_FragCoord = PBegin;
-						FragmentShader();
+						//_FragCoord = PBegin;
+						a_FragmentShader();
 						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin.x, y }, Fragment );
+						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
 					}
 				}
 			}
 		}
+	}
 
-		float _min = minDepth;
-		float _max = maxDepth;
+	template < uint8_t _Interface >
+	static void DrawProcessor( uint32_t a_Begin, uint32_t a_Count )
+	{
+		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
+		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
+
+		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
+		ProcessFragments< _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
+	}
+
+	template < size_t... Idxs >
+	static DrawProcessorFunc* GetDrawProcessors( std::in_place_type_t< std::index_sequence< Idxs... > > )
+	{
+		static DrawProcessorFunc DrawProcessors[ 256 ] = { DrawProcessor< Idxs >... };
+		return DrawProcessors;
+	}
+
+	static DrawProcessorFunc GetDrawProcessor( uint8_t a_Interface )
+	{
+		return GetDrawProcessors( std::in_place_type< std::make_index_sequence< 256 > > )[ a_Interface ];
+	}
+
+	static void UpdateDrawProcessor()
+	{
+		//static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		//static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		//static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		//static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		//static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		//static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		//static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		//static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
+
+		uint8_t Interface = 0;
+
+		if ( s_RenderState.Perspective                         ) Interface |= ( 1u << 7u );
+		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 6u );
+		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 5u );
+		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 4u );
+		if ( s_RenderState.DepthTest                           ) Interface |= ( 1u << 3u );
+		if ( true                                              ) Interface |= ( 1u << 2u ); // Unused
+		if ( true                                              ) Interface |= ( 1u << 1u ); // Unused
+		if ( true                                              ) Interface |= ( 1u << 0u ); // Unused
+
+		s_DrawProcessorFunc = GetDrawProcessor( Interface );
 	}
 
 	template < typename T >
 	static void TexParameterImpl( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, T a_Value )
 	{
-		TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+		TextureHandle Handle = s_TextureUnits[ s_ActiveTextureUnit ][ ( uint32_t )a_TextureTarget ];
+		Texture& Target = s_TextureRegistry[ Handle ];
 
 		switch ( a_TextureParameter )
 		{
@@ -1820,7 +2120,7 @@ private:
 	template < typename T >
 	static void TextureParameterImpl( TextureHandle a_Handle, TextureParameter a_TextureParameter, T a_Value )
 	{
-		TextureBuffer& Target = s_TextureRegistry[ a_Handle ];
+		Texture& Target = s_TextureRegistry[ a_Handle ];
 
 		switch ( a_TextureParameter )
 		{
@@ -2040,24 +2340,36 @@ private:
 		}
 	}
 
+	static bool DepthCompare_LEQUAL		( float a_A, float a_B ) { return a_A <= a_B; }
+	static bool DepthCompare_GEQUAL		( float a_A, float a_B ) { return a_A >= a_B; }
+	static bool DepthCompare_LESS		( float a_A, float a_B ) { return a_A <  a_B; }
+	static bool DepthCompare_GREATER	( float a_A, float a_B ) { return a_A >  a_B; }
+	static bool DepthCompare_EQUAL		( float a_A, float a_B ) { return a_A == a_B; }
+	static bool DepthCompare_NOT_EQUAL	( float a_A, float a_B ) { return a_A != a_B; }
+	static bool DepthCompare_ALWAYS		( float a_A, float a_B ) { return true;       }
+	static bool DepthCompare_NEVER		( float a_A, float a_B ) { return false;      }
 
-	inline static BufferRegistry        s_BufferRegistry;
-	inline static ArrayRegistry         s_ArrayRegistry;
-	inline static TextureRegistry       s_TextureRegistry;
-	inline static AttributeRegistry     s_AttributeRegistry;
-	inline static ShaderRegistry        s_ShaderRegistry;
-	inline static ShaderProgramRegistry s_ShaderProgramRegistry;
-	inline static ArrayHandle           s_ActiveArray;
-	inline static ShaderProgramHandle   s_ActiveShaderProgram;
-	inline static BufferHandle          s_BufferTargets[ 14 ];
-	inline static TextureHandle         s_TextureTargets[ 17 ];
-	inline static UniformMap            s_UniformMap;
-	inline static VertexDataStorage     s_VertexDataStorage;
-	inline static PositionDataStorage   s_PositionDataStorage;
-	inline static StrideRegistry        s_VaryingStrides;
-	inline static RenderState           s_RenderState;
-	inline static DepthBuffer           s_DepthBuffer;
-	inline static Pixel                 s_ClearColour;
-	inline static float                 s_ClearDepth;
-
+	inline static BufferRegistry                  s_BufferRegistry;
+	inline static ArrayRegistry                   s_ArrayRegistry;
+	inline static TextureRegistry                 s_TextureRegistry;
+	inline static AttributeRegistry               s_AttributeRegistry;
+	inline static ShaderRegistry                  s_ShaderRegistry;
+	inline static ShaderProgramRegistry           s_ShaderProgramRegistry;
+	inline static ArrayHandle                     s_ActiveArray;
+	inline static ShaderProgramHandle             s_ActiveShaderProgram;
+	inline static std::array< BufferHandle, 14 >  s_BufferTargets;
+	inline static UniformMap                      s_UniformMap;
+	inline static DataStorage< float >            s_VertexStorage;
+	inline static DataStorage< Vector4 >          s_PositionStorage;
+	inline static DataStorage< float >            s_InterpolatedStorage;
+	inline static StrideRegistry                  s_VaryingStrides;
+	inline static RenderState                     s_RenderState;
+	inline static DepthBuffer                     s_DepthBuffer;
+	inline static Pixel                           s_ClearColour;
+	inline static float                           s_ClearDepth;
+	inline static std::array< TextureUnit, 32 >   s_TextureUnits;
+	inline static uint32_t                        s_ActiveTextureUnit;
+	inline static uint32_t                        s_ActiveTextureTarget;
+	inline static DepthCompareFunc                s_DepthCompareFunc         = DepthCompare_LESS;
+	inline static DrawProcessorFunc               s_DrawProcessorFunc        = DrawProcessor< 0b10011111 >;
 };

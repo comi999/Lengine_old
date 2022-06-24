@@ -6,8 +6,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "STBI.hpp"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "TOBJ.hpp"
+//#define TINYOBJLOADER_IMPLEMENTATION
+//#include "TOBJ.hpp"
+
 
 // Resource types
 #include "Texture.hpp"
@@ -17,7 +18,7 @@
 bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 {
 	Directory ThisDir;
-
+	
 	if ( !ThisDir.ContainsFile( "manifest.json" ) )
 	{
 		return false;
@@ -41,16 +42,17 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 		ThisDir.GetDirectory( "Temp" ) :
 		ThisDir.CreateDirectory( "Temp" );
 
-	std::vector< std::pair< std::string, size_t > > ResourceHeader;
+	//std::vector< std::pair< std::string, size_t > > ResourceHeader;
+	std::vector< std::pair< Name, size_t > > ResourceHeader;
 	std::vector< File > ResourceFiles;
-
 
 	size_t HeaderSize = 0;
 	size_t ResourcesSize = 0;
 
 	for ( auto Begin = Resources.begin(), End = Resources.end(); Begin != End; ++Begin )
 	{
-		std::string Key = Begin.key();
+		//std::string Key = Begin.key();
+		Name Key = Begin.key();
 		Json Value = *Begin;
 
 		if ( !( Value.contains( "Path" ) && Value.contains( "Type" ) ) )
@@ -62,17 +64,17 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 		std::string FileType = Value[ "Type" ].get< std::string >();
 
 		File ResourceFile( FilePath.c_str() );
-
 		ResourceHeader.emplace_back( Key, ResourcesSize );
 
 		HeaderSize += Serialization::GetSizeOf( Key );
 		HeaderSize += sizeof( size_t );
 
-		std::string TempFile = Key + "." + FileType;
+		std::string KeyName = Key;
+		std::string TempFile = KeyName + "." + FileType;
 
-		if      ( FileType == "texture"  ) ResourcesSize += CreateTemp< Texture  >( TempFile, TempDirectory, ResourceFile );
-		else if ( FileType == "mesh"     ) ResourcesSize += CreateTemp< Mesh     >( TempFile, TempDirectory, ResourceFile );
-		else if ( FileType == "material" ) ResourcesSize += CreateTemp< Material >( TempFile, TempDirectory, ResourceFile );
+		if      ( FileType == "texture2d"  ) ResourcesSize += CreateTemp< Texture2D  >( Key, TempFile, TempDirectory, ResourceFile );
+		else if ( FileType == "mesh"       ) ResourcesSize += CreateTemp< Mesh       >( Key, TempFile, TempDirectory, ResourceFile );
+		else if ( FileType == "material"   ) ResourcesSize += CreateTemp< Material   >( Key, TempFile, TempDirectory, ResourceFile );
 
 		ResourceFiles.push_back( TempDirectory.GetFile( TempFile.c_str() ) );
 	}
@@ -119,7 +121,7 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 	return true;
 }
 
-bool ResourcePackager::Load( Texture& o_Texture, File& a_File ) const
+bool ResourcePackager::Load( Texture2D& o_Texture, File& a_File ) const
 {
 	std::string FilePath = a_File;
 	o_Texture.m_Data = ( Colour* )stbi_load( FilePath.c_str(), &o_Texture.m_Size.x, &o_Texture.m_Size.y, nullptr, 4 );
@@ -130,57 +132,105 @@ bool ResourcePackager::Load( Mesh& o_Mesh, File& a_File ) const
 {
 	if ( a_File.GetExtension() == ".obj" )
 	{
-		tinyobj::attrib_t Attributes;
-		std::vector< tinyobj::shape_t > Shapes;
-		std::string Warning;
-		std::string Error;
-		a_File.Open();
-		std::ifstream FileStream = a_File;
-		bool Success = tinyobj::LoadObj( &Attributes, &Shapes, nullptr, &Warning, &Error, &FileStream );
+		Assimp::Importer Importer;
+		auto Scene = Importer.ReadFile( a_File, aiPostProcessSteps::aiProcess_CalcTangentSpace | aiPostProcessSteps::aiProcess_Triangulate | aiPostProcessSteps::aiProcess_JoinIdenticalVertices );
 		
-		for ( size_t i = 0; i < Shapes[ 0 ].mesh.indices.size(); ++i )
+		if ( !Scene->HasMeshes() )
 		{
-			o_Mesh.m_Vertices.emplace_back(
-				Shapes[ 0 ].mesh.indices[ i ].texcoord_index,
-				Shapes[ 0 ].mesh.indices[ i ].vertex_index,
-				Shapes[ 0 ].mesh.indices[ i ].normal_index,
-				Shapes[ 0 ].mesh.indices[ i ].texcoord_index
-			);
+			return false;
 		}
 
-		for ( size_t i = 0; i < Attributes.colors.size(); i += 3 )
+		auto Mesh = Scene->mMeshes[ 0 ];
+
+		if ( Mesh->HasFaces() )
 		{
-			o_Mesh.m_Colours.emplace_back(
-				255 * Attributes.colors[ i + 0 ],
-				255 * Attributes.colors[ i + 1 ],
-				255 * Attributes.colors[ i + 2 ]
-			);
+			uint32_t IndexCount = Mesh->mNumFaces * 3u;
+			o_Mesh.m_Indices.resize( IndexCount );
+			aiFace* Face = Mesh->mFaces;
+
+			for ( uint32_t i = 0, *Begin = o_Mesh.m_Indices.data(), *End = Begin + IndexCount; Begin != End; ++i, Begin += 3, ++Face )
+			{
+				Begin[ 0 ] = Face->mIndices[ 0 ];
+				Begin[ 1 ] = Face->mIndices[ 1 ];
+				Begin[ 2 ] = Face->mIndices[ 2 ];
+			}
 		}
 
-		for ( size_t i = 0; i < Attributes.vertices.size(); i += 3 )
+		if ( Mesh->HasVertexColors( 0 ) )
 		{
-			o_Mesh.m_Positions.emplace_back( 
-				Attributes.vertices[ i + 0 ], 
-				Attributes.vertices[ i + 1 ], 
-				Attributes.vertices[ i + 2 ] 
-			);
+			o_Mesh.m_Colours.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Colours[ i ] = {
+					Mesh->mColors[ 0 ][ i ].r,
+					Mesh->mColors[ 0 ][ i ].g,
+					Mesh->mColors[ 0 ][ i ].b,
+					Mesh->mColors[ 0 ][ i ].a 
+				};
+			};
 		}
 
-		for ( size_t i = 0; i < Attributes.normals.size(); i += 3 )
+		if ( Mesh->HasPositions() )
 		{
-			o_Mesh.m_Normals.emplace_back(
-				Attributes.normals[ i + 0 ],
-				Attributes.normals[ i + 1 ],
-				Attributes.normals[ i + 2 ]
-			);
+			o_Mesh.m_Positions.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Positions[ i ] = {
+					Mesh->mVertices[ i ][ 0 ],
+					Mesh->mVertices[ i ][ 1 ],
+					Mesh->mVertices[ i ][ 2 ]
+				};
+			}
 		}
 
-		for ( size_t i = 0; i < Attributes.texcoords.size(); i += 2 )
+		if ( Mesh->HasNormals() )
 		{
-			o_Mesh.m_Texels.emplace_back(
-				Attributes.texcoords[ i + 0 ],
-				Attributes.texcoords[ i + 1 ]
-			);
+			o_Mesh.m_Normals.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Normals[ i ] = {
+					Mesh->mNormals[ i ][ 0 ],
+					Mesh->mNormals[ i ][ 1 ],
+					Mesh->mNormals[ i ][ 2 ]
+				};
+			}
+		}
+
+		if ( Mesh->HasTangentsAndBitangents() )
+		{
+			o_Mesh.m_Tangents.resize( Mesh->mNumVertices );
+			o_Mesh.m_Bitangents.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Tangents[ i ] = {
+					Mesh->mTangents[ i ][ 0 ],
+					Mesh->mTangents[ i ][ 1 ],
+					Mesh->mTangents[ i ][ 2 ]
+				};
+
+				o_Mesh.m_Bitangents[ i ] = {
+					Mesh->mBitangents[ i ][ 0 ],
+					Mesh->mBitangents[ i ][ 1 ],
+					Mesh->mBitangents[ i ][ 2 ]
+				};
+			}
+		}
+
+		if ( Mesh->HasTextureCoords( 0 ) )
+		{
+			o_Mesh.m_Texels.resize( Mesh->mNumVertices );
+
+			for ( uint32_t i = 0; i < Mesh->mNumVertices; ++i )
+			{
+				o_Mesh.m_Texels[ i ] = {
+					Mesh->mTextureCoords[ 0 ][ i ][ 0 ],
+					Mesh->mTextureCoords[ 0 ][ i ][ 1 ]
+				};
+			}
 		}
 	}
 
@@ -189,5 +239,16 @@ bool ResourcePackager::Load( Mesh& o_Mesh, File& a_File ) const
 
 bool ResourcePackager::Load( Material& o_Material, File& a_File ) const
 {
+	Assimp::Importer Importer;
+	auto Scene = Importer.ReadFile( a_File, 0 );
+	
+	if ( !Scene->HasMaterials() )
+	{
+		return false;
+	}
+
+	auto Material = Scene->mMaterials[ 1 ];
+
+	//Material->
 	return true;
 }

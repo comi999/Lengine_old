@@ -56,8 +56,8 @@ private:
 		DeltaTimeIndex = ++DeltaTimeIndex >= 100 ? 0 : DeltaTimeIndex;
 	}
 	
-	static float s_TimeDilation;
-	static float s_DeltaTime;
-	static float s_FixedTime;
-	static float s_AverageDeltaTime;
+	inline static float s_TimeDilation     = 1.0f;
+	inline static float s_DeltaTime        = 0.0f;
+	inline static float s_FixedTime        = 0.01f;
+	inline static float s_AverageDeltaTime = 0.0f;
 };

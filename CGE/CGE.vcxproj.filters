@@ -19,12 +19,6 @@
     <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Time.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Name.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -32,9 +26,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
@@ -47,6 +38,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderPipeline.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -177,37 +171,22 @@
     <ClInclude Include="ResourcePackage.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Any.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawCall.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderMode.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderObject.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderBuffer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderStage.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderStage.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderPipeline.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderInstruction.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Frustum.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Utilities.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Any.hpp">
+      <Filter>Source Files\WIP</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderInstruction.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderQueue.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -218,6 +197,9 @@
     </Filter>
     <Filter Include="Entt">
       <UniqueIdentifier>{f0195290-6c7d-4958-a6da-e7f7c69af474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WIP">
+      <UniqueIdentifier>{e8f48077-7bca-432f-bfe2-feadba1c25f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

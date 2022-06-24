@@ -3,7 +3,7 @@
 #include "entt/resource/cache.hpp"
 #include "entt/resource/handle.hpp"
 #include "entt/resource/loader.hpp"
-#include "Hash.hpp"
+#include "Name.hpp"
 
 // Need to add loading and unloading automatically.
 class Resource;
@@ -19,10 +19,10 @@ class ResourceLoader : public entt::resource_loader< ResourceLoader< T >, T >
 {
 public:
 
-	ResourceHandle< T > load( const std::string a_Name ) const
+	ResourceHandle< T > load( Hash a_Name ) const
 	{
 		auto NewResource = std::make_shared< T >();
-		return Resource::LoadBin( a_Name, *NewResource ) ? NewResource : nullptr;
+		return Resource::LoadBin( a_Name, *NewResource ) ? NewResource : ResourceHandle< T >{};
 	}
 };
 
@@ -96,68 +96,83 @@ class Resource
 {
 public:
 
-	template < typename T >
-	static ResourceHandle< T > Find( std::string a_Name )
+	const Name& GetName() const
 	{
-		Hash Name = CRC32_RT( a_Name.c_str() );
+		return m_Name;
+	}
+
+	static void Init( const std::string& a_Package )
+	{
+		s_ResourcePackage.Init( a_Package );
+	}
+
+	template < typename T >
+	static ResourceHandle< T > Find( Hash a_Name )
+	{
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.contains( Name ) ? Cache.handle( Name ) : ResourceHandle< T >();
+		return Cache.contains( a_Name ) ? Cache.handle( a_Name ) : ResourceHandle< T >{};
 	}
 
 	template < typename T >
-	static ResourceHandle< T > FindOrLoad( std::string a_Name )
+	static ResourceHandle< T > Load( Hash a_Name )
 	{
-		Hash Name = CRC32_RT( a_Name.c_str() );
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.load< ResourceLoader< T > >( Name, a_Name );
+		return Cache.contains( a_Name ) ? Cache.handle( a_Name ) : Cache.load< ResourceLoader< T > >( a_Name, a_Name );
 	}
 
 	template < typename T >
-	static T* Get( std::string a_Name )
+	static bool Release( Hash a_Name )
 	{
-		Hash Name = CRC32_RT( a_Name.c_str() );
-		auto& Cache = s_ResourceRepository.Get< int >();
-		return Cache.contains( Name ) ? &*Cache.handle( Name ) : nullptr;
-	}
+		auto& Cache = s_ResourceRepository.Get< T >();
 
-	template < typename T >
-	inline static T* GetOrLoad( std::string a_Name )
-	{
-		return &*s_ResourceRepository.Get< T >().load< ResourceLoader< T > >( CRC32_RT( a_Name.c_str() ), a_Name );
-	}
-
-	template < typename T >
-	inline static bool Loaded( std::string a_Name )
-	{
-		return s_ResourceRepository.Get< T >().contains( CRC32_RT( a_Name.c_str() ) );
-	}
-
-	template < typename T >
-	static bool Unload( std::string a_Name )
-	{
-		Hash Name = CRC32_RT( a_Name.c_str() );
-		auto& Cache = s_ResourceRepository.Get< int >();
-
-		if ( !Cache.contains( Name ) )
+		if ( !Cache.contains( a_Name ) )
 		{
 			return false;
 		}
 
-		Cache.discard( Name );
+		Cache.discard( a_Name );
 		return true;
+	}
+
+	template < typename T >
+	inline static bool IsLoaded( Hash a_Name )
+	{
+		return s_ResourceRepository.Get< T >().contains( a_Name );
 	}
 
 private:
 
 	template < typename T >
-	inline static bool LoadBin( const std::string& a_Name, T& o_Resource )
+	inline static bool LoadBin( Hash a_Name, T& o_Resource )
 	{
 		return s_ResourcePackage.Load( o_Resource, a_Name );
 	}
 
 	friend class CGE;
+	friend class Serialization;
+	friend class ResourcePackager;
 	template < typename > friend class ResourceLoader;
 
-	static ResourcePackage    s_ResourcePackage;
-	static ResourceRepository s_ResourceRepository;
+	template < typename T >
+	void Serialize( T& a_Serializer ) const
+	{
+		a_Serializer << m_Name;
+	}
+
+	template < typename T >
+	void Deserialize( T& a_Deserializer )
+	{
+		a_Deserializer >> m_Name;
+	}
+
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
+	{
+		a_Sizer & m_Name;
+	}
+
+	Name m_Name;
+
+	inline static ResourcePackage    s_ResourcePackage;
+	inline static ResourceRepository s_ResourceRepository;
 };

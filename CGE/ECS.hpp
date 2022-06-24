@@ -83,12 +83,12 @@ public:
 	static T* AddComponent( GameObjectID a_GameObjectID )
 	{
 		static bool RegisterTypes = s_TypeMap.RegisterTypes< typename T::InheritanceTrace >();
-		static bool RegisterFunction = s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > );
-		static bool RegisterOnConstruct = []()
-		{
+		static bool RegisterFunctions = [](){
 			s_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
+			s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > );
+			s_TypeMap.RegisterFunction< T >( "GetComponents"_H, GetExactComponents< T > );
 			return true;
-		}( );
+		}();
 
 		if ( a_GameObjectID == static_cast< GameObjectID >( -1 ) )
 		{
@@ -165,25 +165,39 @@ public:
 	}
 
 	template < typename T >
-	static auto GetAllComponents()
+	static std::list< T* > GetComponents()
 	{
-		
+		std::list< T* > Collated;
+
+		for ( auto Begin = s_TypeMap.GetBFBegin< T >(), End = s_TypeMap.GetBFEnd(); Begin != End; ++Begin )
+		{
+			size_t HashCode = Begin->hash_code();
+			std::list< T* > Components;
+			s_TypeMap.InvokeFunction( HashCode, "GetComponents"_H, Components );
+			Collated.splice( Collated.end(), Components );
+		}
+
+		return Collated;
 	}
 
 	template < typename T >
-	static std::vector< T > GetAllExactComponents()
+	static std::list< T* > GetExactComponents()
 	{
-		using Type = std::remove_const_t< T >;
-		auto Components = s_Registry.view< T >();
-		std::vector< T* > Collated;
-		Collated.reserve( Components.size() );
-		Components.each( [&]( T& Component ) { Collated.push_back( &Component ); } );
-		return std::move( Collated );
+		auto View = s_Registry.view< T >();
+		std::list< T* > Collated;
+		
+		for ( auto Begin = View.rbegin(), End = View.rend(); Begin != End; ++Begin )
+		{
+			Collated.push_back( &View.get< T >( *Begin ) );
+		}
+
+		return Collated;
 	}
 
 private:
 
 	friend class ComponentBase;
+	template < typename > friend class ComponentCollection;
 
 	static void AttachTransform( GameObjectID a_GameObjectID, GameObjectID a_Parent );
 	static void AttachAlias( GameObjectID a_GameObjectID, const Name& a_Name );

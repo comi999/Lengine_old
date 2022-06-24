@@ -35,7 +35,7 @@ public:
 		//tr = 0.393R + 0.769G + 0.189B
 		//tg = 0.349R + 0.686G + 0.168B
 		//tb = 0.272R + 0.534G + 0.131B
-		for ( int i = 0; i < 16; ++i )
+		/*for ( int i = 0; i < 16; ++i )
 		{
 			Colour& c = SeedColours[ i ];
 			Vector3 crgb = { ( float )c.R / 255, ( float )c.G / 255, ( float )c.B / 255 };
@@ -50,7 +50,7 @@ public:
 			c.R = 255 * n.x;
 			c.G = 255 * n.y;
 			c.B = 255 * n.z;
-		}
+		}*/
 
 		if ( s_Active.Load() )
 		{

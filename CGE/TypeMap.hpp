@@ -247,16 +247,17 @@ public:
 		using First = typename Tuple::_This_type;
 		using Base = typename Tuple::_Mybase;
 
+		auto first = typeid( First ).name();
+		auto base = typeid( Base ).name();
+
 		if constexpr ( std::is_same_v< Base, std::tuple<> > )
 		{
 			return RegisterType< First >();
 		}
 		else
 		{
-			if ( RegisterType< typename Base::_This_type, First >() )
-			{
-				return RegisterTypes< Base >();
-			}
+			RegisterType< typename Base::_This_type, First >();
+			RegisterTypes< Base >();
 		}
 
 		return false;

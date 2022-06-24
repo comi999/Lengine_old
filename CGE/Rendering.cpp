@@ -84,6 +84,9 @@ void Rendering::ClearDepth( float a_ClearDepth )
 
 void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Count )
 {
+	s_AttributeRegistry.UnsetIndices();
+	UpdateDrawProcessor();
+
 	switch ( a_Mode )
 	{
 		case RenderMode::POINT:
@@ -92,7 +95,7 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 			break;
 		case RenderMode::TRIANGLE:
 		{
-			DrawArraysImpl< 3 >( a_Begin, a_Count );
+			s_DrawProcessorFunc( a_Begin, a_Count );
 			break;
 		}
 		default:
@@ -184,6 +187,25 @@ void Rendering::VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType
 	Attributes.Offset = ( uint32_t )a_Offset;
 }
 
+void Rendering::DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void* a_Indices )
+{
+	const void* Indices = nullptr;
+	auto Handle = s_BufferTargets[ ( uint32_t )BufferTarget::ELEMENT_ARRAY_BUFFER ];
+	Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ].data() + ( uint32_t )a_Indices ) : a_Indices; 
+
+	switch ( a_DataType )
+	{
+		case DataType::UNSIGNED_BYTE:  s_AttributeRegistry.SetIndices( reinterpret_cast< const uint8_t*  >( Indices ) ); break;
+		case DataType::UNSIGNED_SHORT: s_AttributeRegistry.SetIndices( reinterpret_cast< const uint16_t* >( Indices ) ); break;
+		case DataType::UNSIGNED_INT:   s_AttributeRegistry.SetIndices( reinterpret_cast< const uint32_t* >( Indices ) ); break;
+		default: break;
+	}
+
+	UpdateDrawProcessor();
+
+	s_DrawProcessorFunc( 0, a_Count );
+}
+
 void Rendering::Enable( RenderSetting a_RenderSetting )
 {
 	switch ( a_RenderSetting )
@@ -246,6 +268,22 @@ void Rendering::CullFace( CullFaceMode a_CullFaceMode )
 		}
 		default:
 			break;
+	}
+}
+
+void Rendering::DepthFunc( TextureSetting a_TextureSetting )
+{
+	switch ( a_TextureSetting )
+	{
+		case TextureSetting::LEQUAL:    s_DepthCompareFunc = DepthCompare_LEQUAL;    break;
+		case TextureSetting::GEQUAL:    s_DepthCompareFunc = DepthCompare_GEQUAL;    break;
+		case TextureSetting::LESS:      s_DepthCompareFunc = DepthCompare_LESS;      break;
+		case TextureSetting::GREATER:   s_DepthCompareFunc = DepthCompare_GREATER;   break;
+		case TextureSetting::EQUAL:     s_DepthCompareFunc = DepthCompare_EQUAL;     break;
+		case TextureSetting::NOT_EQUAL: s_DepthCompareFunc = DepthCompare_NOT_EQUAL; break;
+		case TextureSetting::ALWAYS:    s_DepthCompareFunc = DepthCompare_ALWAYS;    break;
+		case TextureSetting::NEVER:     s_DepthCompareFunc = DepthCompare_NEVER;     break;
+		default: break;
 	}
 }
 
@@ -317,98 +355,98 @@ void Rendering::Uniform4ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, ui
 	*reinterpret_cast< Vector4UInt* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) = { a_V0, a_V1, a_V2, a_V3 };
 }
 
-void Rendering::Uniform1fv( int32_t a_Location, uint32_t a_Count, float* a_Value )
+void Rendering::Uniform1fv( int32_t a_Location, uint32_t a_Count, const float* a_Value )
 {
 	typedef std::array< float, 1 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) = 
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform2fv( int32_t a_Location, uint32_t a_Count, float* a_Value )
+void Rendering::Uniform2fv( int32_t a_Location, uint32_t a_Count, const float* a_Value )
 {
 	typedef std::array< float, 2 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform3fv( int32_t a_Location, uint32_t a_Count, float* a_Value )
+void Rendering::Uniform3fv( int32_t a_Location, uint32_t a_Count, const float* a_Value )
 {
 	typedef std::array< float, 3 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform4fv( int32_t a_Location, uint32_t a_Count, float* a_Value )
+void Rendering::Uniform4fv( int32_t a_Location, uint32_t a_Count, const float* a_Value )
 {
 	typedef std::array< float, 4 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform1iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value )
+void Rendering::Uniform1iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value )
 {
 	typedef std::array< int32_t, 1 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform2iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value )
+void Rendering::Uniform2iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value )
 {
 	typedef std::array< int32_t, 2 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform3iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value )
+void Rendering::Uniform3iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value )
 {
 	typedef std::array< int32_t, 3 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform4iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value )
+void Rendering::Uniform4iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value )
 {
 	typedef std::array< int32_t, 4 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform1uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value )
+void Rendering::Uniform1uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value )
 {
 	typedef std::array< uint32_t, 1 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform2uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value )
+void Rendering::Uniform2uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value )
 {
 	typedef std::array< uint32_t, 2 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform3uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value )
+void Rendering::Uniform3uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value )
 {
 	typedef std::array< uint32_t, 3 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::Uniform4uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value )
+void Rendering::Uniform4uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value )
 {
 	typedef std::array< uint32_t, 4 > Type;
 	*reinterpret_cast< Type* >( s_ShaderProgramRegistry[ s_ActiveShaderProgram ].m_Uniforms[ a_Location ] ) =
-		*reinterpret_cast< Type* >( a_Value );
+		*reinterpret_cast< const Type* >( a_Value );
 }
 
-void Rendering::UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 	auto* UniformValue = reinterpret_cast< Matrix2* >( ActiveProgram.m_Uniforms[ a_Location ] );
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Matrix2* >( a_Value );
+		auto& Value = *reinterpret_cast< const Matrix2* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -417,7 +455,7 @@ void Rendering::UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Matrix2* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Matrix2* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -426,14 +464,14 @@ void Rendering::UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 }
 
-void Rendering::UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 	auto* UniformValue = reinterpret_cast< Matrix3* >( ActiveProgram.m_Uniforms[ a_Location ] );
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Matrix3* >( a_Value );
+		auto& Value = *reinterpret_cast< const Matrix3* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -442,7 +480,7 @@ void Rendering::UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Matrix3* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Matrix3* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -451,14 +489,14 @@ void Rendering::UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 }
 
-void Rendering::UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 	auto* UniformValue = reinterpret_cast< Matrix4* >( ActiveProgram.m_Uniforms[ a_Location ] );
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Matrix4* >( a_Value );
+		auto& Value = *reinterpret_cast< const Matrix4* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -467,7 +505,7 @@ void Rendering::UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Matrix4* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Matrix4* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -476,7 +514,7 @@ void Rendering::UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_
 	}
 }
 
-void Rendering::UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix2x3 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -484,7 +522,7 @@ void Rendering::UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -493,7 +531,7 @@ void Rendering::UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -502,7 +540,7 @@ void Rendering::UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 }
 
-void Rendering::UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix3x2 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -510,7 +548,7 @@ void Rendering::UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -519,7 +557,7 @@ void Rendering::UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -528,7 +566,7 @@ void Rendering::UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 }
 
-void Rendering::UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix2x4 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -536,7 +574,7 @@ void Rendering::UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -545,7 +583,7 @@ void Rendering::UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -554,7 +592,7 @@ void Rendering::UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 }
 
-void Rendering::UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix4x2 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -562,7 +600,7 @@ void Rendering::UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -571,7 +609,7 @@ void Rendering::UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -580,7 +618,7 @@ void Rendering::UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 }
 
-void Rendering::UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix3x4 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -588,7 +626,7 @@ void Rendering::UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -597,7 +635,7 @@ void Rendering::UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -606,7 +644,7 @@ void Rendering::UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 }
 
-void Rendering::UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value )
+void Rendering::UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value )
 {
 	typedef Matrix4x3 Type;
 	auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
@@ -614,7 +652,7 @@ void Rendering::UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool 
 
 	if ( !a_Transpose )
 	{
-		auto& Value = *reinterpret_cast< Type* >( a_Value );
+		auto& Value = *reinterpret_cast< const Type* >( a_Value );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -623,7 +661,7 @@ void Rendering::UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool 
 	}
 	else
 	{
-		auto Value = Math::Transpose( *reinterpret_cast< Type* >( a_Value ) );
+		auto Value = Math::Transpose( *reinterpret_cast< const Type* >( a_Value ) );
 
 		for ( uint32_t i = 0; i < a_Count; ++i )
 		{
@@ -651,11 +689,11 @@ void Rendering::ShaderSource( ShaderHandle a_ShaderHandle, uint32_t a_Count, con
 
 void Rendering::CompileShader( ShaderHandle a_ShaderHandle )
 {
-	Shader& ActiveShader = s_ShaderRegistry[ a_ShaderHandle ];
+	ShaderObject& ActiveShader = s_ShaderRegistry[ a_ShaderHandle ];
 
 	if ( !ActiveShader.Callback )
 	{
-		ActiveShader.Callback = Shader::Empty;
+		ActiveShader.Callback = ShaderObject::Empty;
 	}
 }
 
@@ -685,9 +723,9 @@ ShaderProgramHandle Rendering::CreateProgram()
 void Rendering::AttachShader( ShaderProgramHandle a_ShaderProgramHandle, ShaderHandle a_ShaderHandle )
 {
 	auto& Program = s_ShaderProgramRegistry[ a_ShaderProgramHandle ];
-	auto& Shader  = s_ShaderRegistry[ a_ShaderHandle ];
-	Program.m_Shaders[ ( uint32_t )Shader.Type ].Handle = a_ShaderHandle;
-	Program.m_Shaders[ ( uint32_t )Shader.Type ].Set = true;
+	auto& ShaderObject  = s_ShaderRegistry[ a_ShaderHandle ];
+	Program.m_Shaders[ ( uint32_t )ShaderObject.Type ].Handle = a_ShaderHandle;
+	Program.m_Shaders[ ( uint32_t )ShaderObject.Type ].Set = true;
 }
 
 void Rendering::LinkProgram( ShaderProgramHandle a_ShaderProgramHandle )
@@ -700,7 +738,7 @@ void Rendering::LinkProgram( ShaderProgramHandle a_ShaderProgramHandle )
 
 		if ( !Entry.Set )
 		{
-			Entry.Callback = Shader::Empty;
+			Entry.Callback = ShaderObject::Empty;
 			continue;
 		}
 
@@ -734,8 +772,8 @@ void Rendering::GetProgramInfoLog( ShaderProgramHandle a_ShaderProgramHandle, si
 void Rendering::DetachShader( ShaderProgramHandle a_ShaderProgramHandle, ShaderHandle a_ShaderHandle )
 {
 	auto& Program = s_ShaderProgramRegistry[ a_ShaderProgramHandle ];
-	auto& Shader  = s_ShaderRegistry[ a_ShaderHandle ];
-	auto& Entry   = Program.m_Shaders[ ( uint32_t )Shader.Type ];
+	auto& ShaderObject  = s_ShaderRegistry[ a_ShaderHandle ];
+	auto& Entry   = Program.m_Shaders[ ( uint32_t )ShaderObject.Type ];
 	Entry.Handle = 0;
 	Entry.Set = false;
 }
@@ -748,6 +786,11 @@ void Rendering::DeleteShader( ShaderHandle a_ShaderHandle )
 void Rendering::DeleteProgram( ShaderProgramHandle a_ShaderProgramHandle )
 {
 	s_ShaderProgramRegistry.Destroy( a_ShaderProgramHandle );
+}
+
+void Rendering::ActiveTexture( uint32_t a_ActiveTexture )
+{
+	s_ActiveTextureUnit = a_ActiveTexture;
 }
 
 void Rendering::TexParameterf( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, float a_Value )
@@ -817,11 +860,22 @@ void Rendering::GenTextures( size_t a_Count, TextureHandle* a_Handles )
 
 void Rendering::BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle )
 {
-	s_TextureTargets[ ( uint32_t )a_TextureTarget ] = a_Handle;
+	if ( s_TextureRegistry.Bind( a_TextureTarget, a_Handle ) )
+	{
+		s_ActiveTextureTarget = ( uint32_t )a_TextureTarget;
+	}
+
+	auto& ActiveTextureUnit = s_TextureUnits[ s_ActiveTextureUnit ];
+	ActiveTextureUnit[ s_ActiveTextureTarget ] = a_Handle;
 }
 
-void Rendering::TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, DataType a_DataType, void* a_Data )
+void Rendering::TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data )
 {
-	TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+	//TextureBuffer& Target = s_TextureRegistry[ s_TextureTargets[ ( uint32_t )a_TextureTarget ] ];
+	auto Handle = s_TextureUnits[ s_ActiveTextureUnit ][ ( uint32_t )a_TextureTarget ];
+	auto& Target = s_TextureRegistry[ Handle ];
+	Target.Data = a_Data;
+	Target.Dimensions = { a_Width, a_Height };
 
+	// Need to implement rest of all the settings.
 }

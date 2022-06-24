@@ -1,5 +1,6 @@
 #pragma once
 #include "File.hpp"
+#include "Name.hpp"
 #include "Serialization.hpp"
 
 class ResourcePackageHeader
@@ -9,7 +10,7 @@ private:
 	friend class Serialization;
 	friend class ResourcePackage;
 
-	size_t GetResourceLocation( const std::string& a_Name )
+	size_t GetResourceLocation( Hash a_Name )
 	{
 		auto Iter = m_ResourceLocations.find( a_Name );
 
@@ -18,33 +19,54 @@ private:
 			return size_t( -1 );
 		}
 
-		return Iter->second;
+		return Iter->second.second;
+	}
+	
+	const std::string& GetName( Hash a_Name ) const
+	{
+		auto Iter = m_ResourceLocations.find( a_Name );
+
+		if ( Iter != m_ResourceLocations.end() )
+		{
+			return Iter->second.first;
+		}
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		a_Deserializer >> m_ResourceLocations;
+		std::vector< std::pair< Name, size_t > > ResourceLocations;
+		a_Deserializer >> ResourceLocations;
+
+		for ( auto Begin = ResourceLocations.begin(), End = ResourceLocations.end(); Begin != End; ++Begin )
+		{
+			auto& Pair = m_ResourceLocations[ Begin->first.HashCode() ];
+			Pair.first = std::string( Begin->first.Data(), Begin->first.Length() );
+			Pair.second = Begin->second;
+		}
 	}
 
-	std::map< std::string, size_t > m_ResourceLocations;
+	std::map< Hash, std::pair< std::string, size_t > > m_ResourceLocations;
 };
 
 class ResourcePackage
 {
 public:
 
-	ResourcePackage( const File& a_File )
-		: m_File( a_File )
+	ResourcePackage() = default;
+
+	void Init( const std::string& a_Path )
 	{
-		_ASSERT_EXPR( m_File.Open(), "Can not open package file." );
-		FileDeserializer HeaderDeserializer( m_File );
+		m_File = a_Path;
+		File ResourceFile( m_File.c_str() );
+		_ASSERT_EXPR( ResourceFile.Open(), "Can not open package file." );
+		FileDeserializer HeaderDeserializer( ResourceFile );
 		HeaderDeserializer >> m_Header;
-		m_File.Close();
+		ResourceFile.Close();
 	}
 
 	template < typename T >
-	bool Load( T& o_Resource, const std::string& a_Name )
+	bool Load( T& o_Resource, Hash a_Name )
 	{
 		size_t Location = m_Header.GetResourceLocation( a_Name );
 
@@ -53,21 +75,28 @@ public:
 			return false;
 		}
 
-		m_File.Open();
-		m_File.Seek( Location );
-		FileDeserializer ResourceDeserializer( m_File );
+		File ResourceFile( m_File.c_str() );
+
+		ResourceFile.Open();
+		ResourceFile.Seek( Location );
+		FileDeserializer ResourceDeserializer( ResourceFile );
 		std::string TypeString;
 		ResourceDeserializer >> TypeString;
 
 		if ( TypeString != typeid( T ).name() )
 		{
-			m_File.Close();
+			ResourceFile.Close();
 			return false;
 		}
 
 		ResourceDeserializer >> o_Resource;
-		m_File.Close();
+		ResourceFile.Close();
 		return true;
+	}
+
+	const std::string& GetNameFromHash( Hash a_Name )
+	{
+		return m_Header.GetName( a_Name );
 	}
 
 	size_t Size() const
@@ -78,5 +107,5 @@ public:
 private:
 
 	ResourcePackageHeader m_Header;
-	File                  m_File;
+	std::string           m_File;
 };

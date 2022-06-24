@@ -169,15 +169,13 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Name.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
     <ClCompile Include="Rect.hpp" />
     <ClCompile Include="RenderPipeline.hpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
-    <ClCompile Include="Time.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alias.hpp" />
@@ -189,7 +187,6 @@
     <ClInclude Include="ConsoleColour.hpp" />
     <ClInclude Include="ConsoleWindow.hpp" />
     <ClInclude Include="Delegate.hpp" />
-    <ClInclude Include="DrawCall.hpp" />
     <ClInclude Include="ECS.hpp" />
     <ClInclude Include="entt\entt.hpp" />
     <ClInclude Include="entt\fwd.hpp" />
@@ -198,15 +195,12 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="File.hpp" />
-    <ClInclude Include="RenderBuffer.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Invoker.hpp" />
     <ClInclude Include="RenderInstruction.hpp" />
-    <ClInclude Include="RenderMode.hpp" />
-    <ClInclude Include="RenderObject.hpp" />
-    <ClInclude Include="RenderStage.hpp" />
+    <ClInclude Include="RenderQueue.hpp" />
     <ClInclude Include="Segment.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Math.hpp" />
@@ -223,8 +217,7 @@
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="ScreenBuffer.hpp" />
     <ClInclude Include="Serialization.hpp" />
-    <ClInclude Include="ShaderPipeline.hpp" />
-    <ClInclude Include="ShaderStage.hpp" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Transform.hpp" />
