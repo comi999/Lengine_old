@@ -1,31 +1,24 @@
 #pragma once
+#include "Math.hpp"
 #include "Rendering.hpp"
 #include "Resource.hpp"
 #include "Hash.hpp"
-
-DefineShader( Default_Vertex )
-{
-	Uniform( Matrix4, u_PVM );
-	Attribute( 0, Vector4, a_Position );
-	Rendering::Position = Math::Multiply( u_PVM, a_Position );
-}
-
-DefineShader( Default_Fragment )
-{
-	Rendering::FragColour = Vector4::One;
-}
 
 class Shader : public Resource
 {
 public:
 
 	Shader()
-		: m_VertexShaderSource( "Shader_Default_Vertex" )
+		: Resource( "Shader_Default" )
+		, m_ShaderProgramHandle( 0 )
+		, m_VertexShaderSource( "Shader_Default_Vertex" )
 		, m_FragmentShaderSource( "Shader_Default_Fragment" )
 	{ }
 
-	Shader( const std::string& a_VertexShaderSource, const std::string& a_FragmentShaderSource )
-		: m_VertexShaderSource( a_VertexShaderSource )
+	Shader( const Name& a_Name, const std::string& a_VertexShaderSource, const std::string& a_FragmentShaderSource )
+		: Resource( a_Name )
+		, m_ShaderProgramHandle( 0 )
+		, m_VertexShaderSource( a_VertexShaderSource )
 		, m_FragmentShaderSource( a_FragmentShaderSource )
 	{ }
 
@@ -66,18 +59,7 @@ public:
 		return nullptr;
 	}
 
-	void SetColour( const char* a_Name, Colour a_Colour )
-	{
-		uint32_t Location = Rendering::GetUniformLocation( m_ShaderProgramHandle, a_Name );
-		
-		if ( Location != -1 )
-		{
-			Vector4 Colour = a_Colour.Normalized();
-			Rendering::Uniform4f( Location, Colour.x, Colour.y, Colour.z, Colour.w );
-		}
-	}
-
-	// void SetInt/Float/Bool/Vector/Matrix
+	//Ideally, shader object should be in charge of setting uniforms and setting up attributes.
 
 	void Compile()
 	{
@@ -89,11 +71,11 @@ public:
 		ShaderHandle VertexShaderID = Rendering::CreateShader( ShaderType::VERTEX_SHADER );
 		ShaderHandle FragmentShaderID = Rendering::CreateShader( ShaderType::FRAGMENT_SHADER );
 
-		auto VertexShaderIter = Internal::ShaderFuncLookup.find( CRC32_RT( m_VertexShaderSource.c_str() ) );
-		auto FragmentShaderIter = Internal::ShaderFuncLookup.find( CRC32_RT( m_FragmentShaderSource.c_str() ) );
+		auto VertexShaderIter = Internal::ShaderFuncLookup::Value.find( CRC32_RT( m_VertexShaderSource.c_str() ) );
+		auto FragmentShaderIter = Internal::ShaderFuncLookup::Value.find( CRC32_RT( m_FragmentShaderSource.c_str() ) );
 
-		const void* VertexSource = VertexShaderIter != Internal::ShaderFuncLookup.end() ? VertexShaderIter->second : nullptr;
-		const void* FragmentSource = FragmentShaderIter != Internal::ShaderFuncLookup.end() ? FragmentShaderIter->second : nullptr;
+		const void* VertexSource = VertexShaderIter != Internal::ShaderFuncLookup::Value.end() ? VertexShaderIter->second : nullptr;
+		const void* FragmentSource = FragmentShaderIter != Internal::ShaderFuncLookup::Value.end() ? FragmentShaderIter->second : nullptr;
 
 		Rendering::ShaderSource( VertexShaderID, 1, &VertexSource, nullptr );
 		Rendering::CompileShader( VertexShaderID );
@@ -152,4 +134,6 @@ private:
 public:
 
 	static Shader Default;
+	static Shader Phong;
+	// More lighting models.
 };

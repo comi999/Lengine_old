@@ -96,14 +96,20 @@ class Resource
 {
 public:
 
+	Resource() = default;
+
+	Resource( const Name& a_Name )
+		: m_Name( a_Name )
+	{ }
+
 	const Name& GetName() const
 	{
 		return m_Name;
 	}
 
-	static void Init( const std::string& a_Package )
+	static void Init()
 	{
-		s_ResourcePackage.Init( a_Package );
+		s_ResourcePackage.Init( s_PackagePath );
 	}
 
 	template < typename T >
@@ -173,6 +179,7 @@ private:
 
 	Name m_Name;
 
+	inline static std::string        s_PackagePath = "./Resources/resource.package";
 	inline static ResourcePackage    s_ResourcePackage;
 	inline static ResourceRepository s_ResourceRepository;
 };

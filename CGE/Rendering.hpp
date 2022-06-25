@@ -205,7 +205,7 @@ enum class DataUsage : uint8_t
 	STREAM,
 	STATIC,
 	DYNAMIC,
-	STATIC_DRAW,
+	DRAW,
 	READ,
 	COPY
 };
@@ -258,17 +258,21 @@ void Shader_##Name ()
 #define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
 
 
+
 namespace Internal {
 template < Hash _ShaderName >
 void* ShaderAddress = nullptr;
 
-static std::map< Hash, void* > ShaderFuncLookup;
+struct ShaderFuncLookup
+{
+	inline static std::map< Hash, void* > Value;
+};
 
 template < Hash _ShaderName >
 struct RegisterShader
 {
 	inline static bool Registered = [](){
-		ShaderFuncLookup[ _ShaderName ] = ShaderAddress< _ShaderName >;
+		ShaderFuncLookup::Value.emplace( _ShaderName, ShaderAddress< _ShaderName > );
 		return true;
 	}();
 };
@@ -395,11 +399,14 @@ public:
 	static void EnableVertexAttribArray( uint32_t a_Position );
 	static void DisableVertexAttribArray( uint32_t a_Position );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
-	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void*  a_Indices );
+	static void DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_DataType, const void*  a_Indices );
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
 	static void DepthFunc( TextureSetting a_TextureSetting );
+
+	static void GetBooleanv( RenderSetting a_RenderSetting, bool* a_Value );
+	// Need the other Get functions.
 
 	// Textures
 	static void ActiveTexture( uint32_t a_ActiveTexture );	
@@ -722,7 +729,8 @@ private:
 						( a_VertexAttribute.Normalized ) ];
 
 			m_Begin = 
-				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() + 
+				//s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				s_BufferRegistry[ a_VertexAttribute.Buffer ] +
 				a_VertexAttribute.Offset;
 
 			m_Data = m_Begin;
@@ -751,7 +759,8 @@ private:
 						( a_VertexAttribute.Normalized ) ];
 
 			m_Begin =
-				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				//s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				s_BufferRegistry[ a_VertexAttribute.Buffer ] +
 				a_VertexAttribute.Offset;
 
 			m_Data = m_Begin;
@@ -858,10 +867,10 @@ private:
 			return &Funcs[ 0 ];
 		}
 
-		OutputFunc m_Output;
-		uint32_t   m_Stride;
-		uint8_t*   m_Begin;
-		uint8_t*   m_Data;
+		OutputFunc     m_Output;
+		uint32_t       m_Stride;
+		const uint8_t* m_Begin;
+		const uint8_t* m_Data;
 	};
 	class Texture
 	{
@@ -902,7 +911,8 @@ private:
 		uint8_t     Format;
 	};
 
-	typedef std::vector< uint8_t >           Buffer;
+	//typedef std::vector< uint8_t >           Buffer;
+	typedef const uint8_t*                   Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
@@ -924,7 +934,8 @@ private:
 		void Destroy( BufferHandle a_Handle )
 		{
 			m_Availability[ a_Handle - 1 ] = false;
-			m_Buffers[ a_Handle - 1 ].clear();
+			//m_Buffers[ a_Handle - 1 ].clear();
+			m_Buffers[ a_Handle - 1 ] = nullptr;
 		}
 
 		inline Buffer& operator[]( BufferHandle a_Handle )

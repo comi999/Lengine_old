@@ -253,7 +253,7 @@ public:
 	}
 
 	template < typename T >
-	inline static T Degrees( T a_Radians )
+	inline static constexpr T Degrees( T a_Radians )
 	{
 		return static_cast< T >( 180 ) * InversePi() * a_Radians;
 	}
@@ -621,7 +621,7 @@ public:
 	}
 
 	template < typename T >
-	inline static T Radians( T a_Degrees )
+	inline static constexpr T Radians( T a_Degrees )
 	{
 		return a_Degrees * Pi() * static_cast< float >( 0.00555555555555555555 );
 	}

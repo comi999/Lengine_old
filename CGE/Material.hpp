@@ -19,6 +19,7 @@ public:
 		, m_Size( 0 )
 		, m_Type( Type::INT )
 		, m_Data( nullptr )
+		, m_Location( 0 )
 	{ }
 
 	~MaterialProperty()
@@ -300,7 +301,7 @@ private:
 public:
 
 	Material()
-		: m_Shader( nullptr )
+		: m_Shader( &Shader::Default )
 	{ }
 
 	template < typename T >
@@ -436,13 +437,13 @@ private:
 	friend class ResourcePackager;
 	friend class RenderPipeline;
 
-	// All of the uniform functions really should be delegated to a m_Shader.
-	void Apply()
+	// All of the uniform functions really should be delegated to the Shader object.
+	void Apply() const
 	{
 		if ( !m_Shader->GetProgramHandle() )
 		{
-			m_Shader->Compile();
-			FindLocations();
+			const_cast< Material* >( this )->m_Shader->Compile();
+			const_cast< Material* >( this )->FindLocations();
 		}
 
 		for ( auto Begin = m_Attributes.begin(), End = m_Attributes.end(); Begin != End; ++Begin )

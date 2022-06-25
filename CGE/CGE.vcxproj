@@ -170,8 +170,6 @@
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
-    <ClCompile Include="Rect.hpp" />
-    <ClCompile Include="RenderPipeline.hpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
@@ -211,7 +209,9 @@
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
     <ClInclude Include="Primitive.hpp" />
+    <ClCompile Include="Rect.hpp" />
     <ClInclude Include="Renderer.hpp" />
+    <ClCompile Include="RenderPipeline.hpp" />
     <ClInclude Include="Resource.hpp" />
     <ClInclude Include="ResourcePackage.hpp" />
     <ClInclude Include="Scene.hpp" />

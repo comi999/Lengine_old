@@ -106,22 +106,24 @@ void Rendering::DrawArrays( RenderMode a_Mode, uint32_t a_Begin, uint32_t a_Coun
 void Rendering::BufferData( BufferTarget a_BufferTarget, size_t a_Size, const void* a_Data, DataUsage a_DataUsage )
 {
 	Buffer& TargetBuffer = s_BufferRegistry[ s_BufferTargets[ ( uint32_t )a_BufferTarget ] ];
-	TargetBuffer.resize( a_Size );
+	//TargetBuffer.resize( a_Size );
 	
 	if ( a_Data )
 	{
-		memcpy( TargetBuffer.data(), a_Data, a_Size );
+		//memcpy( TargetBuffer.data(), a_Data, a_Size );
+		TargetBuffer = static_cast< const uint8_t* >( a_Data );
 	}
 }
 
 void Rendering::NamedBufferData( BufferHandle a_Handle, size_t a_Size, const void* a_Data, DataUsage a_DataUsage )
 {
 	Buffer& TargetBuffer = s_BufferRegistry[ a_Handle ];
-	TargetBuffer.resize( a_Size );
+	//TargetBuffer.resize( a_Size );
 
 	if ( a_Data )
 	{
-		memcpy( TargetBuffer.data(), a_Data, a_Size );
+		//memcpy( TargetBuffer.data(), a_Data, a_Size );
+		TargetBuffer = static_cast< const uint8_t* >( a_Data );
 	}
 }
 
@@ -187,11 +189,12 @@ void Rendering::VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType
 	Attributes.Offset = ( uint32_t )a_Offset;
 }
 
-void Rendering::DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void* a_Indices )
+void Rendering::DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_DataType, const void* a_Indices )
 {
 	const void* Indices = nullptr;
 	auto Handle = s_BufferTargets[ ( uint32_t )BufferTarget::ELEMENT_ARRAY_BUFFER ];
-	Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ].data() + ( uint32_t )a_Indices ) : a_Indices; 
+	//Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ].data() + ( uint32_t )a_Indices ) : a_Indices; 
+	Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ] + ( uint32_t )a_Indices ) : a_Indices;
 
 	switch ( a_DataType )
 	{
@@ -284,6 +287,15 @@ void Rendering::DepthFunc( TextureSetting a_TextureSetting )
 		case TextureSetting::ALWAYS:    s_DepthCompareFunc = DepthCompare_ALWAYS;    break;
 		case TextureSetting::NEVER:     s_DepthCompareFunc = DepthCompare_NEVER;     break;
 		default: break;
+	}
+}
+
+void Rendering::GetBooleanv( RenderSetting a_RenderSetting, bool* a_Value )
+{
+	switch ( a_RenderSetting )
+	{
+		case RenderSetting::DEPTH_TEST: *a_Value = s_RenderState.DepthTest;
+		case RenderSetting::CULL_FACE: *a_Value = s_RenderState.CullFace;
 	}
 }
 

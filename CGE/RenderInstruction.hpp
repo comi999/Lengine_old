@@ -9,11 +9,12 @@ struct RenderInstruction
 		SET,
 		ENABLE,
 		DISABLE,
-		STATIC_DRAW
+		DRAW
 	};
 
 	enum class Object : uint8_t
 	{
+		None,
 		Mesh,
 		Material,
 		Model,

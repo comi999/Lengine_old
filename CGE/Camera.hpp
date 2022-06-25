@@ -42,9 +42,9 @@ public:
 		return m_FOV;
 	}
 
-	inline void SetFOV( float a_Degrees )
+	inline void SetFOV( float a_Radians )
 	{
-		m_FOV = Math::Radians( a_Degrees );
+		m_FOV = a_Radians;
 		m_Dirty = true;
 	}
 
