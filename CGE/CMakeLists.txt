@@ -1,10 +1,3 @@
-cmake_minimum_required(VERSION 3.10)
-
-project(CGE)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 file(GLOB CGE_SOURCES ./*.cpp)
 file(GLOB CGE_HEADERS ./*.hpp)
 
