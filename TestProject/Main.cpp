@@ -100,10 +100,11 @@ DefineShader( Basic_Lit_Fragment )
 	Vector4 diffuseFrag  = Rendering::Sample( DiffuseTexture, texel );
 	Vector4 normalFrag   = Rendering::Sample( NormalTexture, texel );
 	Vector4 specularFrag = Rendering::Sample( SpecularTexture, texel );
-	Matrix4 TBN( Vector4( Math::Normalize( normal ), 0.0f ), Vector4( Math::Normalize( tangent ), 0.0f ), Vector4( Math::Normalize( bitangent ), 0.0f ), Vector4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+	Matrix4 TBN( Vector4( Math::Normalize( normal ), 0.0f ), Vector4( Math::Normalize( bitangent ), 0.0f ), Vector4( Math::Normalize( tangent ), 0.0f ),  Vector4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+	//TBN = Math::Transpose( TBN );
 	Vector4 Normal = Math::Multiply( Math::Transpose( TBN ), Vector4( Math::Normalize( normal ) * 2 - Vector3::One, 0.0f )  );
 	Vector3 R = Math::Reflect( LightObject, Vector3( Normal ) );
-	Vector3 V = Math::Normalize( CameraObject - LightObject );
+	Vector3 V = Math::Normalize( CameraObject - Vector3( position ) );
 	float LambertTerm = Math::Clamp( Math::Dot( Vector3( Normal ), -LightObject ), 0.0f, 1.0f );
 	float SpecularTerm = Math::Pow( Math::Clamp( Math::Dot( R, V ), 0.0f, 1.0f ), 20.0f /*Ns*/ );
 	Vector4 Diffuse = LightColour * /*Kd*/ Vector4( 0.8f, 0.8f, 0.8f, 1.0f ) * LambertTerm;
