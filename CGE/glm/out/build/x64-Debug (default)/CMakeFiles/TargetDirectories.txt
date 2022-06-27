@@ -1,2 +1,0 @@
-C:/Users/Glizz/Desktop/Programming/Unity Projects/FaragGame/Don'tEatTheApple/NativeProjects/FaragGameNative/FaragGameNative/Dependency/glm/out/build/x64-Debug (default)/CMakeFiles/edit_cache.dir
-C:/Users/Glizz/Desktop/Programming/Unity Projects/FaragGame/Don'tEatTheApple/NativeProjects/FaragGameNative/FaragGameNative/Dependency/glm/out/build/x64-Debug (default)/CMakeFiles/rebuild_cache.dir

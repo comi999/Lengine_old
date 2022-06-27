@@ -14,12 +14,6 @@
 #include "ConsoleWindow.hpp"
 #include "Rendering.hpp"
 #include "Math.hpp"
-#include <thread>
-#include <iostream>
-
-#define GLM_LEFT_HANDED
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 // Basic shaders
 DefineShader( Basic_Vertex )
@@ -176,14 +170,15 @@ ShaderProgramHandle LoadShaders( void* a_VertexShader, void* a_FragmentShader )
 
 void RunCubeDemo()
 {
-	PixelColourMap::Initialize();
+	PixelColourMap::Init();
 	auto* window = ConsoleWindow::Create( "Title", { 100, 100 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( window );
 	Rendering::Init();
 
 	// Load resources
-	auto grass = Resource::GetOrLoad< Mesh >( "plane" );
-	auto grass_diffuse = Resource::GetOrLoad< Texture2D >( "len" );
+	Resource::Init();
+	auto grass = Resource::Load< Mesh >( "plane"_H );
+	auto grass_diffuse = Resource::Load< Texture2D >( "landscape"_H );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
@@ -194,18 +189,18 @@ void RunCubeDemo()
 
 	// Bind positions
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Positions.size() * sizeof( Vector3 ), grass->m_Positions.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Positions.size() * sizeof( Vector3 ), grass->m_Positions.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 0, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Texels.size() * sizeof( Vector2 ), grass->m_Texels.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Texels.size() * sizeof( Vector2 ), grass->m_Texels.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
 	Rendering::BindBuffer( BufferTarget::ELEMENT_ARRAY_BUFFER, vbo[ 2 ] );
-	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, grass->m_Indices.size() * sizeof( uint32_t ), grass->m_Indices.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, grass->m_Indices.size() * sizeof( uint32_t ), grass->m_Indices.data(), DataUsage::DRAW );
 
 	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
@@ -243,7 +238,7 @@ void RunCubeDemo()
 	while ( 1 )
 	{
 		i += 0.05f;
-		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( -0.4f, i, 0.0f ) ), Vector3( 2.0f, 1.0f, 2.0f ) * 1.0f );
+		auto M = Matrix4::CreateTransform( Vector3( 0.0f, 0.0f, 0.0f ), Quaternion::ToQuaternion( Vector3( -0.4f, i, 0.0f ) ), Vector3( 1.0f, 1.0f, 1.0f ) * 1.0f );
 		auto PVM = Math::Multiply( PV, M );
 		Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 
@@ -260,7 +255,7 @@ void RunCubeDemo()
 
 void RunSquaresDemo()
 {
-	PixelColourMap::Initialize();
+	PixelColourMap::Init();
 
 	auto* window = ConsoleWindow::Create( "Title", { 64, 64 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( window );
@@ -325,13 +320,13 @@ void RunSquaresDemo()
 	};
 
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_positions ), vertices_positions, DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_positions ), vertices_positions, DataUsage::DRAW );
 
 	Rendering::VertexAttribPointer( 0, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_colours ), vertices_colours, DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, sizeof( vertices_colours ), vertices_colours, DataUsage::DRAW );
 
 	Rendering::VertexAttribPointer( 1, 4, DataType::FLOAT, false, 4 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
@@ -375,16 +370,16 @@ void RunSquaresDemo()
 
 void RunLitSpearDemo()
 {
-	PixelColourMap::Initialize();
+	PixelColourMap::Init();
 	auto* window = ConsoleWindow::Create( "Title", { 100, 100 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( window );
 	Rendering::Init();
 
 	// Load resources
-	auto spear = Resource::GetOrLoad< Mesh >( "spear" );
-	auto spear_diffuse = Resource::GetOrLoad< Texture2D >( "spear_diffuse" );
-	auto spear_normal = Resource::GetOrLoad< Texture2D >( "spear_normal" );
-	auto spear_specular = Resource::GetOrLoad< Texture2D >( "spear_specular" );
+	auto spear = Resource::Load< Mesh >( "spear"_H );
+	auto spear_diffuse = Resource::Load< Texture2D >( "spear_diffuse"_H );
+	auto spear_normal = Resource::Load< Texture2D >( "spear_normal"_H );
+	auto spear_specular = Resource::Load< Texture2D >( "spear_specular"_H );
 
 	ArrayHandle vao;
 	Rendering::GenVertexArrays( 1, &vao );
@@ -395,37 +390,37 @@ void RunLitSpearDemo()
 
 	// Bind positions
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 0 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Positions.size() * sizeof( spear->m_Positions[ 0 ] ), spear->m_Positions.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Positions.size() * sizeof( spear->m_Positions[ 0 ] ), spear->m_Positions.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 0, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 0 );
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Texels.size() * sizeof( spear->m_Texels[ 0 ] ), spear->m_Texels.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Texels.size() * sizeof( spear->m_Texels[ 0 ] ), spear->m_Texels.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
 	// Bind normals
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 2 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Normals.size() * sizeof( spear->m_Normals[ 0 ] ), spear->m_Normals.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Normals.size() * sizeof( spear->m_Normals[ 0 ] ), spear->m_Normals.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 2, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 2 );
 
 	// Bind tangents
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 3 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Tangents.size() * sizeof( spear->m_Tangents[ 0 ] ), spear->m_Tangents.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Tangents.size() * sizeof( spear->m_Tangents[ 0 ] ), spear->m_Tangents.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 3, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 3 );
 
 	// Bind bitangents
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 4 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Bitangents.size() * sizeof( spear->m_Bitangents[ 0 ] ), spear->m_Bitangents.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Bitangents.size() * sizeof( spear->m_Bitangents[ 0 ] ), spear->m_Bitangents.data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 4, 3, DataType::FLOAT, false, 3 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 4 );
 
 	// Bind indices
 	Rendering::BindBuffer( BufferTarget::ELEMENT_ARRAY_BUFFER, vbo[ 5 ] );
-	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, spear->m_Indices.size() * sizeof( spear->m_Indices[ 0 ] ), spear->m_Indices.data(), DataUsage::STATIC_DRAW );
+	Rendering::BufferData( BufferTarget::ELEMENT_ARRAY_BUFFER, spear->m_Indices.size() * sizeof( spear->m_Indices[ 0 ] ), spear->m_Indices.data(), DataUsage::DRAW );
 
 	//-------------------------------------------------------------
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, 0 );
@@ -664,12 +659,44 @@ void RunOldDemo()
 	//		  } );
 }
 
+void RunNewRendererTest()
+{
+	auto Window = ConsoleWindow::Create( "Title goes here.", { 64, 64 }, { 8, 8 } );
+	ConsoleWindow::MakeContextCurrent( Window );
+	CGE::Init();
+	auto grass_model = Resource::Load< Mesh >( "grass"_H );
+	auto grass_mat = Material();
+
+	GameObject GrassBlock = GameObject::Instantiate();
+	MeshRenderer* Renderer = GrassBlock.AddComponent< MeshRenderer >();
+	Renderer->SetMesh( &grass_model.get() );
+	Renderer->SetMaterial( &grass_mat );
+	
+	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
+	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
+	CameraObject.GetTransform()->SetGlobalPosition( Vector3( 0.0f, 0.0f, 0.0f ) );
+	CameraObject.GetTransform()->SetGlobalRotation( Quaternion::ToQuaternion( Vector3::Zero ) );
+	CameraComponent->SetAspect( 1.0f );
+	CameraComponent->SetFOV( Math::Radians( 90.0f ) );
+	CameraComponent->SetNearZ( 0.1f );
+	CameraComponent->SetFarZ( 100.0f );
+	Camera::SetMainCamera( CameraComponent );
+	CameraObject.GetTransform()->SetGlobalPositionZ( -5.0f );
+
+	CGE::Run( [&]()
+	{
+		GrassBlock.GetTransform()->RotateGlobal( Quaternion::ToQuaternion( Vector3( 0.1f, .0f, .0f ) ) );
+	} );
+}
+
 int main()
 {
-	RunCubeDemo();
+	//RunCubeDemo();
 	//RunLitSpearDemo();
 	//RunSquaresDemo();
 	//RunOldDemo();
+	RunNewRendererTest();
+
 	
 	return 0;
 }

@@ -17,5 +17,27 @@ public:
 
 private:
 
+	inline void Sort()
+	{
+		// Need to sort the queue here somehow.
+	}
+
+	inline RenderInstruction& Front()
+	{
+		return m_RenderInstructions.front();
+	}
+
+	inline void Pop()
+	{
+		m_RenderInstructions.pop_front();
+	}
+
+	inline bool Empty()
+	{
+		return m_RenderInstructions.empty();
+	}
+
+	friend class RenderPipeline;
+
 	std::list< RenderInstruction > m_RenderInstructions;
 };

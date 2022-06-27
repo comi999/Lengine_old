@@ -10,9 +10,9 @@ typedef IRenderer< void > Renderer;
 template < typename T >
 class IRenderer : public IComponent< IRenderer< T > >
 {
-private:
+public:
 
 	friend class RenderPipeline;
 	
-	virtual void OnDraw( RenderQueue ) { };
+	virtual void OnDraw( RenderQueue& a_RenderQueue ) const { };
 };

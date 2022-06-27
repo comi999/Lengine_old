@@ -3,10 +3,9 @@
 #include "Math.hpp"
 #include "Colour.hpp"
 #include "Vertex.hpp"
+#include "Resource.hpp"
 
-
-
-class Mesh
+class Mesh : public Resource
 {
 public:
 
@@ -28,33 +27,105 @@ public:
 		};
 	}
 
-	inline size_t GetVertexCount() const
+	inline uint32_t GetVertexCount() const
+	{
+		return m_Positions.size();
+	}
+
+	inline uint32_t GetIndexCount() const
 	{
 		return m_Indices.size();
 	}
 
-	inline float GetRadius() const
+	inline uint32_t GetOutermost() const
 	{
-		if ( m_Outermost == size_t( -1 ) )
+		if ( m_Outermost == uint32_t( -1 ) )
 		{
-			// Find outmost point.
 			float RadiusSqrd = 0.0f;
 
-			for ( size_t i = 0; i < m_Positions.size(); ++i )
+			for ( uint32_t i = 0; i < m_Positions.size(); ++i )
 			{
 				float CurrentRadiusSqrd = Math::LengthSqrd( m_Positions[ i ] );
 
-				if ( CurrentRadiusSqrd < RadiusSqrd )
+				if ( CurrentRadiusSqrd > RadiusSqrd )
 				{
 					const_cast< Mesh* >( this )->m_Outermost = i;
 					RadiusSqrd = CurrentRadiusSqrd;
 				}
 			}
-
-			return RadiusSqrd;
 		}
 
-		return Math::LengthSqrd( m_Positions[ m_Outermost ] );
+		return m_Outermost;
+	}
+
+	inline float GetRadius() const
+	{
+		return Math::Length( m_Positions[ GetOutermost() ] );
+	}
+
+	inline const uint32_t* GetIndices() const
+	{
+		return m_Indices.data();
+	}
+
+	inline const Vector4* GetColours() const
+	{
+		return m_Colours.data();
+	}
+
+	inline const Vector3* GetPositions() const
+	{
+		return m_Positions.data();
+	}
+
+	inline const Vector3* GetNormals() const
+	{
+		return m_Normals.data();
+	}
+
+	inline const Vector3* GetTangents() const
+	{
+		return m_Tangents.data();
+	}
+
+	inline const Vector3* GetBitangents() const
+	{
+		return m_Bitangents.data();
+	}
+
+	inline const Vector2* GetTexels() const
+	{
+		return m_Texels.data();
+	}
+
+	inline bool HasColours() const
+	{
+		return !m_Colours.empty();
+	}
+
+	inline bool HasPositions() const
+	{
+		return !m_Positions.empty();
+	}
+
+	inline bool HasNormals() const
+	{
+		return !m_Normals.empty();
+	}
+
+	inline bool HasTangents() const
+	{
+		return !m_Tangents.empty();
+	}
+
+	inline bool HasBitangents() const
+	{
+		return !m_Bitangents.empty();
+	}
+
+	inline bool HasTexels() const
+	{
+		return !m_Texels.empty();
 	}
 
 //private:
@@ -65,18 +136,21 @@ public:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
+		a_Serializer << *static_cast< const Resource* >( this );
 		a_Serializer << m_Indices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
+		a_Deserializer >> *static_cast< Resource* >( this );
 		a_Deserializer >> m_Indices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
 	}
 
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
+		a_Sizer & *static_cast< const Resource* >( this );
 		a_Sizer & m_Indices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
 	}
 
@@ -87,5 +161,5 @@ public:
 	std::vector< Vector3  > m_Tangents;
 	std::vector< Vector3  > m_Bitangents;
 	std::vector< Vector2  > m_Texels;
-	size_t                  m_Outermost;
+	uint32_t                m_Outermost;
 };

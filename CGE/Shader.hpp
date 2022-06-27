@@ -1,4 +1,5 @@
 #pragma once
+#include "Math.hpp"
 #include "Rendering.hpp"
 #include "Resource.hpp"
 #include "Hash.hpp"
@@ -7,18 +8,58 @@ class Shader : public Resource
 {
 public:
 
-	void SetColour( const char* a_Name, Colour a_Colour )
+	Shader()
+		: Resource( "Shader_Default" )
+		, m_ShaderProgramHandle( 0 )
+		, m_VertexShaderSource( "Shader_Default_Vertex" )
+		, m_FragmentShaderSource( "Shader_Default_Fragment" )
+	{ }
+
+	Shader( const Name& a_Name, const std::string& a_VertexShaderSource, const std::string& a_FragmentShaderSource )
+		: Resource( a_Name )
+		, m_ShaderProgramHandle( 0 )
+		, m_VertexShaderSource( a_VertexShaderSource )
+		, m_FragmentShaderSource( a_FragmentShaderSource )
+	{ }
+
+	void SetSource( ShaderType a_ShaderType, const char* a_Source )
 	{
-		uint32_t Location = Rendering::GetUniformLocation( m_ShaderProgramHandle, a_Name );
-		
-		if ( Location != -1 )
+		std::string* Source = nullptr;
+
+		switch ( a_ShaderType )
 		{
-			Vector4 Colour = a_Colour.Normalized();
-			Rendering::Uniform4f( Location, Colour.x, Colour.y, Colour.z, Colour.w );
+			case ShaderType::VERTEX_SHADER:   Source = &m_VertexShaderSource;   break;
+			case ShaderType::FRAGMENT_SHADER: Source = &m_FragmentShaderSource; break;
 		}
+
+		if ( !Source )
+		{
+			return;
+		}
+
+		*Source = a_Source;
+
+		if ( !m_ShaderProgramHandle )
+		{
+			return;
+		}
+
+		Decompile();
+		Compile();
 	}
 
-	// void SetInt/Float/Bool/Vector/Matrix
+	const char* GetSource( ShaderType a_ShaderType )
+	{
+		switch ( a_ShaderType )
+		{
+			case ShaderType::VERTEX_SHADER: return m_VertexShaderSource.c_str();
+			case ShaderType::FRAGMENT_SHADER: return m_FragmentShaderSource.c_str();
+		}
+
+		return nullptr;
+	}
+
+	//Ideally, shader object should be in charge of setting uniforms and setting up attributes.
 
 	void Compile()
 	{
@@ -30,11 +71,11 @@ public:
 		ShaderHandle VertexShaderID = Rendering::CreateShader( ShaderType::VERTEX_SHADER );
 		ShaderHandle FragmentShaderID = Rendering::CreateShader( ShaderType::FRAGMENT_SHADER );
 
-		auto VertexShaderIter = Internal::ShaderFuncLookup.find( CRC32_RT( m_VertexShaderSource.c_str() ) );
-		auto FragmentShaderIter = Internal::ShaderFuncLookup.find( CRC32_RT( m_FragmentShaderSource.c_str() ) );
+		auto VertexShaderIter = Internal::ShaderFuncLookup::Value.find( CRC32_RT( m_VertexShaderSource.c_str() ) );
+		auto FragmentShaderIter = Internal::ShaderFuncLookup::Value.find( CRC32_RT( m_FragmentShaderSource.c_str() ) );
 
-		const void* VertexSource = VertexShaderIter != Internal::ShaderFuncLookup.end() ? VertexShaderIter->second : nullptr;
-		const void* FragmentSource = FragmentShaderIter != Internal::ShaderFuncLookup.end() ? FragmentShaderIter->second : nullptr;
+		const void* VertexSource = VertexShaderIter != Internal::ShaderFuncLookup::Value.end() ? VertexShaderIter->second : nullptr;
+		const void* FragmentSource = FragmentShaderIter != Internal::ShaderFuncLookup::Value.end() ? FragmentShaderIter->second : nullptr;
 
 		Rendering::ShaderSource( VertexShaderID, 1, &VertexSource, nullptr );
 		Rendering::CompileShader( VertexShaderID );
@@ -75,18 +116,24 @@ private:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
-		VertexShader >> a_Serializer;
-		FragmentShader >> a_Serializer;
+		a_Serializer << m_VertexShaderSource;
+		a_Serializer << m_FragmentShaderSource;
 	}
 
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		m_VertexShaderSource << a_Deserializer;
-		m_FragmentShaderSource << a_Deserializer;
+		a_Deserializer >> m_VertexShaderSource;
+		a_Deserializer >> m_FragmentShaderSource;
 	}
 
 	ShaderProgramHandle m_ShaderProgramHandle;
 	std::string         m_VertexShaderSource;
 	std::string         m_FragmentShaderSource;
+
+public:
+
+	static Shader Default;
+	static Shader Phong;
+	// More lighting models.
 };

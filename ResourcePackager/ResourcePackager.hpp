@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "File.hpp"
+#include "Name.hpp"
 
 #include <assimp/config.h>
 #include <assimp/Importer.hpp>
@@ -20,7 +21,7 @@ public:
 private:
 
 	template < typename T >
-	size_t CreateTemp( const std::string& a_TempFile, const Directory& a_TempDirectory, File& a_From ) const
+	size_t CreateTemp( const Name& a_Name, const std::string& a_TempFile, const Directory& a_TempDirectory, File& a_From ) const
 	{
 		T Resource;
 
@@ -28,6 +29,8 @@ private:
 		{
 			return 0;
 		}
+
+		Resource.m_Name = a_Name;
 
 		if ( a_TempDirectory.ContainsFile( a_TempFile.c_str() ) )
 		{

@@ -17,7 +17,7 @@ public:
 		delete[] m_PixelMap;
 	}
 
-	static bool Initialize()
+	static bool Init()
 	{
 		//0.2989 * R + 0.5870 * G + 0.1140 * B
 		/*for ( int i = 0; i < 16; ++i )

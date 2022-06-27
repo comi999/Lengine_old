@@ -205,7 +205,7 @@ enum class DataUsage : uint8_t
 	STREAM,
 	STATIC,
 	DYNAMIC,
-	STATIC_DRAW,
+	DRAW,
 	READ,
 	COPY
 };
@@ -252,23 +252,27 @@ namespace Internal { bool _ShaderRegistered_##Name = RegisterShader< "Shader_"#N
 void Shader_##Name ()
 
 #define Uniform( Type, Name ) auto& ##Name = Rendering::Uniform< crc32_cpt( __FUNCTION__ ), Type, #Name##_H >::Value()
-#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Attribute< Location, Type >::Value()
+#define Attribute( Location, Type, Name ) auto& ##Name = Rendering::Property< Location, Type >::Value()
 #define Varying_In( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::In()
 #define Varying_Out( Type, Name ) auto& ##Name = Rendering::Varying< crc32_cpt( __FUNCTION__ ), Type, #Name##""_H >::Out()
 #define InOut( Type, Name ) auto& ##Name = Rendering::InOut< Type, #Name##""_H >::Value()
+
 
 
 namespace Internal {
 template < Hash _ShaderName >
 void* ShaderAddress = nullptr;
 
-static std::map< Hash, void* > ShaderFuncLookup;
+struct ShaderFuncLookup
+{
+	inline static std::map< Hash, void* > Value;
+};
 
 template < Hash _ShaderName >
 struct RegisterShader
 {
 	inline static bool Registered = [](){
-		ShaderFuncLookup[ _ShaderName ] = ShaderAddress< _ShaderName >;
+		ShaderFuncLookup::Value.emplace( _ShaderName, ShaderAddress< _ShaderName > );
 		return true;
 	}();
 };
@@ -395,11 +399,14 @@ public:
 	static void EnableVertexAttribArray( uint32_t a_Position );
 	static void DisableVertexAttribArray( uint32_t a_Position );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
-	static void DrawElements( RenderMode a_Mode, size_t a_Count, DataType a_DataType, const void*  a_Indices );
+	static void DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_DataType, const void*  a_Indices );
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
 	static void DepthFunc( TextureSetting a_TextureSetting );
+
+	static void GetBooleanv( RenderSetting a_RenderSetting, bool* a_Value );
+	// Need the other Get functions.
 
 	// Textures
 	static void ActiveTexture( uint32_t a_ActiveTexture );	
@@ -438,27 +445,27 @@ public:
 	static void Uniform2ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1 );
 	static void Uniform3ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2 );
 	static void Uniform4ui( int32_t a_Location, uint32_t a_V0, uint32_t a_V1, uint32_t a_V2, uint32_t a_V3 );
-	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, float* a_Value );
-	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, int32_t* a_Value );
-	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, uint32_t* a_Value );
-	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
-	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, float* a_Value );
+	static void Uniform1fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform2fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform3fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform4fv( int32_t a_Location, uint32_t a_Count, const float* a_Value );
+	static void Uniform1iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform2iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform3iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform4iv( int32_t a_Location, uint32_t a_Count, const int32_t* a_Value );
+	static void Uniform1uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform2uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform3uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void Uniform4uiv( int32_t a_Location, uint32_t a_Count, const uint32_t* a_Value );
+	static void UniformMatrix2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix2x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x2fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix3x4fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
+	static void UniformMatrix4x3fv( uint32_t a_Location, uint32_t a_Count, bool a_Transpose, const float* a_Value );
 
 	//----------SHADER_ACCESS--------------
 
@@ -525,7 +532,7 @@ private:
 public:
 
 	template < uint32_t _Location, typename _Type >
-	class Attribute
+	class Property
 	{
 	public:
 
@@ -722,7 +729,8 @@ private:
 						( a_VertexAttribute.Normalized ) ];
 
 			m_Begin = 
-				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() + 
+				//s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				s_BufferRegistry[ a_VertexAttribute.Buffer ] +
 				a_VertexAttribute.Offset;
 
 			m_Data = m_Begin;
@@ -751,7 +759,8 @@ private:
 						( a_VertexAttribute.Normalized ) ];
 
 			m_Begin =
-				s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				//s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
+				s_BufferRegistry[ a_VertexAttribute.Buffer ] +
 				a_VertexAttribute.Offset;
 
 			m_Data = m_Begin;
@@ -858,10 +867,10 @@ private:
 			return &Funcs[ 0 ];
 		}
 
-		OutputFunc m_Output;
-		uint32_t   m_Stride;
-		uint8_t*   m_Begin;
-		uint8_t*   m_Data;
+		OutputFunc     m_Output;
+		uint32_t       m_Stride;
+		const uint8_t* m_Begin;
+		const uint8_t* m_Data;
 	};
 	class Texture
 	{
@@ -902,7 +911,8 @@ private:
 		uint8_t     Format;
 	};
 
-	typedef std::vector< uint8_t >           Buffer;
+	//typedef std::vector< uint8_t >           Buffer;
+	typedef const uint8_t*                   Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
@@ -924,7 +934,8 @@ private:
 		void Destroy( BufferHandle a_Handle )
 		{
 			m_Availability[ a_Handle - 1 ] = false;
-			m_Buffers[ a_Handle - 1 ].clear();
+			//m_Buffers[ a_Handle - 1 ].clear();
+			m_Buffers[ a_Handle - 1 ] = nullptr;
 		}
 
 		inline Buffer& operator[]( BufferHandle a_Handle )

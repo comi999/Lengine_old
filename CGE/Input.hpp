@@ -119,7 +119,7 @@ class Input
 {
 public:
 
-	static void Initialize()
+	static void Init()
 	{
 		MousePosition = GetMousePosition();
 	}

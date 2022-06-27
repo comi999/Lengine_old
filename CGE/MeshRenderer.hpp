@@ -24,9 +24,9 @@ class IMeshRenderer : public IRenderer< IMeshRenderer< T > >
 {
 public:
 
-	void OnDraw( RenderQueue a_Queue ) override
+	void OnDraw( RenderQueue& a_Queue ) const override
 	{
-		if ( !Camera::GetMainCamera() || !m_Mesh )
+		if ( !Camera::GetMainCamera() || !m_Mesh || !m_Material )
 		{
 			return;
 		}
@@ -55,24 +55,34 @@ public:
 		Instruction.Object = RenderInstruction::Object::Mesh;
 		Instruction.Source = m_Mesh;
 		a_Queue += Instruction;
+
+		Instruction.Modification = RenderInstruction::Modification::SET;
+		Instruction.Object = RenderInstruction::Object::Material;
+		Instruction.Source = m_Material;
+		a_Queue += Instruction;
+
+		Instruction.Modification = RenderInstruction::Modification::SET;
+		Instruction.Object = RenderInstruction::Object::Model;
+		Instruction.Source = &this->GetOwner().GetTransform()->GetGlobalMatrix();
+		a_Queue += Instruction;
+
+		Instruction.Modification = RenderInstruction::Modification::DRAW;
+		Instruction.Object = RenderInstruction::Object::None;
+		Instruction.Source = nullptr;
+		a_Queue += Instruction;
 	}
 
-	inline void SetMesh( const Mesh* a_Mesh )
+	void SetMesh( const Mesh* a_Mesh )
 	{
 		m_Mesh = a_Mesh;
 	}
 
-	inline void SetMaterial( const Material* a_Material )
+	void SetMaterial( const Material* a_Material )
 	{
 		m_Material = a_Material;
 	}
 
-	inline void SetTexture( const Texture2D* a_Texture )
-	{
-		m_Texture = a_Texture;
-	}
-
-	inline void SetRenderMode( RenderMode a_RenderMode )
+	void SetRenderMode( RenderMode a_RenderMode )
 	{
 		m_RenderMode = a_RenderMode;
 	}
@@ -81,6 +91,5 @@ private:
 
 	const Mesh*       m_Mesh;
 	const Material*   m_Material;
-	RenderMode        m_RenderMode;
-	const Texture2D*  m_Texture;
+	RenderMode        m_RenderMode; // unused at the moment.
 };

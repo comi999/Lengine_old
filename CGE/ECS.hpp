@@ -84,7 +84,7 @@ public:
 	{
 		static bool RegisterTypes = s_TypeMap.RegisterTypes< typename T::InheritanceTrace >();
 		static bool RegisterFunctions = [](){
-			s_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
+			//s_Registry.on_construct< T >().connect< &ComponentOnConstruct< T > >();
 			s_TypeMap.RegisterFunction< T >( "GetComponent"_H, GetExactComponent< T > );
 			s_TypeMap.RegisterFunction< T >( "GetComponents"_H, GetExactComponents< T > );
 			return true;
@@ -205,7 +205,9 @@ private:
 	template < typename T >
 	static void ComponentOnConstruct( entt::registry& a_Registry, entt::entity a_Entity )
 	{
-		reinterpret_cast< ComponentBase& >( a_Registry.get< T >( a_Entity ) ).m_GameObjectID = GameObjectID( a_Entity );
+		//auto* s = &a_Registry.get< T >( a_Entity );
+		//auto s1 = reinterpret_cast< Component* >( s );
+		//s1->m_GameObjectID = GameObjectID( a_Entity );
 	}
 
 	static TypeMap		  s_TypeMap;
