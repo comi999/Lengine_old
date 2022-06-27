@@ -146,7 +146,7 @@ private:
 
 		switch ( m_Type )
 		{
-			case Material::Property::Type::INT:
+			case MaterialProperty::Type::INT:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{
@@ -155,7 +155,7 @@ private:
 
 				break;
 			}
-			case Material::Property::Type::FLOAT:
+			case MaterialProperty::Type::FLOAT:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{
@@ -164,7 +164,7 @@ private:
 
 				break;
 			}
-			case Material::Property::Type::STRING:
+			case MaterialProperty::Type::STRING:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{

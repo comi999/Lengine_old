@@ -76,12 +76,12 @@ public:
 	Directory GetRoot() const;
 	bool Contains( const char* a_FileOrFolder ) const;
 	bool ContainsFile( const char* a_File ) const;
-	File CreateFile( const char* a_File, size_t a_Size ) const;
-	bool DeleteFile( const char* a_File ) const;
+	File NewFile( const char* a_File, size_t a_Size ) const;
+	bool DestroyFile( const char* a_File ) const;
 	File GetFile( const char* a_File ) const;
 	bool ContainsDirectory( const char* a_Directory ) const;
-	Directory CreateDirectory( const char* a_Directory ) const;
-	bool DeleteDirectory( const char* a_Directory ) const;
+	Directory NewDirectory( const char* a_Directory ) const;
+	bool DestroyDirectory( const char* a_Directory ) const;
 	Directory GetDirectory( const char* a_Directory ) const;
 	operator const Path& () const;
 	operator Path& ();

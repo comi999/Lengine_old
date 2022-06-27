@@ -211,7 +211,7 @@ bool Directory::ContainsFile( const char* a_File ) const
 	return std::filesystem::exists( File ) && std::filesystem::is_regular_file( File );
 }
 
-File Directory::CreateFile( const char* a_File, size_t a_Size ) const
+File Directory::NewFile( const char* a_File, size_t a_Size ) const
 {
 	auto NewFilePath = *m_Path / a_File;
 
@@ -226,7 +226,7 @@ File Directory::CreateFile( const char* a_File, size_t a_Size ) const
 	return NewFilePath;
 }
 
-bool Directory::DeleteFile( const char* a_File ) const
+bool Directory::DestroyFile( const char* a_File ) const
 {
 	if ( !ContainsFile( a_File ) )
 	{
@@ -248,7 +248,7 @@ bool Directory::ContainsDirectory( const char* a_Directory ) const
 	return std::filesystem::exists( File ) && std::filesystem::is_directory( File );
 }
 
-Directory Directory::CreateDirectory( const char* a_Directory ) const
+Directory Directory::NewDirectory( const char* a_Directory ) const
 {
 	auto NewDirectoryPath = *m_Path / a_Directory;
 
@@ -258,7 +258,7 @@ Directory Directory::CreateDirectory( const char* a_Directory ) const
 	return NewDirectoryPath;
 }
 
-bool Directory::DeleteDirectory( const char* a_Directory ) const
+bool Directory::DestroyDirectory( const char* a_Directory ) const
 {
 	if ( !ContainsDirectory( a_Directory ) )
 	{
