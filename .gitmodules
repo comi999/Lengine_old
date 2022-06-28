@@ -1,0 +1,3 @@
+[submodule "ResourcePackager/Dependencies/assimp"]
+	path = ResourcePackager/Dependencies/assimp
+	url = https://github.com/assimp/assimp.git

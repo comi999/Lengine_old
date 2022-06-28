@@ -21,7 +21,7 @@ public:
         size_t Length = strlen( a_Title ) + 1;
         Length = Length > 64 ? 64 : Length;
         mbstowcs_s( nullptr, m_TitleBuffer, Length, a_Title, Length );
-        SetConsoleTitle( m_TitleBuffer );
+        SetConsoleTitleW( m_TitleBuffer );
     }
 
     inline Vector2Int GetSize()
