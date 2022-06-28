@@ -179,7 +179,7 @@ private:
 	template < typename T >
 	void Serialize( T& a_Serializer ) const
 	{
-		a_Serializer << m_Type << m_Size;
+		a_Serializer << m_Name << m_Size << m_Type;
 
 		switch ( m_Type )
 		{
@@ -213,7 +213,7 @@ private:
 	template < typename T >
 	void Deserialize( T& a_Deserializer )
 	{
-		a_Deserializer >> m_Type >> m_Size;
+		a_Deserializer >> m_Name >> m_Size >> m_Type;
 
 		switch ( m_Type )
 		{
@@ -266,38 +266,6 @@ private:
 
 class Material : public Resource
 {
-private:
-
-	class TextureRef
-	{
-	public:
-
-		Hash                        Name;
-		ResourceHandle< Texture2D > Handle;
-
-	private:
-
-		friend class Serialization;
-
-		template < typename T >
-		void Serialize( T& a_Serializer ) const
-		{
-			a_Serializer << Name;
-		}
-
-		template < typename T >
-		void Deserialize( T& a_Deserializer )
-		{
-			a_Deserializer >> Name;
-		}
-
-		template < typename T >
-		void SizeOf( T& a_Sizer ) const
-		{
-			a_Sizer & Name;
-		}
-	};
-
 public:
 
 	Material()
@@ -365,28 +333,15 @@ public:
 		return m_Attributes.find( a_Key ) != m_Attributes.end();
 	}
 
-	void AddTexture( const Name& a_Key, ResourceHandle< Texture2D > a_Texture )
+	void AddTexture( Hash a_Key, ResourceHandle< Texture2D > a_Texture )
 	{
-		TextureRef& NewTexture = m_Textures[ a_Key.HashCode() ];
-		NewTexture.Name = a_Key;
-		NewTexture.Handle = a_Texture;
+		m_Textures[ a_Key ] = a_Texture;
 	}
 
 	ResourceHandle< Texture2D > GetTexture( Hash a_Key )
 	{
 		auto Iter = m_Textures.find( a_Key );
-
-		if ( Iter != m_Textures.end() )
-		{
-			if ( !Iter->second.Handle )
-			{
-				Iter->second.Handle = Resource::Load< Texture2D >( Iter->first );
-			}
-
-			return Iter->second.Handle;
-		}
-		
-		return ResourceHandle< Texture2D >{};
+		return Iter != m_Textures.end() ? Iter->second : ResourceHandle< Texture2D >{};
 	}
 
 	bool SetTexture( Hash a_Key, ResourceHandle< Texture2D > a_Texture )
@@ -395,7 +350,7 @@ public:
 
 		if ( Iter != m_Textures.end() )
 		{
-			Iter->second.Handle = a_Texture;
+			Iter->second = a_Texture;
 			return true;
 		}
 
@@ -484,30 +439,30 @@ private:
 		}
 	}
 
-	template < typename T >
-	void Serialize( T& a_Serializer ) const
+	template < typename _Serializer >
+	void Serialize( _Serializer& a_Serializer ) const
 	{
 		a_Serializer << *static_cast< const Resource* >( this );
 		a_Serializer << m_Attributes << m_Textures;
 	}
 
-	template < typename T >
-	void Deserialize( T& a_Deserializer )
+	template < typename _Deserializer >
+	void Deserialize( _Deserializer& a_Deserializer )
 	{
 		a_Deserializer >> *static_cast< Resource* >( this );
 		a_Deserializer >> m_Attributes >> m_Textures;
 	}
 
-	template < typename T >
-	void SizeOf( T& a_Sizer ) const
+	template < typename _Sizer >
+	void SizeOf( _Sizer& a_Sizer ) const
 	{
 		a_Sizer & *static_cast< const Resource* >( this );
 		a_Sizer & m_Attributes & m_Textures;
 	}
 
-	Shader*                            m_Shader;
-	std::map< Hash, MaterialProperty > m_Attributes;
-	std::map< Hash, TextureRef       > m_Textures;
+	Shader*                                       m_Shader;
+	std::map< Hash, MaterialProperty >            m_Attributes;
+	std::map< Hash, ResourceHandle< Texture2D > > m_Textures;
 };
 
 struct MaterialOld

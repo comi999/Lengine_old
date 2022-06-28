@@ -4,11 +4,7 @@
 
 typedef uint32_t GameObjectID;
 
-template < typename T > class ITransform;
-typedef ITransform< void > Transform;
-
-template < typename T >
-class ITransform : public IComponent< ITransform< T > >
+DefineComponent( Transform, Component )
 {
 public:
 
@@ -43,7 +39,7 @@ public:
 
 	inline void SetParent( GameObjectID a_Parent, bool a_RetainGlobalTransform = true )
 	{
-		SetParentImpl( ECS::GetComponent< Transform >( a_Parent ), a_RetainGlobalTransform );
+		SetParentImpl( Component::GetComponent< Transform >( a_Parent ), a_RetainGlobalTransform );
 	}
 
 	inline void DetachFromParent( bool a_RetainGlobalTransform = true )
@@ -71,9 +67,9 @@ public:
 		a_Transform->SetParent( this, a_RetainGlobalTransform );
 	}
 
-	inline void AttachChild( GameObjectID a_Transform, bool a_RetainGlobalTransform = true )
+	inline void AttachChild( GameObjectID a_Child, bool a_RetainGlobalTransform = true )
 	{
-		//implementation
+		GameObject::FindByID( a_Child ).GetTransform()->SetParentImpl( this, a_RetainGlobalTransform );
 	}
 
 	inline void DetachChild( size_t a_Index, bool a_RetainGlobalTransform = true )
@@ -655,16 +651,16 @@ public:
 		return m_LocalMatrix;
 	}
 
-//private:
+private:
 
 	inline void SetParentImpl( Transform* a_Transform, bool a_RetainGlobalTransform, size_t a_ChildIndex = -1 )
 	{
-		GameObjectID ThisID = this->GetOwnerID();
+		GameObjectID ThisID = *this->GetOwner();
 
 		// unset parent
 		if ( m_Parent != static_cast< GameObjectID >( -1 ) )
 		{
-			Transform* ParentTransform = ECS::GetExactComponent< Transform >( m_Parent );
+			Transform* ParentTransform = Component::GetExactComponent< Transform >( m_Parent );
 
 			if ( a_RetainGlobalTransform )
 			{
@@ -686,7 +682,7 @@ public:
 			}
 
 			a_Transform->m_Children.push_back( ThisID );
-			m_Parent = a_Transform->GetOwnerID();
+			m_Parent = *a_Transform->GetOwner();
 		}
 		else
 		{
@@ -711,6 +707,29 @@ public:
 		{
 			GameObject::FindByID( *Begin ).GetTransform()->UpdateTransform();
 		}
+	}
+
+	friend class ResourcePackager;
+	friend class Serialization;
+	friend class Prefab;
+
+	template < typename _Serializer >
+	void Serialize( _Serializer& a_Serializer ) const
+	{
+		a_Serializer << m_LocalPosition << m_LocalRotation << m_LocalScale;
+	}
+
+	template < typename _Deserializer >
+	void Deserialize( _Deserializer& a_Deserializer )
+	{
+		a_Deserializer >> m_LocalPosition >> m_LocalRotation >> m_LocalScale;
+		m_IsDirty = true;
+	}
+
+	template < typename _Sizer >
+	void SizeOf( _Sizer& a_Sizer ) const
+	{
+		a_Sizer & m_LocalPosition & m_LocalRotation & m_LocalScale;
 	}
 
 	Matrix4                     m_GlobalMatrix;

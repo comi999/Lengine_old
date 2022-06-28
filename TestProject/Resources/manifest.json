@@ -12,9 +12,15 @@
       "Path": "./SomeFolder/test2.jpg",
       "Type": "texture2d"
     },
-    "grass": {
+    "grass_prefab": {
       "Path": "./SomeFolder/grass.obj",
-      "Type": "mesh"
+      "Type": "prefab",
+      "Objects": {
+        "grass_mesh": {
+          "Type": "mesh",
+          "Index": 0
+        }
+      }
     },
     "grass_diffuse": {
       "Path": "./SomeFolder/grass.png",

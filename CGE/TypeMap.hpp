@@ -15,13 +15,12 @@ class TypeMap
 {
 	struct Function
 	{
-		template < typename Return, typename... Args >
-		Function( Return( *a_Function )( Args... ) )
+		Function( void* a_Function )
 			: m_Function( a_Function )
 		{ }
 
 		template < typename Return, typename... Args >
-		Return Invoke( Args... a_Args )
+		Return Invoke( Args&&... a_Args )
 		{
 			return static_cast< Return( * )( Args... ) >( m_Function )( std::forward< Args >( a_Args )... );
 		}
@@ -35,8 +34,7 @@ class TypeMap
 	{
 		Node( const TypeInfo& a_TypeInfo )
 			: m_TypeInfo( a_TypeInfo )
-		{
-		}
+		{ }
 
 		const TypeInfo& m_TypeInfo;
 		std::vector< Node* > m_Children;
@@ -207,9 +205,6 @@ public:
 	template < typename This, typename Base = void >
 	bool RegisterType()
 	{
-		auto type1 = typeid( This ).name();
-		auto type2 = typeid( Base ).name();
-
 		auto Found = m_Nodes.find( typeid( This ).hash_code() );
 
 		if ( Found == m_Nodes.end() )
@@ -247,9 +242,6 @@ public:
 		using First = typename Tuple::_This_type;
 		using Base = typename Tuple::_Mybase;
 
-		auto first = typeid( First ).name();
-		auto base = typeid( Base ).name();
-
 		if constexpr ( std::is_same_v< Base, std::tuple<> > )
 		{
 			return RegisterType< First >();
@@ -278,7 +270,7 @@ public:
 	}
 
 	template < typename Return, typename... Args >
-	inline bool InvokeFunction( size_t a_HashCode, Hash a_Name, Return& a_Return, Args... a_Args )
+	inline bool InvokeFunction( size_t a_HashCode, Hash a_Name, Return& a_Return, Args&&... a_Args )
 	{
 		auto Found = m_Nodes.find( a_HashCode );
 
@@ -288,7 +280,7 @@ public:
 
 			if ( FoundFunction != Found->second.m_FunctionTable.end() )
 			{
-				a_Return = FoundFunction->second.Invoke< Return, Args... >( std::forward< Args >( a_Args )... );
+				a_Return = FoundFunction->second.Invoke< Return >( std::forward< Args >( a_Args )... );
 				return true;
 			}
 		}

@@ -2,13 +2,7 @@
 #include "Component.hpp"
 #include "Math.hpp"
 
-template < typename T >
-class ILight;
-
-typedef ILight< void > Light;
-
-template < typename T >
-class ILight : public IComponent< ILight< T > >
+DefineComponent( Light, Component )
 {
 public:
 

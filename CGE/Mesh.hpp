@@ -11,6 +11,8 @@ public:
 
 	Mesh()
 		: m_Outermost( size_t( -1 ) )
+		, m_ActiveColourChannel( 0 )
+		, m_ActiveTexelChannel( 0 )
 	{ }
 
 	void GetVertex( size_t a_Index, Vertex& o_Vertex ) const
@@ -18,12 +20,12 @@ public:
 		uint32_t Index = m_Indices[ a_Index ];
 		o_Vertex = 
 		{
-			m_Colours   [ Index ],
+			m_Colours[ m_ActiveColourChannel ][ Index ],
+			m_Texels [ m_ActiveTexelChannel  ][ Index ],
 			m_Positions [ Index ],
 			m_Normals   [ Index ],
 			m_Tangents  [ Index ],
-			m_Bitangents[ Index ],
-			m_Texels    [ Index ]
+			m_Bitangents[ Index ]
 		};
 	}
 
@@ -68,9 +70,9 @@ public:
 		return m_Indices.data();
 	}
 
-	inline const Vector4* GetColours() const
+	inline const Vector4* GetColours( uint32_t a_Channel = 0 ) const
 	{
-		return m_Colours.data();
+		return m_Colours[ a_Channel ].data();
 	}
 
 	inline const Vector3* GetPositions() const
@@ -93,14 +95,14 @@ public:
 		return m_Bitangents.data();
 	}
 
-	inline const Vector2* GetTexels() const
+	inline const Vector2* GetTexels( uint32_t a_Channel = 0 ) const
 	{
-		return m_Texels.data();
+		return m_Texels[ a_Channel ].data();
 	}
 
-	inline bool HasColours() const
+	inline bool HasColours( uint32_t a_Channel = 0 ) const
 	{
-		return !m_Colours.empty();
+		return !m_Colours[ a_Channel ].empty();
 	}
 
 	inline bool HasPositions() const
@@ -123,9 +125,9 @@ public:
 		return !m_Bitangents.empty();
 	}
 
-	inline bool HasTexels() const
+	inline bool HasTexels( uint32_t a_Channel = 0 ) const
 	{
-		return !m_Texels.empty();
+		return !m_Texels[ a_Channel ].empty();
 	}
 
 //private:
@@ -133,33 +135,53 @@ public:
 	friend class ResourcePackager;
 	friend class Serialization;
 
-	template < typename T >
-	void Serialize( T& a_Serializer ) const
+	template < typename _Serializer >
+	void Serialize( _Serializer& a_Serializer ) const
 	{
 		a_Serializer << *static_cast< const Resource* >( this );
-		a_Serializer << m_Indices << m_Colours << m_Positions << m_Normals << m_Tangents << m_Bitangents << m_Texels;
+		a_Serializer << m_Indices;
+		a_Serializer << m_Colours;
+		a_Serializer << m_Positions;
+		a_Serializer << m_Normals;
+		a_Serializer << m_Tangents;
+		a_Serializer << m_Bitangents;
+		a_Serializer << m_Texels;
 	}
 
-	template < typename T >
-	void Deserialize( T& a_Deserializer )
+	template < typename _Deserializer >
+	void Deserialize( _Deserializer& a_Deserializer )
 	{
 		a_Deserializer >> *static_cast< Resource* >( this );
-		a_Deserializer >> m_Indices >> m_Colours >> m_Positions >> m_Normals >> m_Tangents >> m_Bitangents >> m_Texels;
+		a_Deserializer >> m_Indices;
+		a_Deserializer >> m_Colours;
+		a_Deserializer >> m_Positions;
+		a_Deserializer >> m_Normals;
+		a_Deserializer >> m_Tangents;
+		a_Deserializer >> m_Bitangents;
+		a_Deserializer >> m_Texels;
 	}
 
-	template < typename T >
-	void SizeOf( T& a_Sizer ) const
+	template < typename _Sizer >
+	void SizeOf( _Sizer& a_Sizer ) const
 	{
 		a_Sizer & *static_cast< const Resource* >( this );
-		a_Sizer & m_Indices & m_Colours & m_Positions & m_Normals & m_Tangents & m_Bitangents & m_Texels;
+		a_Sizer & m_Indices;
+		a_Sizer & m_Colours;
+		a_Sizer & m_Positions;
+		a_Sizer & m_Normals;
+		a_Sizer & m_Tangents;
+		a_Sizer & m_Bitangents;
+		a_Sizer & m_Texels;
 	}
 
-	std::vector< uint32_t > m_Indices;
-	std::vector< Vector4  > m_Colours;
-	std::vector< Vector3  > m_Positions;
-	std::vector< Vector3  > m_Normals;
-	std::vector< Vector3  > m_Tangents;
-	std::vector< Vector3  > m_Bitangents;
-	std::vector< Vector2  > m_Texels;
-	uint32_t                m_Outermost;
+	std::vector< uint32_t >                 m_Indices;
+	std::vector< Vector3  >                 m_Positions;
+	std::vector< Vector3  >                 m_Normals;
+	std::vector< Vector3  >                 m_Tangents;
+	std::vector< Vector3  >                 m_Bitangents;
+	std::array< std::vector< Vector2 >, 8 > m_Texels;
+	std::array< std::vector< Vector4 >, 8 > m_Colours;
+	uint32_t                                m_Outermost;
+	uint32_t                                m_ActiveColourChannel;
+	uint32_t                                m_ActiveTexelChannel;
 };

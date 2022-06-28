@@ -22,19 +22,10 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ECS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="File.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderPipeline.hpp">
@@ -52,9 +43,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="PixelColourMap.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Primitive.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ScreenBuffer.hpp">
@@ -114,9 +102,6 @@
     <ClInclude Include="TypeMap.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ECS.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="MeshRenderer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -139,12 +124,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Material.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TypeMapNew.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tree.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="CGE.hpp">
@@ -188,6 +167,15 @@
     </ClInclude>
     <ClInclude Include="Shader.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefab.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeMapNew.hpp">
+      <Filter>Source Files\WIP</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.hpp">
+      <Filter>Source Files\WIP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

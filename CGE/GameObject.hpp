@@ -1,69 +1,50 @@
 #pragma once
-#include "ECS.hpp"
+#include "Component.hpp"
 #include "Transform.hpp"
 #include "Alias.hpp"
+#include "Name.hpp"
 
 typedef uint32_t GameObjectID;
-typedef uint32_t Hash;
-struct Name;
 
 class GameObject
 {
 public:
 
-	inline bool IsValid() const
+	static GameObject Instantiate()
 	{
-		return m_ID == static_cast< GameObjectID >( -1 );
+		entt::entity NewEntity = ComponentBase::GetRegistry().create();
+		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
+		NewGameObject.AddComponent< Alias >();
+		NewGameObject.AddComponent< Transform >();
+		return NewGameObject;
 	}
 
-	template < typename T >
-	inline T* AddComponent()
+	static GameObject Instantiate( const Name& a_Name )
 	{
-		return ECS::AddComponent< T >( m_ID );
+		entt::entity NewEntity = ComponentBase::GetRegistry().create();
+		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
+		NewGameObject.AddComponent< Alias >()->SetName( a_Name );
+		NewGameObject.AddComponent< Transform >();
+		return NewGameObject;
 	}
 
-	template < typename T >
-	inline T* GetComponent()
+	/*static GameObject Instantiate( GameObject a_Parent )
 	{
-		return ECS::GetComponent< T >( m_ID );
+		entt::entity NewEntity = ComponentBase::GetRegistry().create();
+		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
+		NewGameObject.AddComponent< Alias >();
+		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent );
+		return NewGameObject;
 	}
 
-	template < typename T >
-	inline const T* GetComponent() const
+	static GameObject Instantiate( const Name& a_Name, GameObject a_Parent )
 	{
-		return ECS::GetComponentConst< T >( m_ID );
-	}
-
-	inline Alias* GetAlias()
-	{
-		return ECS::GetExactComponent< Alias >( m_ID );
-	}
-
-	inline const Alias* GetAlias() const
-	{
-		return ECS::GetExactComponent< const Alias >( m_ID );
-	}
-
-	inline Transform* GetTransform()
-	{
-		return ECS::GetExactComponent< Transform >( m_ID );
-	}
-
-	inline const Transform* GetTransform() const
-	{
-		return ECS::GetExactComponent< const Transform >( m_ID );
-	}
-
-	template < typename T >
-	inline bool DestroyComponent()
-	{
-		return ECS::DestroyComponent< T >();
-	}
-
-	inline GameObjectID GetID() const
-	{
-		return m_ID;
-	}
+		entt::entity NewEntity = ComponentBase::GetRegistry().create();
+		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
+		NewGameObject.AddComponent< Alias >()->SetName( a_Name );
+		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent );
+		return NewGameObject;
+	}*/
 
 	inline static GameObject FindByID( GameObjectID a_GameObjectID )
 	{
@@ -75,42 +56,85 @@ public:
 		return GameObject::FindByID( Alias::FindByName( a_Name ) );
 	}
 
-	inline static GameObject Instantiate()
+	inline static void Destroy( GameObjectID a_GameObjectID )
 	{
-		return FindByID( ECS::Instantiate() );
+		// Implementation
 	}
 
-	inline static GameObject Instantiate( GameObject a_Parent )
+	inline bool IsValid() const
 	{
-		return FindByID( ECS::Instantiate( reinterpret_cast< GameObjectID&& >( a_Parent ) ) );
+		return m_ID == static_cast< GameObjectID >( -1 );
 	}
 
-	inline static GameObject Instantiate( const Name& a_Name )
+	template < typename T >
+	inline T* AddComponent()
 	{
-		return FindByID( ECS::Instantiate( a_Name ) );
+		return Component::AddComponent< T >( m_ID );
 	}
 
-	inline static GameObject Instantiate( const Name& a_Name, GameObject a_Parent )
+	template < typename T >
+	inline T* GetComponent()
 	{
-		return FindByID( ECS::Instantiate( a_Name, reinterpret_cast< GameObjectID&& >( a_Parent ) ) );
+		return Component::GetComponent< T >( m_ID );
 	}
 
-	inline static GameObject Destroy( GameObject a_GameObject )
+	template < typename T >
+	inline const T* GetComponent() const
 	{
-		// implementation
+		return Component::GetComponent< T >( m_ID );
 	}
 
-	operator GameObjectID()
+	template < typename T >
+	inline T* GetExactComponent()
+	{
+		return Component::GetExactComponent< T >( m_ID );
+	}
+
+	template < typename T >
+	inline const T* GetExactComponent() const
+	{
+		return Component::GetExactComponent< T >( m_ID );
+	}
+
+	template < typename T >
+	inline bool DestroyComponent()
+	{
+		return Component::DestroyComponent< T >( m_ID );
+	}
+
+	inline Transform* GetTransform()
+	{
+		return Component::GetExactComponent< Transform >( m_ID );
+	}
+
+	inline const Transform* GetTransform() const
+	{
+		return Component::GetExactComponent< Transform >( m_ID );
+	}
+
+	inline Alias* GetAlias()
+	{
+		return Component::GetExactComponent< Alias >( m_ID );
+	}
+
+	inline const Alias* GetAlias() const
+	{
+		return Component::GetExactComponent< Alias >( m_ID );
+	}
+
+	inline GameObjectID GetID() const
 	{
 		return m_ID;
 	}
 
-	operator GameObjectID const() const
+	operator GameObjectID() const
 	{
 		return m_ID;
 	}
 
 private:
+
+	friend class ComponentBase;
 
 	GameObjectID m_ID;
 };

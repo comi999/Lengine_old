@@ -89,26 +89,26 @@ private:
 
     friend class Serialization;
 
-    template < typename T >
-    void Serialize( T& a_Serializer ) const
+    template < typename _Serializer >
+    void Serialize( _Serializer& a_Serializer ) const
     {
         a_Serializer << m_Hash << m_Length;
-        a_Serializer.Stream().Write( m_String, sizeof( const char ) * m_Length );
+        a_Serializer.Stream().Write( m_String, sizeof( char ) * m_Length );
     }
 
-    template < typename T >
-    void Deserialize( T& a_Deserializer )
+    template < typename _Deserializer >
+    void Deserialize( _Deserializer& a_Deserializer )
     {
         a_Deserializer >> m_Hash >> m_Length;
         s_NameStorage.emplace_back();
         auto& String = s_NameStorage.back();
         String.resize( m_Length );
-        a_Deserializer.Stream().Read( String.data(), sizeof( const char ) * m_Length );
+        a_Deserializer.Stream().Read( String.data(), sizeof( char ) * m_Length );
         m_String = String.data();
     }
 
-    template < typename T >
-    void SizeOf( T& a_Sizer ) const
+    template < typename _Sizer >
+    void SizeOf( _Sizer& a_Sizer ) const
     {
         a_Sizer & m_Hash & m_Length += sizeof( const char ) * m_Length;
     }

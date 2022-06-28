@@ -1,9 +1,6 @@
 #include "Texture.hpp"
 #include "Mesh.hpp"
-#include "Primitive.hpp"
-#include "entt/entt.hpp"
 #include "Input.hpp"
-#include "Component.hpp"
 #include "Light.hpp"
 #include "MeshRenderer.hpp"
 #include "Transform.hpp"
@@ -14,6 +11,8 @@
 #include "ConsoleWindow.hpp"
 #include "Rendering.hpp"
 #include "Math.hpp"
+#include "CGE.hpp"
+#include "Prefab.hpp"
 
 // Basic shaders
 DefineShader( Basic_Vertex )
@@ -195,7 +194,7 @@ void RunCubeDemo()
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Texels.size() * sizeof( Vector2 ), grass->m_Texels.data(), DataUsage::DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, grass->m_Texels[0].size() * sizeof( Vector2 ), grass->m_Texels[0].data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
@@ -396,7 +395,7 @@ void RunLitSpearDemo()
 
 	// Bind texels
 	Rendering::BindBuffer( BufferTarget::ARRAY_BUFFER, vbo[ 1 ] );
-	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Texels.size() * sizeof( spear->m_Texels[ 0 ] ), spear->m_Texels.data(), DataUsage::DRAW );
+	Rendering::BufferData( BufferTarget::ARRAY_BUFFER, spear->m_Texels[0].size() * sizeof( spear->m_Texels[ 0 ] ), spear->m_Texels[0].data(), DataUsage::DRAW );
 	Rendering::VertexAttribPointer( 1, 2, DataType::FLOAT, false, 2 * sizeof( float ), ( void* )0 );
 	Rendering::EnableVertexAttribArray( 1 );
 
@@ -664,13 +663,9 @@ void RunNewRendererTest()
 	auto Window = ConsoleWindow::Create( "Title goes here.", { 64, 64 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( Window );
 	CGE::Init();
-	auto grass_model = Resource::Load< Mesh >( "grass"_H );
-	auto grass_mat = Material();
 
-	GameObject GrassBlock = GameObject::Instantiate();
-	MeshRenderer* Renderer = GrassBlock.AddComponent< MeshRenderer >();
-	Renderer->SetMesh( &grass_model.get() );
-	Renderer->SetMaterial( &grass_mat );
+	auto grass_prefab = Resource::Load< Prefab >( "grass_prefab"_H );
+	GameObject grass_object = Prefab::Instantiate( *grass_prefab );
 	
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
@@ -683,9 +678,11 @@ void RunNewRendererTest()
 	Camera::SetMainCamera( CameraComponent );
 	CameraObject.GetTransform()->SetGlobalPositionZ( -5.0f );
 
+	auto renderers = Component::GetComponents< Renderer >();
+
 	CGE::Run( [&]()
 	{
-		GrassBlock.GetTransform()->RotateGlobal( Quaternion::ToQuaternion( Vector3( 0.1f, .0f, .0f ) ) );
+		grass_object.GetTransform()->RotateGlobal( Quaternion::ToQuaternion( Vector3( 0.1f, .0f, .0f ) ) );
 	} );
 }
 

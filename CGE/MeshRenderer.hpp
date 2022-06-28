@@ -14,19 +14,18 @@
 #include "Rect.hpp"
 #include "Frustum.hpp"
 
-template < typename T >
-class IMeshRenderer;
-
-typedef IMeshRenderer< void > MeshRenderer;
-
-template < typename T >
-class IMeshRenderer : public IRenderer< IMeshRenderer< T > >
+DefineComponent( MeshRenderer, Renderer )
 {
 public:
-
-	void OnDraw( RenderQueue& a_Queue ) const override
+	
+	void OnRender( RenderQueue& a_Queue ) const override
 	{
-		if ( !Camera::GetMainCamera() || !m_Mesh || !m_Material )
+		if ( !Camera::GetMainCamera() )
+		{
+			return;
+		}
+
+		if ( !m_Mesh.Assure() || !m_Material.Assure() )
 		{
 			return;
 		}
@@ -53,12 +52,12 @@ public:
 		RenderInstruction Instruction;
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Mesh;
-		Instruction.Source = m_Mesh;
+		Instruction.Source = m_Mesh.Assure();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Material;
-		Instruction.Source = m_Material;
+		Instruction.Source = m_Material.Assure();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;
@@ -72,24 +71,39 @@ public:
 		a_Queue += Instruction;
 	}
 
-	void SetMesh( const Mesh* a_Mesh )
+	void SetMesh( ResourceHandle< Mesh > a_Mesh )
 	{
 		m_Mesh = a_Mesh;
 	}
 
-	void SetMaterial( const Material* a_Material )
+	void SetMaterial( ResourceHandle< Material > a_Material )
 	{
 		m_Material = a_Material;
 	}
 
-	void SetRenderMode( RenderMode a_RenderMode )
-	{
-		m_RenderMode = a_RenderMode;
-	}
-
 private:
 
-	const Mesh*       m_Mesh;
-	const Material*   m_Material;
-	RenderMode        m_RenderMode; // unused at the moment.
+	friend class ResourcePackager;
+	friend class Serialization;
+
+	template < typename _Serializer >
+	void Serialize( _Serializer& a_Serializer ) const
+	{
+		a_Serializer << m_Mesh << m_Material;
+	}
+
+	template < typename _Deserializer >
+	void Deserialize( _Deserializer& a_Deserializer )
+	{
+		a_Deserializer >> m_Mesh >> m_Material;
+	}
+
+	template < typename _Sizer >
+	void SizeOf( _Sizer& a_Sizer ) const
+	{
+		a_Sizer & m_Mesh & m_Material;
+	}
+
+	ResourceHandle< Mesh     > m_Mesh;
+	ResourceHandle< Material > m_Material;
 };

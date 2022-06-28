@@ -5,7 +5,6 @@
 #include "Delegate.hpp"
 #include "Input.hpp"
 #include "Time.hpp"
-#include "ECS.hpp"
 #include "RenderPipeline.hpp"
 
 class CGE

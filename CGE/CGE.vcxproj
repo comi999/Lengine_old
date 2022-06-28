@@ -162,15 +162,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CGE.cpp" />
     <ClCompile Include="Colour.cpp" />
-    <ClCompile Include="ECS.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="PixelColourMap.cpp" />
-    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -185,7 +182,6 @@
     <ClInclude Include="ConsoleColour.hpp" />
     <ClInclude Include="ConsoleWindow.hpp" />
     <ClInclude Include="Delegate.hpp" />
-    <ClInclude Include="ECS.hpp" />
     <ClInclude Include="entt\entt.hpp" />
     <ClInclude Include="entt\fwd.hpp" />
     <ClInclude Include="Frustum.hpp" />
@@ -193,6 +189,7 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="File.hpp" />
+    <ClInclude Include="Prefab.hpp" />
     <ClInclude Include="Rendering.hpp" />
     <ClInclude Include="Hash.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -208,7 +205,6 @@
     <ClInclude Include="Name.hpp" />
     <ClInclude Include="PixelColourMap.hpp" />
     <ClInclude Include="Pixel.hpp" />
-    <ClInclude Include="Primitive.hpp" />
     <ClCompile Include="Rect.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClCompile Include="RenderPipeline.hpp" />
