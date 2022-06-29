@@ -40,7 +40,7 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 	Directory TempDirectory =
 		ThisDir.ContainsDirectory( "Temp" ) ?
 		ThisDir.GetDirectory( "Temp" ) :
-		ThisDir.CreateDirectory( "Temp" );
+		ThisDir.NewDirectory( "Temp" );
 
 	//std::vector< std::pair< std::string, size_t > > ResourceHeader;
 	std::vector< std::pair< Name, size_t > > ResourceHeader;
@@ -82,10 +82,10 @@ bool ResourcePackager::BuildPackage( const Directory& a_OutputDirectory ) const
 	// Compile into a Resource Package.
 	if ( a_OutputDirectory.ContainsFile( "resource.package" ) )
 	{
-		a_OutputDirectory.DeleteFile( "resource.package" );
+		a_OutputDirectory.DestroyFile( "resource.package" );
 	}
 
-	File PackageFile = a_OutputDirectory.CreateFile( "resource.package", HeaderSize + ResourcesSize );
+	File PackageFile = a_OutputDirectory.NewFile( "resource.package", HeaderSize + ResourcesSize );
 	
 	if ( !PackageFile.Open() )
 	{

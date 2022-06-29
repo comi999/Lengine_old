@@ -34,13 +34,13 @@ private:
 
 		if ( a_TempDirectory.ContainsFile( a_TempFile.c_str() ) )
 		{
-			a_TempDirectory.DeleteFile( a_TempFile.c_str() );
+			a_TempDirectory.DestroyFile( a_TempFile.c_str() );
 		}
 
 		std::string TypeString( typeid( T ).name() );
 		size_t ResourceSize = Serialization::GetSizeOf( TypeString );
 		ResourceSize += Serialization::GetSizeOf( Resource );
-		auto OutputFile = a_TempDirectory.CreateFile( a_TempFile.c_str(), ResourceSize );
+		auto OutputFile = a_TempDirectory.NewFile( a_TempFile.c_str(), ResourceSize );
 
 		if ( !OutputFile.Open() )
 		{
