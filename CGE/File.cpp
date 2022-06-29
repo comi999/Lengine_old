@@ -1,5 +1,7 @@
 #include "File.hpp"
+
 #include <filesystem>
+#undef DestroyFile
 
 // Path...
 Path::Path()
@@ -296,7 +298,8 @@ Directory& Directory::operator =( const Path& a_Path )
 
 Directory& Directory::operator =( const Directory& a_Path )
 {
-	return *this = a_Path;
+	*this->m_Path = *a_Path.m_Path;
+	return *this;
 }
 
 Directory& Directory::operator /=( const char* a_Append )
@@ -542,7 +545,7 @@ bool DirectoryIterator::operator!=( const DirectoryIterator& a_Iterator ) const
 
 DirectoryIterator::operator bool () const
 {
-	return *m_Underlying == *m_End;
+	return *m_Underlying != *m_End;
 }
 
 DirectoryIterator::operator Path () const

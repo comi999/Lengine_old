@@ -4,22 +4,22 @@
 #include "Colour.hpp"
 #include "Resource.hpp"
 
-enum class TextureType
-{
-	NONE = 0x0,
-	DIFFUSE = 0x1,
-	SPECULAR = 0x2,
-	AMBIENT = 0x3,
-	EMISSIVE = 0x4,
-	HEIGHT = 0x5,
-	NORMALS = 0x6,
-	SHININESS = 0x7,
-	OPACITY = 0x8,
-	DISPLACEMENT = 0x9,
-	LIGHTMAP = 0xA,
-	REFLECTION = 0xB,
-	UNKNOWN = 0xC
-};
+//enum class TextureType
+//{
+//	NONE = 0x0,
+//	DIFFUSE = 0x1,
+//	SPECULAR = 0x2,
+//	AMBIENT = 0x3,
+//	EMISSIVE = 0x4,
+//	HEIGHT = 0x5,
+//	NORMALS = 0x6,
+//	SHININESS = 0x7,
+//	OPACITY = 0x8,
+//	DISPLACEMENT = 0x9,
+//	LIGHTMAP = 0xA,
+//	REFLECTION = 0xB,
+//	UNKNOWN = 0xC
+//};
 
 class Texture2D : public Resource
 {

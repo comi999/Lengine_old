@@ -5,13 +5,7 @@
 #include "GameObject.hpp"
 #include "Transform.hpp"
 
-template < typename T >
-class ICamera;
-
-typedef ICamera< void > Camera;
-
-template < typename T >
-class ICamera : public IComponent< ICamera< T > >
+DefineComponent( Camera, Component )
 {
 public:
 
@@ -100,5 +94,5 @@ private:
 	float   m_FarZ;
 	bool    m_Dirty;
 
-	static const Camera* s_MainCamera;
+	inline static const Camera* s_MainCamera = nullptr;
 };

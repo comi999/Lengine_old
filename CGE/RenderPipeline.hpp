@@ -1,6 +1,6 @@
 #pragma once
 #include <list>
-#include "ECS.hpp"
+#include "Component.hpp"
 #include "Mesh.hpp"
 #include "Frustum.hpp"
 #include "Renderer.hpp"
@@ -19,12 +19,12 @@ private:
 	static void Tick()
 	{
 		// Collect all instructions.
-		auto Renderers = ECS::GetComponents< Renderer >();
+		auto Renderers = Component::GetComponents< Renderer >();
 		RenderQueue Queue;
 
 		for ( auto Renderer : Renderers )
 		{
-			Renderer->OnDraw( Queue );
+			Renderer->OnRender( Queue );
 		}
 
 		// Sort all render instructions

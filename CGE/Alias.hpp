@@ -2,13 +2,7 @@
 #include "Component.hpp"
 #include "Name.hpp"
 
-template < typename T >
-class IAlias;
-
-typedef IAlias< void > Alias;
-
-template < typename T >
-class IAlias : public IComponent< Alias >
+DefineComponent( Alias, Component )
 {
 public:
 
@@ -19,17 +13,40 @@ public:
 
 	void SetName( const Name& a_Name )
 	{
-		//implement
+		m_Name = a_Name;
 	}
 
 private:
 
 	static GameObjectID FindByName( Hash a_Name )
 	{
+		// Implementation required
 		return GameObjectID( -1 );
 	}
 
 	friend class GameObject;
+	friend class ResourcePackager;
+	friend class Serialization;
+	friend class Prefab;
+
+	template < typename _Serializer >
+	void Serialize( _Serializer& a_Serializer ) const
+	{
+		a_Serializer << m_Name;
+	}
+
+	template < typename _Deserializer >
+	void Deserialize( _Deserializer& a_Deserializer )
+	{
+		a_Deserializer >> m_Name;
+	}
+
+	template < typename _Sizer >
+	void SizeOf( _Sizer& a_Sizer ) const
+	{
+		a_Sizer & m_Name;
+	}
+
 
 	Name m_Name;
 	bool m_ToDestroy;

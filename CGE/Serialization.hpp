@@ -396,32 +396,20 @@ public:
 		, m_Size( 0 )
 	{ }
 
-	BufferStream( size_t a_Size )
-		: m_Data( ( uint8_t* )malloc( a_Size ) )
-		, m_Head( m_Data )
-		, m_Size( a_Size )
-	{ }
-
-	~BufferStream()
-	{
-		Close();
-	}
-
-	void Open( size_t a_Size )
+	void Open( void* a_Data, size_t a_Size )
 	{
 		if ( m_Data )
 		{
 			Close();
 		}
 
-		m_Data = ( uint8_t* )malloc( a_Size );
+		m_Data = ( uint8_t* )a_Data;
 		m_Head = m_Data;
 		m_Size = a_Size;
 	}
 
 	void Close()
 	{
-		delete[] m_Data;
 		m_Data = nullptr;
 		m_Head = nullptr;
 		m_Size = 0;
@@ -442,6 +430,11 @@ public:
 	inline void Seek( size_t a_Position )
 	{
 		m_Head = m_Data + a_Position;
+	}
+
+	inline size_t Tell() const
+	{
+		return m_Head - m_Data;
 	}
 
 	inline bool End() const
