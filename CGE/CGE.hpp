@@ -5,6 +5,7 @@
 #include "Delegate.hpp"
 #include "Input.hpp"
 #include "Time.hpp"
+#include "Scene.hpp"
 #include "RenderPipeline.hpp"
 
 class CGE
@@ -29,9 +30,10 @@ public:
             a_Action.Invoke();
 
             // Update calls.
-            RenderPipeline::Tick();
+            Scene::Tick();
             Input::Tick();
             Time::Tick();
+            RenderPipeline::Tick();
             
             ConsoleWindow::SwapBuffers( ConsoleWindow::GetCurrentContext() );
         }

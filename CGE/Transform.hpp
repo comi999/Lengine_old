@@ -712,6 +712,7 @@ private:
 	friend class ResourcePackager;
 	friend class Serialization;
 	friend class Prefab;
+	friend class Scene;
 
 	template < typename _Serializer >
 	void Serialize( _Serializer& a_Serializer ) const

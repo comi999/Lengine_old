@@ -43,17 +43,22 @@ private:
 namespace Internal
 {
 	template < typename T >
-	struct RegisterComponent
+	constexpr int ForceInitialization()
 	{
-		inline static std::vector< T > Component;
-	};
+		static std::vector< T > Static;
+		return 0;
+	}
+
+	template < Hash _Hash >
+	int ComponentHash;
 };
 
 #define DefineComponent( Name, Base ) \
 template < typename T > \
 class I##Name; \
 typedef I##Name< void > ##Name; \
-Internal::RegisterComponent< Name##* > a##Name; \
+template <> \
+int Internal::ComponentHash< #Name##_H > = Internal::ForceInitialization< ##Name##* >(); \
 template < typename T > \
 class I##Name : public I##Base< I##Name< T > >
 
