@@ -19,7 +19,7 @@ public:
 		, m_Size( 0 )
 		, m_Type( Type::INT )
 		, m_Data( nullptr )
-		, m_Location( 0 )
+		, m_Location( -1 )
 	{ }
 
 	~MaterialProperty()
@@ -266,6 +266,56 @@ private:
 	int32_t m_Location;
 };
 
+class TextureProperty
+{
+public:
+
+	TextureProperty()
+		: m_Name()
+		, m_Resource{}
+		, m_Handle( 0 )
+		, m_Location( -1 )
+	{ }
+
+	const Name& GetName() const
+	{
+		return m_Name;
+	}
+
+	void SetName( const Name& a_Name )
+	{
+		m_Name = a_Name;
+	}
+
+private:
+
+	friend class Serialization;
+	friend class Material;
+
+	template < typename T >
+	void Serialize( T& a_Serializer ) const
+	{
+		a_Serializer << m_Name << m_Resource;
+	}
+
+	template < typename T >
+	void Deserialize( T& a_Deserializer )
+	{
+		a_Deserializer >> m_Name >> m_Resource;
+	}
+
+	template < typename T >
+	void SizeOf( T& a_Sizer ) const
+	{
+		a_Sizer & m_Name & m_Resource;
+	}
+
+	Name                        m_Name;
+	ResourceHandle< Texture2D > m_Resource;
+	TextureHandle               m_Handle;
+	int32_t                     m_Location;
+};
+
 class Material : public Resource
 {
 public:
@@ -335,15 +385,24 @@ public:
 		return m_Attributes.find( a_Key ) != m_Attributes.end();
 	}
 
-	void AddTexture( Hash a_Key, ResourceHandle< Texture2D > a_Texture )
+	void AddTexture( const Name& a_Key, ResourceHandle< Texture2D > a_Texture )
 	{
-		m_Textures[ a_Key ] = a_Texture;
+		auto& NewProperty = m_Textures[ a_Key ];
+		NewProperty.m_Name = a_Key;
+		NewProperty.m_Resource = a_Texture;
+
+		if ( !m_Shader->GetProgramHandle() )
+		{
+			return;
+		}
+
+		NewProperty.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), a_Key.Data() );
 	}
 
 	ResourceHandle< Texture2D > GetTexture( Hash a_Key )
 	{
 		auto Iter = m_Textures.find( a_Key );
-		return Iter != m_Textures.end() ? Iter->second : ResourceHandle< Texture2D >{};
+		return Iter != m_Textures.end() ? Iter->second.m_Resource : ResourceHandle< Texture2D >{};
 	}
 
 	bool SetTexture( Hash a_Key, ResourceHandle< Texture2D > a_Texture )
@@ -352,7 +411,7 @@ public:
 
 		if ( Iter != m_Textures.end() )
 		{
-			Iter->second = a_Texture;
+			Iter->second.m_Resource = a_Texture;
 			return true;
 		}
 
@@ -382,10 +441,9 @@ public:
 		return m_Shader ? *m_Shader : Shader::Default;
 	}
 
-	void SetShader( Shader& a_Shader )
+	void SetShader( const Shader& a_Shader )
 	{
-		m_Shader = &a_Shader;
-		FindLocations();		
+		m_Shader = &a_Shader;		
 	}
 
 private:
@@ -399,8 +457,9 @@ private:
 	{
 		if ( !m_Shader->GetProgramHandle() )
 		{
-			const_cast< Material* >( this )->m_Shader->Compile();
+			const_cast< Shader* >( const_cast< Material* >( this )->m_Shader )->Compile();
 			const_cast< Material* >( this )->FindLocations();
+			Rendering::UseProgram( GetShader().GetProgramHandle() );
 		}
 
 		for ( auto Begin = m_Attributes.begin(), End = m_Attributes.end(); Begin != End; ++Begin )
@@ -431,11 +490,39 @@ private:
 				}
 			}
 		}
+
+		for ( auto 
+			  Begin = const_cast< Material* >( this )->m_Textures.begin(), 
+			  End = const_cast< Material* >( this )->m_Textures.end(); 
+			  Begin !=  End; ++Begin )
+		{
+			if ( Begin->second.m_Location < 0 )
+			{
+				continue;
+			}
+
+			if ( !Begin->second.m_Handle )
+			{
+				Rendering::GenTextures( 1, &Begin->second.m_Handle );
+				Rendering::ActiveTexture( 0 );
+				Rendering::BindTexture( TextureTarget::TEXTURE_2D, Begin->second.m_Handle );
+				Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), Begin->second.m_Resource.Assure()->GetWidth(), Begin->second.m_Resource.Assure()->GetHeight(), 0, TextureFormat( 0 ), TextureSetting( 0 ), Begin->second.m_Resource.Assure()->GetData() );
+			}
+
+			Rendering::Uniform1i( Begin->second.m_Location, 0 );
+		}
 	}
+
+	// There should be an unapply function too to free all texture handles etc.
 
 	void FindLocations()
 	{
 		for ( auto Begin = m_Attributes.begin(), End = m_Attributes.end(); Begin != End; ++Begin )
+		{
+			Begin->second.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), Begin->second.GetName().Data() );
+		}
+
+		for ( auto Begin = m_Textures.begin(), End = m_Textures.end(); Begin != End; ++Begin )
 		{
 			Begin->second.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), Begin->second.GetName().Data() );
 		}
@@ -462,65 +549,7 @@ private:
 		a_Sizer & m_Attributes & m_Textures;
 	}
 
-	Shader*                                       m_Shader;
-	std::map< Hash, MaterialProperty >            m_Attributes;
-	std::map< Hash, ResourceHandle< Texture2D > > m_Textures;
-};
-
-struct MaterialOld
-{
-	MaterialOld()
-	{
-		name;
-		Ns = 0.0f;
-		Ni = 0.0f;
-		d = 0.0f;
-		illum = 0;
-	}
-
-	// Material Name
-	std::string name;
-	// Ambient Color
-	Vector3 Ka;
-	// Diffuse Color
-	Vector3 Kd;
-	// Specular Color
-	Vector3 Ks;
-	// Specular Exponent
-	float Ns;
-	// Optical Density
-	float Ni;
-	// Dissolve
-	float d;
-	// Illumination
-	int illum;
-	// Ambient Texture Map
-	std::string map_Ka;
-	// Diffuse Texture Map
-	std::string map_Kd;
-	// Specular Texture Map
-	std::string map_Ks;
-	// Specular Hightlight Map
-	std::string map_Ns;
-	// Alpha Texture Map
-	std::string map_d;
-	// Bump Map
-	std::string map_bump;
-
-private:
-
-	friend class ResourcePackager;
-	friend class Serialization;
-
-	template < typename T >
-	void Deserializer( T& a_Deserializer )
-	{
-
-	}
-
-	template < typename T >
-	void SizeOf( T& a_Sizer ) const
-	{
-
-	}
+	const Shader*                      m_Shader;
+	std::map< Hash, MaterialProperty > m_Attributes;
+	std::map< Hash, TextureProperty  > m_Textures;
 };

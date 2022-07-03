@@ -670,9 +670,14 @@ void RunNewRendererTest()
 	auto grass_prefab = Resource::Load< Prefab >( "spear"_H );
 	GameObject grass_object = Prefab::Instantiate( *grass_prefab );
 
+
 	MeshRenderer* mesh_renderer = grass_object.GetComponentInChild< MeshRenderer >();
 	auto mat = mesh_renderer->GetMaterial().Assure();
 	auto mesh = mesh_renderer->GetMesh().Assure();
+
+	mat->SetShader( Shader::Diffuse );
+	grass_object.GetTransform()->SetGlobalPositionY( -2.0f );
+	//grass_object.GetTransform()->SetGlobalScale( Vector3::One * 0.01f );
 	
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
@@ -683,13 +688,13 @@ void RunNewRendererTest()
 	CameraComponent->SetNearZ( 0.1f );
 	CameraComponent->SetFarZ( 100.0f );
 	Camera::SetMainCamera( CameraComponent );
-	CameraObject.GetTransform()->SetGlobalPositionZ( -5.0f );
-
+	CameraObject.GetTransform()->SetGlobalPositionZ( -2.0f );
 	auto renderers = Component::GetComponents< Renderer >();
 
 	CGE::Run( [&]()
 	{
-		grass_object.GetTransform()->RotateGlobal( Quaternion::ToQuaternion( Vector3( 0.1f, .0f, .0f ) ) );
+		grass_object.GetTransform()->RotateGlobal( Quaternion::ToQuaternion( Vector3( 0.f, .1f, .0f ) ) );
+		grass_object.GetTransform()->ScaleGlobal( Vector3::One * 1.0001f );
 	} );
 }
 

@@ -9,17 +9,14 @@ class Shader : public Resource
 public:
 
 	Shader()
-		: Resource( "Shader_Default" )
-		, m_ShaderProgramHandle( 0 )
-		, m_VertexShaderSource( "Shader_Default_Vertex" )
-		, m_FragmentShaderSource( "Shader_Default_Fragment" )
+		: Shader( "Default"_N, "Vertex_Default", "Fragment_Default" )
 	{ }
 
 	Shader( const Name& a_Name, const std::string& a_VertexShaderSource, const std::string& a_FragmentShaderSource )
 		: Resource( a_Name )
 		, m_ShaderProgramHandle( 0 )
-		, m_VertexShaderSource( a_VertexShaderSource )
-		, m_FragmentShaderSource( a_FragmentShaderSource )
+		, m_VertexShaderSource( "Shader_" + a_VertexShaderSource )
+		, m_FragmentShaderSource( "Shader_" + a_FragmentShaderSource )
 	{ }
 
 	void SetSource( ShaderType a_ShaderType, const char* a_Source )
@@ -134,6 +131,9 @@ private:
 public:
 
 	static Shader Default;
+	static Shader Diffuse;
+	static Shader Specular;
+	static Shader Normals;
 	static Shader Phong;
 	// More lighting models.
 };

@@ -607,7 +607,7 @@ public:
 
 	template < typename _Type >
 	static typename _Type::Output Sample( _Type a_Sampler, const typename _Type::Input& a_Input )
-	{
+	{// This needs to be cleaned up.
 		auto Handle = s_TextureUnits[ a_Sampler.Location ][ ( uint32_t )_Type::Target ];
 		auto& Target = s_TextureRegistry[ Handle ];
 		auto& Dimensions = Target.Dimensions;

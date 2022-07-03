@@ -157,15 +157,15 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 
 			if ( !a_Entry.ResourceSource )
 			{
-				a_Entry.ResourceSource = Importer.ReadFile( a_Entry.ResourceFilePath,
-													aiPostProcessSteps::aiProcess_CalcTangentSpace |
-													aiPostProcessSteps::aiProcess_Triangulate |
-													aiPostProcessSteps::aiProcess_JoinIdenticalVertices |
-													aiPostProcessSteps::aiProcess_EmbedTextures |
-													aiPostProcessSteps::aiProcess_RemoveRedundantMaterials |
-													aiPostProcessSteps::aiProcess_FindInvalidData |
-													aiPostProcessSteps::aiProcess_FixInfacingNormals |
-													aiPostProcessSteps::aiProcess_MakeLeftHanded );
+				a_Entry.ResourceSource = Importer.ReadFile( 
+					a_Entry.ResourceFilePath,
+					aiPostProcessSteps::aiProcess_CalcTangentSpace |
+					aiPostProcessSteps::aiProcess_Triangulate |
+					aiPostProcessSteps::aiProcess_JoinIdenticalVertices |
+					aiPostProcessSteps::aiProcess_EmbedTextures |
+					aiPostProcessSteps::aiProcess_RemoveRedundantMaterials |
+					aiPostProcessSteps::aiProcess_FindInvalidData |
+					aiPostProcessSteps::aiProcess_FixInfacingNormals );
 				ThisScopeOwnsScene = true;
 			}
 
@@ -242,7 +242,7 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 					uint32_t Unnamed = 0;
 
 					// Load prefab.
-					static Action< const aiScene*, aiNode*, Prefab& > AttachMeshRenderers = [&]( const aiScene* a_Scene, aiNode* a_Node, Prefab& o_Prefab )
+					Action< const aiScene*, aiNode*, Prefab& > AttachMeshRenderers = [&]( const aiScene* a_Scene, aiNode* a_Node, Prefab& o_Prefab )
 					{
 						std::string ThisName = a_Entry.ResourceName + "_" + ( !a_Node->mName.length ? a_Node->mName.C_Str() : "child" + std::to_string( Unnamed++ ) );
 						o_Prefab.SetName( ThisName );
@@ -458,44 +458,44 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 					// Textures
 					static auto AddTextures = [&]( aiTextureType a_Type, const char* a_Name )
 					{
-						for ( uint32_t i = 0; i < ThisMaterialSource->GetTextureCount( a_Type ); ++i )
+						for ( uint32_t i = 0; i < Math::Min( ThisMaterialSource->GetTextureCount( a_Type ), 1u ); ++i )// i < ThisMaterialSource->GetTextureCount( a_Type ); ++i )
 						{
 							if ( aiString TexturePath; !ThisMaterialSource->Get( AI_MATKEY_TEXTURE( a_Type, i ), TexturePath ) )
 							{
 								ResourceEntry NewTexture;
 								NewTexture.ResourceIndex = ThisScene->GetEmbeddedTextureAndIndex( TexturePath.C_Str() ).second;
 								NewTexture.ResourceLoader = 1; /*ASSIMP*/
-								NewTexture.ResourceName = a_Entry.ResourceName + a_Name + std::to_string( i );
+								NewTexture.ResourceName = a_Entry.ResourceName + "_" + a_Name;// + std::to_string( i );
 								NewTexture.ResourceType = 4; /*TEXTURE*/
 								NewTexture.ResourceSource = a_Entry.ResourceSource;
 								ProcessResourceEntry( NewTexture, a_TempDirectory );
-								Hash NewTextureName = CRC32_RT( NewTexture.ResourceName.c_str() );
-								ThisMaterial.AddTexture( NewTextureName, { NewTextureName } );
+								Name NewTextureName = NewTexture.ResourceName;
+								ThisMaterial.AddTexture( Name( a_Name ), { NewTextureName } );
 							}
 						}
 					};
 
 					// Need to add the rest of the properties that aiMaterial contains.
-					AddTextures( aiTextureType::aiTextureType_AMBIENT, "_texture_ambient" );
-					AddTextures( aiTextureType::aiTextureType_AMBIENT_OCCLUSION, "_texture_ambient_occlusion" );
-					AddTextures( aiTextureType::aiTextureType_BASE_COLOR, "_texture_base_colour" );
-					AddTextures( aiTextureType::aiTextureType_CLEARCOAT, "_texture_clearcoat" );
-					AddTextures( aiTextureType::aiTextureType_DIFFUSE, "_texture_diffuse" );
-					AddTextures( aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS, "_texture_diffuse_roughness" );
-					AddTextures( aiTextureType::aiTextureType_DISPLACEMENT, "_texture_displacement" );
-					AddTextures( aiTextureType::aiTextureType_EMISSION_COLOR, "_texture_emission_colour" );
-					AddTextures( aiTextureType::aiTextureType_EMISSIVE, "_texture_emissive" );
-					AddTextures( aiTextureType::aiTextureType_HEIGHT, "_texture_height" );
-					AddTextures( aiTextureType::aiTextureType_LIGHTMAP, "_texture_lightmap" );
-					AddTextures( aiTextureType::aiTextureType_METALNESS, "_texture_metalness" );
-					AddTextures( aiTextureType::aiTextureType_NORMALS, "_texture_normal" );
-					AddTextures( aiTextureType::aiTextureType_NORMAL_CAMERA, "_texture_normal_camera" );
-					AddTextures( aiTextureType::aiTextureType_OPACITY, "_texture_opacity" );
-					AddTextures( aiTextureType::aiTextureType_REFLECTION, "_texture_reflection" );
-					AddTextures( aiTextureType::aiTextureType_SHEEN, "_texture_sheen" );
-					AddTextures( aiTextureType::aiTextureType_SHININESS, "_texture_shininess" );
-					AddTextures( aiTextureType::aiTextureType_SPECULAR, "_texture_specular" );
-					AddTextures( aiTextureType::aiTextureType_TRANSMISSION, "_texture_transmission" );
+					AddTextures( aiTextureType::aiTextureType_AMBIENT, "texture_ambient" );
+					AddTextures( aiTextureType::aiTextureType_AMBIENT_OCCLUSION, "texture_ambient_occlusion" );
+					AddTextures( aiTextureType::aiTextureType_BASE_COLOR, "texture_base_colour" );
+					AddTextures( aiTextureType::aiTextureType_CLEARCOAT, "texture_clearcoat" );
+					AddTextures( aiTextureType::aiTextureType_DIFFUSE, "texture_diffuse" );
+					AddTextures( aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS, "texture_diffuse_roughness" );
+					AddTextures( aiTextureType::aiTextureType_DISPLACEMENT, "texture_displacement" );
+					AddTextures( aiTextureType::aiTextureType_EMISSION_COLOR, "texture_emission_colour" );
+					AddTextures( aiTextureType::aiTextureType_EMISSIVE, "texture_emissive" );
+					AddTextures( aiTextureType::aiTextureType_HEIGHT, "texture_height" );
+					AddTextures( aiTextureType::aiTextureType_LIGHTMAP, "texture_lightmap" );
+					AddTextures( aiTextureType::aiTextureType_METALNESS, "texture_metalness" );
+					AddTextures( aiTextureType::aiTextureType_NORMALS, "texture_normal" );
+					AddTextures( aiTextureType::aiTextureType_NORMAL_CAMERA, "texture_normal_camera" );
+					AddTextures( aiTextureType::aiTextureType_OPACITY, "texture_opacity" );
+					AddTextures( aiTextureType::aiTextureType_REFLECTION, "texture_reflection" );
+					AddTextures( aiTextureType::aiTextureType_SHEEN, "texture_sheen" );
+					AddTextures( aiTextureType::aiTextureType_SHININESS, "texture_shininess" );
+					AddTextures( aiTextureType::aiTextureType_SPECULAR, "texture_specular" );
+					AddTextures( aiTextureType::aiTextureType_TRANSMISSION, "texture_transmission" );
 
 					File ThisTemp = a_TempDirectory.NewFile( ( a_Entry.ResourceName + ConvertToExtension( a_Entry.ResourceType ) ).c_str(), Serialization::GetSizeOf( ThisMaterial ) );
 					ThisTemp.Open();
@@ -599,10 +599,10 @@ bool ResourcePackager::Build() const
 			auto& NewHeader = ResourceHeader.emplace_back( ResourceName, ResourcesSize, "" );
 			std::string ResourceExtension = ResourceFile.GetExtension();
 
-			if      ( ResourceExtension == ".mesh"      ) std::get< 2 >( NewHeader ) = typeid( Mesh      ).name();
-			else if ( ResourceExtension == ".material"  ) std::get< 2 >( NewHeader ) = typeid( Material  ).name();
-			else if ( ResourceExtension == ".texture2d" ) std::get< 2 >( NewHeader ) = typeid( Texture2D ).name();
-			else if ( ResourceExtension == ".prefab"    ) std::get< 2 >( NewHeader ) = typeid( Prefab    ).name();
+			if      ( ResourceExtension == ".mesh"     ) std::get< 2 >( NewHeader ) = typeid( Mesh      ).name();
+			else if ( ResourceExtension == ".material" ) std::get< 2 >( NewHeader ) = typeid( Material  ).name();
+			else if ( ResourceExtension == ".texture"  ) std::get< 2 >( NewHeader ) = typeid( Texture2D ).name();
+			else if ( ResourceExtension == ".prefab"   ) std::get< 2 >( NewHeader ) = typeid( Prefab    ).name();
 
 			ResourceFile.Open();
 			ResourcesSize += ResourceFile.Size();

@@ -31,7 +31,7 @@ private:
 		//s_RenderInstructions.sort();
 
 		// Remove this later
-		Sleep( 33 );
+		//Sleep( 33 );
 		Rendering::Clear( ( uint8_t )BufferFlag::COLOUR_BUFFER_BIT );
 		bool DepthTestActive;
 		Rendering::GetBooleanv( RenderSetting::DEPTH_TEST, &DepthTestActive );
@@ -164,7 +164,6 @@ private:
 		if ( s_ActiveMaterial )
 		{
 			s_ActiveMaterial->Apply();
-			Rendering::UseProgram( s_ActiveMaterial->GetShader().GetProgramHandle() );
 		}
 	}
 
