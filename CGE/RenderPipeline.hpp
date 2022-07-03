@@ -58,17 +58,17 @@ private:
 					{
 						case RenderInstruction::Object::Mesh:
 						{
-							s_ActiveMesh = static_cast< const Mesh* >( Instruction.Source );
+							s_ActiveMesh = static_cast< const Mesh* >( Instruction.ResourceSource );
 							break;
 						}
 						case RenderInstruction::Object::Material:
 						{
-							s_ActiveMaterial = static_cast< const Material* >( Instruction.Source );
+							s_ActiveMaterial = static_cast< const Material* >( Instruction.ResourceSource );
 							break;
 						}
 						case RenderInstruction::Object::Model:
 						{
-							s_ActiveModel = static_cast< const Matrix4* >( Instruction.Source );
+							s_ActiveModel = static_cast< const Matrix4* >( Instruction.ResourceSource );
 							break;
 						}
 					}

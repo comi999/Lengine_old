@@ -52,23 +52,33 @@ public:
 		RenderInstruction Instruction;
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Mesh;
-		Instruction.Source = m_Mesh.Assure();
+		Instruction.ResourceSource = m_Mesh.Assure();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Material;
-		Instruction.Source = m_Material.Assure();
+		Instruction.ResourceSource = m_Material.Assure();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Model;
-		Instruction.Source = &this->GetOwner().GetTransform()->GetGlobalMatrix();
+		Instruction.ResourceSource = &this->GetOwner().GetTransform()->GetGlobalMatrix();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::DRAW;
 		Instruction.Object = RenderInstruction::Object::None;
-		Instruction.Source = nullptr;
+		Instruction.ResourceSource = nullptr;
 		a_Queue += Instruction;
+	}
+
+	ResourceHandle< Mesh > GetMesh()
+	{
+		return m_Mesh;
+	}
+
+	ResourceHandle< Material > GetMaterial()
+	{
+		return m_Material;
 	}
 
 	void SetMesh( ResourceHandle< Mesh > a_Mesh )

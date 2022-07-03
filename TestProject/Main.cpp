@@ -659,14 +659,20 @@ void RunOldDemo()
 	//		  } );
 }
 
+#include "soloud.h"
+
 void RunNewRendererTest()
 {
 	auto Window = ConsoleWindow::Create( "Title goes here.", { 64, 64 }, { 8, 8 } );
 	ConsoleWindow::MakeContextCurrent( Window );
 	CGE::Init();
 
-	auto grass_prefab = Resource::Load< Prefab >( "grass_prefab"_H );
+	auto grass_prefab = Resource::Load< Prefab >( "spear"_H );
 	GameObject grass_object = Prefab::Instantiate( *grass_prefab );
+
+	MeshRenderer* mesh_renderer = grass_object.GetComponentInChild< MeshRenderer >();
+	auto mat = mesh_renderer->GetMaterial().Assure();
+	auto mesh = mesh_renderer->GetMesh().Assure();
 	
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();

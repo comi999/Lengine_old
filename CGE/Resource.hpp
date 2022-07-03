@@ -160,7 +160,7 @@ template < typename T >
 using ResourceCache = entt::resource_cache< T >;
 
 template < typename T >
-class ResourceLoader : public entt::resource_loader< ResourceLoader< T >, T >
+class EResourceLoader : public entt::resource_loader< EResourceLoader< T >, T >
 {
 public:
 
@@ -252,6 +252,11 @@ public:
 		return m_Name;
 	}
 
+	void SetName( const Name& a_Name )
+	{
+		m_Name = a_Name;
+	}
+
 	static void Init()
 	{
 		s_ResourcePackage.Init( s_PackagePath );
@@ -268,7 +273,7 @@ public:
 	static ResourceHandle< T > Load( Hash a_Name )
 	{
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ a_Name, Cache.load< ResourceLoader< T > >( a_Name, a_Name ) };
+		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ a_Name, Cache.load< EResourceLoader< T > >( a_Name, a_Name ) };
 	}
 
 	template < typename T >
@@ -302,7 +307,7 @@ private:
 	friend class CGE;
 	friend class Serialization;
 	friend class ResourcePackager;
-	template < typename > friend class ResourceLoader;
+	template < typename > friend class EResourceLoader;
 
 	template < typename T >
 	void Serialize( T& a_Serializer ) const

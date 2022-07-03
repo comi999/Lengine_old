@@ -30,9 +30,9 @@ public:
 	template < typename T >
 	static constexpr Type Convert = Type::INT;
 
-	template <> static constexpr Type Convert< int         > = Type::INT;
-	template <> static constexpr Type Convert< float       > = Type::FLOAT;
-	template <> static constexpr Type Convert< std::string > = Type::STRING;
+	template <> static constexpr Type Convert< int   > = Type::INT;
+	template <> static constexpr Type Convert< float > = Type::FLOAT;
+	template <> static constexpr Type Convert< char  > = Type::STRING;
 
 	const Name& GetName() const
 	{
@@ -116,6 +116,8 @@ private:
 	template < typename T >
 	void SetImpl( const T* a_Values, size_t a_Count )
 	{
+		m_Size = a_Count;
+
 		if ( sizeof( T ) * a_Count > sizeof( m_Data ) )
 		{
 			m_Data = new T[ a_Count ];
@@ -278,7 +280,7 @@ public:
 		auto& NewProperty = m_Attributes[ a_Key.HashCode() ];
 		NewProperty.SetName( a_Key );
 		NewProperty.Set( a_Value );
-
+		
 		if ( !m_Shader->GetProgramHandle() )
 		{
 			return;
@@ -302,7 +304,7 @@ public:
 	}
 
 	template < typename T >
-	bool SetProperty( const Name& a_Key, const T& a_Value )
+	bool SetProperty( Hash a_Key, const T& a_Value )
 	{
 		auto Iter = m_Attributes.find( a_Key );
 		

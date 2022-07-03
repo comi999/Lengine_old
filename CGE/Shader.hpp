@@ -24,20 +24,20 @@ public:
 
 	void SetSource( ShaderType a_ShaderType, const char* a_Source )
 	{
-		std::string* Source = nullptr;
+		std::string* ResourceSource = nullptr;
 
 		switch ( a_ShaderType )
 		{
-			case ShaderType::VERTEX_SHADER:   Source = &m_VertexShaderSource;   break;
-			case ShaderType::FRAGMENT_SHADER: Source = &m_FragmentShaderSource; break;
+			case ShaderType::VERTEX_SHADER:   ResourceSource = &m_VertexShaderSource;   break;
+			case ShaderType::FRAGMENT_SHADER: ResourceSource = &m_FragmentShaderSource; break;
 		}
 
-		if ( !Source )
+		if ( !ResourceSource )
 		{
 			return;
 		}
 
-		*Source = a_Source;
+		*ResourceSource = a_Source;
 
 		if ( !m_ShaderProgramHandle )
 		{

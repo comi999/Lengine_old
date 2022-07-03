@@ -400,8 +400,8 @@ bool File::Open()
 		return true;
 	}
 
-	std::string FilePath = *this;
-	return !fopen_s( &m_File, FilePath.c_str(), "rb+" );
+	std::string ResourceFilePath = *this;
+	return !fopen_s( &m_File, ResourceFilePath.c_str(), "rb+" );
 }
 
 bool File::Close()

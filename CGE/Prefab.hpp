@@ -43,6 +43,136 @@ public:
 		return NewGameObject;
 	}
 
+	inline Prefab* AddChild()
+	{
+		return &m_Children.emplace_back();
+	}
+
+	bool DestroyChild( uint32_t a_Index )
+	{
+		if ( !( a_Index < m_Children.size() ) )
+		{
+			return false;
+		}
+
+		m_Children.erase( m_Children.begin() + a_Index );
+		return true;
+	}
+
+	inline const Prefab* GetChild( uint32_t a_Index ) const
+	{
+		return ( a_Index < m_Children.size() ) ? &m_Children[ a_Index ] : nullptr;
+	}
+
+	inline Prefab* GetChild( uint32_t a_Index )
+	{
+		return const_cast< Prefab* >( this )->GetChild( a_Index );
+	}
+
+	inline size_t GetChildCount() const
+	{
+		return m_Children.size();
+	}
+
+	template < typename _Component >
+	inline bool HasComponent() const
+	{
+		return m_Components.find( typeid( _Component ) ) != m_Components.end();
+	}
+
+	template < typename _Component >
+	bool AddComponent( const _Component& a_Component )
+	{
+		static size_t ComponentHash = typeid( std::remove_const_t< _Component > ).hash_code();
+		auto Iter = m_Components.find( ComponentHash );
+
+		if ( Iter != m_Components.end() )
+		{
+			return false;
+		}
+
+		auto& Binary = m_Components[ ComponentHash ];
+		Binary.resize( Serialization::GetSizeOf( a_Component ) );
+		bool Successful;
+		BufferStream Stream;
+		Stream.Open( const_cast< uint8_t* >( Binary.data() ), Binary.size() );
+		BufferSerializer Serializer( Stream );
+		ComponentBase::GetTypeMap().InvokeFunction( ComponentHash, "BufferSerializeComponent"_H, Successful, Serializer, &a_Component );
+		Stream.Close();
+		return Successful;
+	}
+
+	template < typename _Component >
+	bool AddComponent()
+	{
+		static size_t ComponentHash = typeid( std::remove_const_t< _Component > ).hash_code();
+		auto Iter = m_Components.find( ComponentHash );
+
+		if ( Iter != m_Components.end() )
+		{
+			return false;
+		}
+
+		auto& Binary = m_Components[ ComponentHash ];
+		_Component NewComponent;
+		Binary.resize( Serialization::GetSizeOf( NewComponent ) );
+		bool Successful;
+		BufferStream Stream;
+		Stream.Open( const_cast< uint8_t* >( Binary.data() ), Binary.size() );
+		BufferSerializer Serializer( Stream );
+		ComponentBase::GetTypeMap().InvokeFunction( ComponentHash, "BufferSerializeComponent"_H, Successful, Serializer, &ThisComponent );
+		Stream.Close();
+		return Successful;
+	}
+
+	template < typename _Component >
+	bool DestroyComponent()
+	{
+		static size_t ComponentHash = typeid( std::remove_const_t< _Component > ).hash_code();
+		auto Iter = m_Components.find( ComponentHash );
+
+		if ( Iter == m_Components.end() )
+		{
+			return false;
+		}
+
+		m_Components.erase( Iter );
+		return true;
+	}
+
+	template < typename _Component >
+	bool PatchComponent( const Action< _Component& >& a_Patch )
+	{
+		static size_t ComponentHash = typeid( std::remove_const_t< _Component > ).hash_code();
+		auto Iter = m_Components.find( ComponentHash );
+
+		if ( Iter == m_Components.end() )
+		{
+			return false;
+		}
+
+		_Component ThisComponent;
+		bool Successful;
+		BufferStream Stream;
+		Stream.Open( const_cast< uint8_t* >( Iter->second.data() ), Iter->second.size() );
+		BufferDeserializer Deserializer( Stream );
+		ComponentBase::GetTypeMap().InvokeFunction( ComponentHash, "BufferDeserializeComponent"_H, Successful, Deserializer, &ThisComponent );
+		Stream.Close();
+
+		if ( !Successful )
+		{
+			return false;
+		}
+
+		a_Patch( ThisComponent );
+		Iter->second.resize( Serialization::GetSizeOf( ThisComponent ) );
+		Stream.Open();
+		BufferSerializer Serializer( Stream );
+		ComponentBase::GetTypeMap().InvokeFunction( ComponentHash, "BufferSerializeComponent"_H, Successful, Serializer, &ThisComponent );
+		Stream.Close();
+		return Successful;
+	}
+
 private:
 
 	friend class ResourcePackager;

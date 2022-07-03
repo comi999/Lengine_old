@@ -653,6 +653,177 @@ public:
 
 private:
 
+	template < typename _Iterator >
+	class IteratorImpl
+	{
+	public:
+
+		using iterator_category = std::random_access_iterator_tag;
+		using value_type        = std::conditional_t< std::is_const_v< typename _Iterator::value_type >, const Transform, Transform >;
+		using difference_type   = std::ptrdiff_t;
+		using pointer           = value_type*;
+		using reference         = value_type&;
+
+	private:
+
+		IteratorImpl( _Iterator a_Iterator )
+			: m_Iterator( a_Iterator )
+		{ }
+
+	public:
+
+		IteratorImpl() = default;
+
+		inline IteratorImpl& operator++()
+		{
+			return ++m_Iterator, *this;
+		}
+
+		IteratorImpl operator++( int )
+		{
+			Iterator Temp = *this;
+			return ++*this, Temp;
+		}
+
+		inline IteratorImpl& operator--()
+		{
+			return --m_Iterator, *this;
+		}
+
+		IteratorImpl operator--( int )
+		{
+			Iterator Temp = *this;
+			return --*this, Temp;
+		}
+
+		IteratorImpl& operator+=( int32_t a_Count )
+		{
+			return m_Iterator += a_Count, *this;
+		}
+
+		IteratorImpl operator+( int32_t a_Count ) const
+		{
+			Iterator Temp;
+			return Temp += a_Count, Temp;
+		}
+
+		IteratorImpl& operator-=( int32_t a_Count )
+		{
+			return m_Iterator -= a_Count, *this;
+		}
+
+		IteratorImpl operator-( int32_t a_Count ) const
+		{
+			Iterator Temp;
+			return Temp -= a_Count, Temp;
+		}
+
+		inline pointer operator->()
+		{
+			return GameObject::FindByID( *m_Iterator ).GetTransform();
+		}
+
+		inline const pointer* operator->() const
+		{
+			return GameObject::FindByID( *m_Iterator ).GetTransform();
+		}
+
+		inline reference operator*()
+		{
+			return *GameObject::FindByID( *m_Iterator ).GetTransform();
+		}
+
+		inline const reference operator*() const
+		{
+			return *GameObject::FindByID( *m_Iterator ).GetTransform();
+		}
+
+		inline bool operator==( const IteratorImpl& a_Iterator ) const
+		{
+			return m_Iterator == a_Iterator.m_Iterator;
+		}
+
+		inline bool operator!=( const IteratorImpl& a_Iterator ) const
+		{
+			return m_Iterator != a_Iterator.m_Iterator;
+		}
+
+	private:
+
+		template < typename > friend class ITransform;
+
+		_Iterator m_Iterator;
+	};
+
+public:
+
+	using Iterator = IteratorImpl< typename std::vector< GameObjectID >::iterator >;
+	using CIterator = IteratorImpl< typename std::vector< GameObjectID >::const_iterator >;
+	using RIterator = IteratorImpl< typename std::vector< GameObjectID >::reverse_iterator >;
+	using CRIterator = IteratorImpl< typename std::vector< GameObjectID >::const_reverse_iterator >;
+
+	inline Iterator begin()
+	{
+		return Iterator( m_Children.begin() );
+	}
+
+	inline CIterator begin() const
+	{
+		return CIterator( m_Children.begin() );
+	}
+
+	inline CIterator cbegin() const
+	{
+		return begin();
+	}
+
+	inline RIterator rbegin()
+	{
+		return RIterator( m_Children.rbegin() );
+	}
+
+	inline CRIterator rbegin() const
+	{
+		return CRIterator( m_Children.begin() );
+	}
+
+	inline CRIterator crbegin() const
+	{
+		return rbegin();
+	}
+
+	inline Iterator end()
+	{
+		return Iterator( m_Children.end() );
+	}
+
+	inline CIterator end() const
+	{
+		return CIterator( m_Children.end() );
+	}
+
+	inline CIterator cend() const
+	{
+		return end();
+	}
+
+	inline RIterator rend()
+	{
+		return RIterator( m_Children.rend() );
+	}
+
+	inline CRIterator rend() const
+	{
+		return CRIterator( m_Children.rend() );
+	}
+
+	inline CRIterator crend() const
+	{
+		return rend();
+	}
+	
+private:
+
 	inline void SetParentImpl( Transform* a_Transform, bool a_RetainGlobalTransform, size_t a_ChildIndex = -1 )
 	{
 		GameObjectID ThisID = *this->GetOwner();

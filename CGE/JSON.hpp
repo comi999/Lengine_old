@@ -15914,13 +15914,13 @@ For a detailed description of the algorithm see:
 namespace dtoa_impl
 {
 
-template<typename Target, typename Source>
-Target reinterpret_bits(const Source source)
+template<typename Target, typename ResourceSource>
+Target reinterpret_bits(const ResourceSource source)
 {
-    static_assert(sizeof(Target) == sizeof(Source), "size mismatch");
+    static_assert(sizeof(Target) == sizeof(ResourceSource), "size mismatch");
 
     Target target;
-    std::memcpy(&target, &source, sizeof(Source));
+    std::memcpy(&target, &source, sizeof(ResourceSource));
     return target;
 }
 

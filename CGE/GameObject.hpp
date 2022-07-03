@@ -28,7 +28,7 @@ public:
 		return NewGameObject;
 	}
 
-	/*static GameObject Instantiate( GameObject a_Parent )
+	static GameObject Instantiate( GameObject a_Parent )
 	{
 		entt::entity NewEntity = ComponentBase::GetRegistry().create();
 		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
@@ -44,7 +44,7 @@ public:
 		NewGameObject.AddComponent< Alias >()->SetName( a_Name );
 		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent );
 		return NewGameObject;
-	}*/
+	}
 
 	inline static GameObject FindByID( GameObjectID a_GameObjectID )
 	{
@@ -73,27 +73,69 @@ public:
 	}
 
 	template < typename T >
-	inline T* GetComponent()
+	inline T* GetComponent( bool a_ExactOnly = false )
 	{
-		return Component::GetComponent< T >( m_ID );
+		return a_ExactOnly ? Component::GetExactComponent< T >( m_ID ) : Component::GetComponent< T >( m_ID );
 	}
 
 	template < typename T >
-	inline const T* GetComponent() const
+	inline const T* GetComponent( bool a_ExactOnly = false ) const
 	{
-		return Component::GetComponent< T >( m_ID );
+		return const_cast< GameObject* >( this )->GetComponent< T >( a_ExactOnly );
 	}
 
 	template < typename T >
-	inline T* GetExactComponent()
+	inline std::list< T* > GetComponents( bool a_ExactOnly = false )
 	{
-		return Component::GetExactComponent< T >( m_ID );
+		return a_ExactOnly ? Component::GetExactComponents< T >( m_ID ) : Component::GetComponents< T >( m_ID );
 	}
 
 	template < typename T >
-	inline const T* GetExactComponent() const
+	inline std::list< const T* > GetComponents( bool a_ExactOnly = false ) const
 	{
-		return Component::GetExactComponent< T >( m_ID );
+		return a_ExactOnly ? Component::GetExactComponents< T >( m_ID ) : Component::GetComponents< T >( m_ID );
+	}
+
+	template < typename T >
+	T* GetComponentInChild( bool a_ExactOnly = false )
+	{
+		auto& ThisTransform = *GetTransform();
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			if ( T* ChildComponent = ChildTransform.GetOwner()->GetComponent< T >( a_ExactOnly ) )
+			{
+				return ChildComponent;
+			}
+		}
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			if ( T* ChildComponent = ChildTransform.GetOwner()->GetComponentInChild< T >( a_ExactOnly ) )
+			{
+				return ChildComponent;
+			}
+		}
+
+		return nullptr;
+	}
+
+	template < typename T >
+	const T* GetComponentInChild( bool a_ExactOnly = false ) const
+	{
+		return const_cast< GameObject* >( this )->GetComponentInChild< T >( a_ExactOnly );
+	}
+
+	template < typename T >
+	std::list< T* > GetComponentsInChildren( bool a_ExactOnly = false )
+	{
+		return std::list< T* >();
+	}
+
+	template < typename T >
+	std::list< const T* > GetComponentsInChildren( bool a_ExactOnly ) const
+	{
+		return std::list< const T* >();
 	}
 
 	template < typename T >

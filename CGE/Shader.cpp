@@ -9,6 +9,8 @@ DefineShader( Default_Vertex )
 
 DefineShader( Default_Fragment )
 {
+	//Uniform( Sampler2D, texture_diffuse );
+	//Rendering::FragColour = Rendering::Sample( texture_diffuse, Vector2::One * 0.5f );
 	Rendering::FragColour = Vector4::One;
 }
 

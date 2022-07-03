@@ -32,7 +32,7 @@ struct RenderInstruction
 
 	union
 	{
-		const void* Source;
+		const void* ResourceSource;
 		uint32_t    Index;
 		bool        State;
 	};
