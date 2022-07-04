@@ -3051,6 +3051,12 @@ struct Quaternion : public IVector< float, 4 >
 		, z( a_Vector[ 2 ] )
 	{ }
 
+	template < typename T >
+	Quaternion( const Vector< T, 3 >& a_EulerAngles )
+	{
+		*this = ToQuaternion( a_EulerAngles );
+	}
+
 	static Matrix3 ToMatrix3( const Quaternion& a_Quaternion )
 	{
 		return Matrix3(

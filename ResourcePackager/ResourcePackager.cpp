@@ -527,7 +527,11 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 					FileSerializer Serializer( ThisTemp );
 					Serializer << ThisTexture;
 					ThisTemp.Close();
-					if ( !ThisTextureSource->mWidth ) stbi_image_free( TextureData );
+					if ( !ThisTextureSource->mWidth )
+					{
+						stbi_image_free( TextureData );
+						TextureData = nullptr;
+					}
 					return ThisTemp;
 				}
 			}
@@ -551,6 +555,7 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 			Serializer << ThisTexture;
 			ThisTemp.Close();
 			stbi_image_free( TextureData );
+			TextureData = nullptr;
 			return ThisTemp;
 		}
 	}

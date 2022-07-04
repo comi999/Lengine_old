@@ -58,7 +58,7 @@ public:
 
 	inline static void Destroy( GameObjectID a_GameObjectID )
 	{
-		// Implementation
+		// implementation
 	}
 
 	inline bool IsValid() const

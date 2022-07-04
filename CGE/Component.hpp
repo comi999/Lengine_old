@@ -67,7 +67,6 @@ class IComponent;
 
 typedef IComponent< void > Component;
 
-
 template < typename T >
 class IComponent : public ComponentBase
 {

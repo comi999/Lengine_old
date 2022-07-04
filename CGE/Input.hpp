@@ -183,7 +183,7 @@ public:
 			return Vector2::Zero;
 		}
 
-		return Vector2( Coordinates.x, Coordinates.y );
+		return Vector2( Coordinates.x, ConsoleWindow::GetCurrentContext()->GetHeight() - Coordinates.y );
 	}
 
 	inline static Vector2 GetMouseDelta()
@@ -191,8 +191,9 @@ public:
 		return GetMousePosition() - MousePosition;
 	}
 
-	//private:
+private:
 
+	friend class CGE;
 
 	static void Tick()
 	{

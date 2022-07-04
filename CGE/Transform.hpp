@@ -79,7 +79,7 @@ public:
 
 	inline void DetachChildren( bool a_RetainGlobalTransforms = true )
 	{
-		for ( size_t i = m_Children.size() - 1; i >= 0; --i )
+		for ( int32_t i = m_Children.size() - 1; i >= 0; --i )
 		{
 			DetachChild( i, a_RetainGlobalTransforms );
 		}

@@ -82,6 +82,8 @@ public:
             NewWindow->m_ConsoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
         }
 
+        NewWindow->m_WindowHandle = GetConsoleWindow();
+
         // Set console font.
         a_PixelSize.x = Math::Min( a_PixelSize.x, static_cast< short >( 8 ) );
         a_PixelSize.y = Math::Min( a_PixelSize.y, static_cast< short >( 8 ) );
@@ -137,7 +139,7 @@ public:
         SetConsoleWindowInfo( NewWindow->m_ConsoleHandle, true, &NewWindow->m_WindowRegion );
         GetConsoleScreenBufferInfoEx( NewWindow->m_ConsoleHandle, &ScreenBufferInfo );
         SetConsoleScreenBufferSize( NewWindow->m_ConsoleHandle, { a_Size.x, a_Size.y } );
-
+        
         // Set cursor attributes.
         CONSOLE_CURSOR_INFO CursorInfo;
         GetConsoleCursorInfo( NewWindow->m_ConsoleHandle, &CursorInfo );

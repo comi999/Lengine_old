@@ -27,11 +27,12 @@ public:
 
         while ( s_Running )
         {
+            Input::Tick();
+
             a_Action.Invoke();
 
             // Update calls.
             Scene::Tick();
-            Input::Tick();
             Time::Tick();
             RenderPipeline::Tick();
             
