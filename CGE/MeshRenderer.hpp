@@ -35,15 +35,20 @@ public:
 		bool Collided = false;
 
 		// Perform broadphase frustum culling.
+
+		// THIS IS NOT WORKING, IT NEVER REJECTS.
 		for ( const auto& FrustumPlane : ViewFrustum.Planes )
 		{
-			if ( Geometry::DistanceFromPlane( FrustumPlane, this->GetOwner().GetTransform()->GetGlobalPosition() ) > -Radius )
+			float dist = Geometry::DistanceFromPlane( FrustumPlane, this->GetOwner().GetTransform()->GetGlobalPosition() );
+
+			if ( dist > -Radius )
 			{
 				Collided = true;
 				break;
 			}
 		}
 
+		// THIS NEVER GETS HIT FOR SOME REASON, INVESTIGATE FURTHER.
 		if ( !Collided )
 		{
 			return;
@@ -52,12 +57,12 @@ public:
 		RenderInstruction Instruction;
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Mesh;
-		Instruction.ResourceSource = m_Mesh.Assure();
+		Instruction.ResourceSource = m_Mesh.Get();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;
 		Instruction.Object = RenderInstruction::Object::Material;
-		Instruction.ResourceSource = m_Material.Assure();
+		Instruction.ResourceSource = m_Material.Get();
 		a_Queue += Instruction;
 
 		Instruction.Modification = RenderInstruction::Modification::SET;

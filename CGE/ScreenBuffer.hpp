@@ -46,27 +46,18 @@ public:
 
     inline Rect GetBufferRect()
     {
-        return { { 0, 0 }, { m_Size.x, m_Size.y } };
+        return { 0.0f, 0.0f, static_cast< float >( m_Size.x ), static_cast< float >( m_Size.y ) };
     }
 
     void SetPixel( Vector< short, 2 > a_Coord, Pixel a_Pixel )
-    {//These early outs can be removed when rendering pipeline is done.
-        if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() )
-        {
-            return;
-        }
-
-        if ( a_Coord.y < 0 || a_Coord.y >= GetHeight() )
-        {
-            return;
-        }
-
+    {
         m_BackBuffer[ a_Coord.y * m_Size.x + a_Coord.x ] = a_Pixel;
     }
 
     void SetPixels( int a_Index, Pixel a_Pixel, short a_Count )
     {
         Pixel* PixelBegin = m_BackBuffer + a_Index;
+
         for ( ; a_Count > 0; --a_Count )
         {
             *PixelBegin = a_Pixel;
@@ -77,6 +68,7 @@ public:
     void SetPixels( Vector< short, 2 > a_Coord, Pixel a_Pixel, short a_Count )
     {
         Pixel* PixelBegin = m_BackBuffer + GetIndex( a_Coord );
+
         for ( ; a_Count > 0; --a_Count )
         {
             *PixelBegin = a_Pixel;
@@ -85,23 +77,10 @@ public:
     }
 
     void SetColour( Vector< short, 2 > a_Coord, Colour a_Colour )
-    { // Remove these when rendering pipeline clipping is complete.
-        //if ( a_Coord.x < 0 || a_Coord.x >= GetWidth() || a_Coord.y < 0 || a_Coord.y >= GetHeight() ) return;
+    {
         int Index = GetIndex( a_Coord );
-
-
-        // Remove this when blending is done through pipeline.
-        if ( BlendingEnabled )
-        {
-            Colour& Background = m_ColourBuffer[ Index ];
-            Background += a_Colour;
-            m_BackBuffer[ Index ] = PixelColourMap::Get().ConvertColour( Background );
-        }
-        else
-        {
-            m_BackBuffer[ Index ] = PixelColourMap::Get().ConvertColour( a_Colour );
-            m_ColourBuffer[ Index ] = a_Colour;
-        }
+        m_BackBuffer[ Index ] = PixelColourMap::Get().ConvertColour( a_Colour );
+        m_ColourBuffer[ Index ] = a_Colour;
     }
 
     void SetColours( Vector< short, 2 > a_Coord, Colour a_Colour, short a_Count )
@@ -111,25 +90,12 @@ public:
         Pixel* PixelBegin = m_BackBuffer + Index;
         Colour* ColourBegin = m_ColourBuffer + Index;
 
-        if ( BlendingEnabled )
+        for ( ; a_Count > 0; --a_Count )
         {
-            for ( ; a_Count > 0; --a_Count )
-            {
-                *ColourBegin += a_Colour;
-                *PixelBegin = PixelColourMap::Get().ConvertColour( *ColourBegin );
-                ++PixelBegin;
-                ++ColourBegin;
-            }
-        }
-        else
-        {
-            for ( ; a_Count > 0; --a_Count )
-            {
-                *PixelBegin = PixelToSet;
-                *ColourBegin = a_Colour;
-                ++PixelBegin;
-                ++ColourBegin;
-            }
+            *PixelBegin = PixelToSet;
+            *ColourBegin = a_Colour;
+            ++PixelBegin;
+            ++ColourBegin;
         }
     }
 
@@ -139,25 +105,12 @@ public:
         Pixel* PixelBegin = m_BackBuffer + a_Index;
         Colour* ColourBegin = m_ColourBuffer + a_Index;
 
-        if ( BlendingEnabled )
+        for ( ; a_Count > 0; --a_Count )
         {
-            for ( ; a_Count > 0; --a_Count )
-            {
-                *ColourBegin += a_Colour;
-                *PixelBegin = PixelColourMap::Get().ConvertColour( *ColourBegin );
-                ++PixelBegin;
-                ++ColourBegin;
-            }
-        }
-        else
-        {
-            for ( ; a_Count > 0; --a_Count )
-            {
-                *PixelBegin = PixelToSet;
-                *ColourBegin = a_Colour;
-                ++PixelBegin;
-                ++ColourBegin;
-            }
+            *PixelBegin = PixelToSet;
+            *ColourBegin = a_Colour;
+            ++PixelBegin;
+            ++ColourBegin;
         }
     }
 
@@ -222,8 +175,4 @@ private:
     Pixel*             m_FrontBuffer;
     Colour*            m_ColourBuffer;
     Vector< short, 2 > m_Size;
-
-public:
-
-    static bool BlendingEnabled;
 };

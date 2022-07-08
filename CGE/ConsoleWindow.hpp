@@ -194,6 +194,8 @@ private:
     {
         m_BufferReady = true;
         m_ConditionVariable.notify_one();
+
+        //while ( m_BufferReady );
     }
 
     void WriteBuffer()

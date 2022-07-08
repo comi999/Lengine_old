@@ -7,6 +7,113 @@ struct Segment
 	Vector2 Start;
 	Vector2 End;
 
+	// This is just a test. remove later
+	inline static bool FindClipParams( Vector4* a_P0, Vector4* a_P1, float* o_T, uint32_t* o_C )
+	{
+		static constexpr uint8_t _Inside = 0b000000;
+		static constexpr uint8_t _Left = 0b000001;
+		static constexpr uint8_t _Right = 0b000010;
+		static constexpr uint8_t _Bottom = 0b000100;
+		static constexpr uint8_t _Top = 0b001000;
+		static constexpr uint8_t _Front = 0b010000;
+		static constexpr uint8_t _Back = 0b100000;
+		static constexpr int8_t  _XMin = -1;
+		static constexpr int8_t  _YMin = -1;
+		static constexpr int8_t  _ZMin = -0;
+		static constexpr int8_t  _XMax = +1;
+		static constexpr int8_t  _YMax = +1;
+		static constexpr int8_t  _ZMax = +1;
+
+		static constexpr auto ComputeCode = []( float* a_P )
+		{
+			uint8_t Code = _Inside;
+			if ( a_P[ 0 ] < _XMin ) Code |= _Left;
+			else if ( a_P[ 0 ] > _XMax ) Code |= _Right;
+			else if ( a_P[ 1 ] < _YMin ) Code |= _Bottom;
+			else if ( a_P[ 1 ] > _YMax ) Code |= _Top;
+			else if ( a_P[ 2 ] < _ZMin ) Code |= _Back;
+			else if ( a_P[ 2 ] > _ZMax ) Code |= _Front;
+			return Code;
+		};
+
+		uint8_t CodeA = ComputeCode( &a_P0->x );
+		uint8_t CodeB = ComputeCode( &a_P1->x );
+		Vector3 Temp;
+		*o_C = 0;
+		float T = 1.0f;
+
+		while ( true )
+		{
+			// Entire segment is inside bounding volume. Trivial. Accept.
+			if ( !( CodeA | CodeB ) ) return *o_C;
+
+			// Entire segment exists in one outside zone. Reject completely.
+			if ( CodeA & CodeB ) return *o_C;
+
+			// Pick one of the outsides.
+			uint8_t CodeC = CodeA > CodeB ? CodeA : CodeB;
+
+			// Needs clipping
+			if ( CodeC & _Top )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _YMax - a_P0->y ) / ( a_P1->y - a_P0->y );
+				Temp.x = a_P0->x + ( a_P1->x - a_P0->x ) * T;
+				Temp.y = _YMax;
+				Temp.z = a_P0->z + ( a_P1->z - a_P0->z ) * T;
+			}
+			else if ( CodeC & _Bottom )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _YMin - a_P0->y ) / ( a_P1->y - a_P0->y );
+				Temp.x = a_P0->x + ( a_P1->x - a_P0->x ) * T;
+				Temp.y = _YMin;
+				Temp.z = a_P0->z + ( a_P1->z - a_P0->z ) * T;
+			}
+			else if ( CodeC & _Right )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _XMax - a_P0->x ) / ( a_P1->x - a_P0->x );
+				Temp.x = _XMax;
+				Temp.y = a_P0->y + ( a_P1->y - a_P0->y ) * T;
+				Temp.z = a_P0->z + ( a_P1->z - a_P0->z ) * T;
+			}
+			else if ( CodeC & _Left )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _XMin - a_P0->x ) / ( a_P1->x - a_P0->x );
+				Temp.x = _XMin;
+				Temp.y = a_P0->y + ( a_P1->y - a_P0->y ) * T;
+				Temp.z = a_P0->z + ( a_P1->z - a_P0->z ) * T;
+			}
+			else if ( CodeC & _Front )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _ZMax - a_P0->z ) / ( a_P1->z - a_P0->z );
+				Temp.x = a_P0->x + ( a_P1->x - a_P0->x ) * T;
+				Temp.y = a_P0->y + ( a_P1->y - a_P0->y ) * T;
+				Temp.z = _ZMax;
+			}
+			else if ( CodeC & _Front )
+			{
+				o_T[ ( *o_C )++ ] = T = T * ( _ZMin - a_P0->z ) / ( a_P1->z - a_P0->z );
+				Temp.x = a_P0->x + ( a_P1->x - a_P0->x ) * T;
+				Temp.y = a_P0->y + ( a_P1->y - a_P0->y ) * T;
+				Temp.z = _ZMin;
+			}
+
+			if ( CodeC == CodeA )
+			{
+				a_P0->x = Temp.x;
+				a_P0->y = Temp.y;
+				a_P0->z = Temp.z;
+				CodeA = ComputeCode( &a_P0->x );
+			}
+			else
+			{
+				a_P1->x = Temp.x;
+				a_P1->y = Temp.y;
+				a_P1->z = Temp.z;
+				CodeB = ComputeCode( &a_P1->x );
+			}
+		}
+	}
+
 	bool RectClamp( Rect a_Rect )
 	{
 		const int INSIDE = 0; // 0000

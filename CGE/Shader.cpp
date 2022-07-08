@@ -44,18 +44,18 @@ DefineShader( Fragment_Specular )
 	Rendering::FragColour = Rendering::Sample( texture_specular, Texel );
 }
 
-// Fragment Normals
-DefineShader( Fragment_Normals )
+// Fragment Normal
+DefineShader( Fragment_Normal )
 {
-	Uniform( Sampler2D, texture_normals );
+	Uniform( Sampler2D, texture_normal );
 	Varying_In( Vector2, Texel );
 
-	Rendering::FragColour = Rendering::Sample( texture_normals, Texel );
+	Rendering::FragColour = Rendering::Sample( texture_normal, Texel );
 }
 
 Shader Shader::Default;
 Shader Shader::Diffuse  = Shader( "Diffuse"_N,  "Vertex_Texel", "Fragment_Diffuse"  );
 Shader Shader::Specular = Shader( "Specular"_N, "Vertex_Texel", "Fragment_Specular" );
-Shader Shader::Normals  = Shader( "Normals"_N,  "Vertex_Texel", "Fragment_Normals"  );
+Shader Shader::Normal  = Shader( "Normal"_N,  "Vertex_Texel", "Fragment_Normal"  );
 Shader Shader::Phong;//    = Shader( "Phong"_N,    "Vertex_Texel", "Phong_Fragment"    );
 

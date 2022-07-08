@@ -607,15 +607,13 @@ public:
 
 	template < typename _Type >
 	static typename _Type::Output Sample( _Type a_Sampler, const typename _Type::Input& a_Input )
-	{// This needs to be cleaned up.
+	{
+		static constexpr float Denom = 1.0f / 255;
 		auto Handle = s_TextureUnits[ a_Sampler.Location ][ ( uint32_t )_Type::Target ];
 		auto& Target = s_TextureRegistry[ Handle ];
 		auto& Dimensions = Target.Dimensions;
-		auto r = Vector2Int( ( Dimensions.x - 1 ) * a_Input.x, ( Dimensions.y - 1 ) * a_Input.y );
-		uint32_t Position = r.y * Dimensions.x + r.x;
-		const Colour* Data = reinterpret_cast< const Colour* >( Target.Data ) + Position;
-
-		static constexpr float Denom = 1.0f / 255;
+		uint32_t X = ( Dimensions.x - 1 ) * a_Input.x, Y = ( Dimensions.y - 1 ) * a_Input.y;
+		const Colour* Data = reinterpret_cast< const Colour* >( Target.Data ) + Y * Dimensions.x + X;
 		return { Denom * Data->R, Denom * Data->G, Denom * Data->B, Denom * Data->A };
 	}
 
@@ -994,7 +992,7 @@ private:
 			size_t Index = 0;
 			while ( m_Availability[ Index++ ] );
 			m_Availability[ Index - 1 ] = true;
-			m_Targets[ Index - 1 ] = -1;
+			m_Targets[ Index - 1 ] = uint8_t( -1 );
 			return Index;
 		}
 
@@ -1371,9 +1369,11 @@ private:
 
 		AttribSpan& operator/=( T a_Value )
 		{
+			float Inv = 1.0f / a_Value;
+
 			for ( size_t i = 0; i < m_Size; ++i )
 			{
-				m_Origin[ i ] /= a_Value;
+				m_Origin[ i ] *= Inv;
 			}
 
 			return *this;
@@ -1439,11 +1439,11 @@ private:
 			: AlphaBlend( false )
 			, Perspective( true )
 			, Viewport( false )
-			, CullFace( true )
+			, CullFace( false )
 			, FrontCull( false )
 			, BackCull( true )
 			, DepthTest( true )
-			, Clip( false )
+			, Clip( true )
 		{ }
 
 		bool AlphaBlend  : 1;
@@ -1513,7 +1513,7 @@ private:
 		Vector2Int m_Size;
 		float*     m_Buffer;
 	};
-
+	
 	template < uint8_t _Interface >
 	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
 	{
@@ -1529,39 +1529,47 @@ private:
 		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
 		s_PositionStorage.Prepare( a_End - a_Begin );
 		s_AttributeRegistry = a_Begin;
-		AttribSpan< float > AttribView( s_VertexStorage.Data(), a_Stride );
-		Vector2 HalfWindow( ConsoleWindow::GetCurrentContext()->GetWidth(), ConsoleWindow::GetCurrentContext()->GetHeight() );
-		HalfWindow *= 0.5f;
+		AttribSpan< float > AttribView;
+
+		// If perspective divide is enabled, setup the attribute view.
+		if constexpr ( _Perspective )
+		{
+			AttribView.Set( s_VertexStorage.Data(), a_Stride );
+		}
 
 		for ( ; a_Begin < a_End; ++a_Begin )
 		{
 			a_VertexShader();
 
+			// Perspective divide x and y but if clipping is on, 
+			// leave z for after near plane clipping.
 			Position.w = 1.0f / Position.w;
 			Position.x *= Position.w;
 			Position.y *= Position.w;
-			Position.z *= Position.w;
 
-			if constexpr ( _Perspective )
+			// If clipping is off, it is ok to perspective divide
+			// z coordinate here.
+			if constexpr ( !_Clipping )
 			{
-				AttribView *= Position.w;
+				Position.z *= Position.w;
 			}
-			 
-			Position.x *= HalfWindow.x;
-			Position.y *= HalfWindow.y;
-			Position.x += HalfWindow.x;
-			Position.y += HalfWindow.y;
-			s_PositionStorage = Position;
 
+			s_PositionStorage = Position;
 			++s_AttributeRegistry;
 			++s_VertexStorage;
 			++s_PositionStorage;
-			AttribView.Advance();
+
+			// Divide all attributes by w as well for perspective correctness.
+			if constexpr ( _Perspective )
+			{
+				AttribView *= Position.w;
+				AttribView.Advance();
+			}
 		}
 	}
 
 	template < uint8_t _Interface >
-	static void ProcessTriangles( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_TriangleProcessor )() )
+	static void RasterizeTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_FragmentShader )() )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
 		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
@@ -1571,6 +1579,386 @@ private:
 		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
 		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
 		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+
+		// Sort corners.
+		if ( a_P[ 0 ].y < a_P[ 1 ].y )
+		{
+			std::swap( a_P[ 0 ], a_P[ 1 ] );
+			a_V[ 0 ].Swap( a_V[ 1 ] );
+		}
+
+		if ( a_P[ 0 ].y < a_P[ 2 ].y )
+		{
+			std::swap( a_P[ 0 ], a_P[ 2 ] );
+			a_V[ 0 ].Swap( a_V[ 2 ] );
+		}
+
+		if ( a_P[ 1 ].y < a_P[ 2 ].y )
+		{
+			std::swap( a_P[ 1 ], a_P[ 2 ] );
+			a_V[ 1 ].Swap( a_V[ 2 ] );
+		}
+
+		if ( a_P[ 0 ].y == a_P[ 2 ].y )
+		{
+			return;
+		}
+
+		// Setup Position and Attribute values.
+		float SpanX, SpanY, Y;
+		static DataStorage< Vector4 > Positions;
+		static AttribSpan < Vector4 > PMid, PStep, PStepL, PStepR, PBegin, PL, PR; // 7
+		static DataStorage< float >   Attributes;
+		static AttribSpan < float >   VMid, VStep, VStepL, VStepR, VBegin, VL, VR; // 7
+		static AttribSpan < float >   InterpolatedValues;
+
+		Positions.Prepare( 7 );
+		Attributes.Prepare( 7, a_Stride * sizeof( float ) );
+		InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
+
+		PMid  .Set( Positions .Head() + 0ul, 1 );
+		PStep .Set( Positions .Head() + 1ul, 1 );
+		PStepL.Set( Positions .Head() + 2ul, 1 );
+		PStepR.Set( Positions .Head() + 3ul, 1 );
+		PBegin.Set( Positions .Head() + 4ul, 1 );
+		PL    .Set( Positions .Head() + 5ul, 1 );
+		PR    .Set( Positions .Head() + 6ul, 1 );
+		VMid  .Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
+		VStep .Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
+		VStepL.Set( Attributes.Head() + 2ul * a_Stride, a_Stride );
+		VStepR.Set( Attributes.Head() + 3ul * a_Stride, a_Stride );
+		VBegin.Set( Attributes.Head() + 4ul * a_Stride, a_Stride );
+		VL    .Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
+		VR    .Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
+
+ 		// Find Mid point in screen space.
+		float L = ( a_P[ 1 ].y - a_P[ 2 ].y ) / ( a_P[ 0 ].y - a_P[ 2 ].y );
+		*PMid = Math::Lerp( L, a_P[ 2 ], a_P[ 0 ] );
+		PMid->y = static_cast< int >( PMid->y );
+
+		// Calculate Vertex attributes mid point.
+		for ( uint32_t i = 0; i < a_Stride; ++i )
+		{
+			VMid[ i ] = Math::Lerp( L, a_V[ 2 ][ i ], a_V[ 0 ][ i ] );
+		}
+
+		// Swap  vertex 1 and Mid if Mid is not on right.
+		if ( PMid->x < a_P[ 1 ].x )
+		{
+			std::swap( *PMid, a_P[ 1 ] );
+			VMid.Swap( a_V[ 1 ] );
+		}
+
+		if ( a_P[ 2 ].y != a_P[ 1 ].y )
+		{
+			SpanY = 1.0f / ( a_P[ 1 ].y - a_P[ 2 ].y );
+			*PStepL = a_P[ 1 ] - a_P[ 2 ];
+			*PStepL *= SpanY;
+			*PStepR = *PMid - a_P[ 2 ];
+			*PStepR *= SpanY;
+			*PL = a_P[ 2 ];
+			*PR = a_P[ 2 ];
+			VStepL = a_V[ 1 ];
+			VStepL -= a_V[ 2 ];
+			VStepL *= SpanY;
+			VStepR = VMid;
+			VStepR -= a_V[ 2 ];
+			VStepR *= SpanY;
+			VL = a_V[ 2 ];
+			VR = a_V[ 2 ];
+			Y = a_P[ 2 ].y;
+
+			for ( ; Y < a_P[ 1 ].y; ++Y )
+			{
+				SpanX = 1.0f / ( PR->x - PL->x );
+				*PBegin = *PL;
+				*PStep = ( *PR - *PL ) * SpanX;
+				VBegin = VL;
+				VStep = VR;
+				VStep -= VL;
+				VStep *= SpanX;
+
+				for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
+				{
+					if constexpr ( _DepthTest )
+					{
+						if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+						{
+							continue;
+						}
+					}
+
+					InterpolatedValues = VBegin;
+
+					if constexpr ( _Perspective )
+					{
+						InterpolatedValues /= PBegin->w;
+					}
+
+					//_FragCoord = PBegin;
+					a_FragmentShader();
+					Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
+					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
+				}
+
+				*PL += *PStepL;
+				*PR += *PStepR;
+				VL += VStepL;
+				VR += VStepR;
+			}
+		}
+		else
+		{
+			Y = a_P[ 1 ].y;
+			*PL = a_P[ 1 ];
+			*PR = *PMid;
+			VL = a_V[ 1 ];
+			VR = VMid;
+		}
+
+		if ( a_P[ 1 ].y != a_P[ 0 ].y )
+		{
+			SpanY = 1.0f / ( a_P[ 0 ].y - a_P[ 1 ].y );
+			*PStepL = a_P[ 0 ] - a_P[ 1 ];
+			*PStepL *= SpanY;
+			*PStepR = a_P[ 0 ] - *PMid;
+			*PStepR *= SpanY;
+			VStepL = a_V[ 0 ];
+			VStepL -= a_V[ 1 ];
+			VStepL *= SpanY;
+			VStepR = a_V[ 0 ];
+			VStepR -= VMid;
+			VStepR *= SpanY;
+
+			for ( ; Y < a_P[ 0 ].y; ++Y )
+			{
+				SpanX = 1.0f / ( PR->x - PL->x );
+				*PBegin = *PL;
+				*PStep = ( *PR - *PL ) * SpanX;
+				VBegin = VL;
+				VStep = VR;
+				VStep -= VL;
+				VStep *= SpanX;
+
+				for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
+				{
+
+					if constexpr ( _DepthTest )
+					{
+						if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
+						{
+							continue;
+						}
+					}
+
+					InterpolatedValues = VBegin;
+
+					if constexpr ( _Perspective )
+					{
+						InterpolatedValues /= PBegin->w;
+					}
+
+					//_FragCoord = PBegin;
+					a_FragmentShader();
+					Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
+					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
+				}
+
+				*PL += *PStepL;
+				*PR += *PStepR;
+				VL += VStepL;
+				VR += VStepR;
+			}
+		}
+	}
+	
+	template < uint8_t _Plane >
+	static void IntersectPlane( Vector4* a_PStart, Vector4* a_PEnd, AttribSpan< float >* a_VStart, AttribSpan< float >* a_VEnd, Vector4* o_POutput, AttribSpan< float >* o_VOutput )
+	{
+		static constexpr Vector3 _Normal = 
+			std::array< Vector3, 6 >( {
+			Vector3(  1,  0,  0 ), // Left
+			Vector3( -1,  0,  0 ), // Right
+			Vector3(  0,  1,  0 ), // Bottom
+			Vector3(  0, -1,  0 ), // Top
+			Vector3(  0,  0,  1 ), // Front
+			Vector3(  0,  0, -1 ), // Back
+		} )[ _Plane ];
+
+		float AD =
+			a_PStart->x * _Normal.x +
+			a_PStart->y * _Normal.y +
+			a_PStart->z * _Normal.z;
+
+		float BD =
+			a_PEnd->x * _Normal.x +
+			a_PEnd->y * _Normal.y +
+			a_PEnd->z * _Normal.z;
+
+		float T = ( AD + 1.0f ) / ( AD - BD );
+		*o_POutput = ( *a_PEnd - *a_PStart ) * T + *a_PStart;
+
+		*o_VOutput = *a_VEnd;
+		*o_VOutput -= *a_VStart;
+		*o_VOutput *= T;
+		*o_VOutput += *a_VStart;
+	}
+
+	template < uint8_t _Plane >
+	static float DistanceFromPlane( Vector4* a_Point )
+	{
+		static constexpr Vector3 _Normal = 
+			std::array< Vector3, 6 >( {
+			Vector3(  1,  0,  0 ), // Left
+			Vector3( -1,  0,  0 ), // Right
+			Vector3(  0,  1,  0 ), // Bottom
+			Vector3(  0, -1,  0 ), // Top
+			Vector3(  0,  0,  1 ), // Front
+			Vector3(  0,  0, -1 ), // Back
+		} )[ _Plane ];
+
+		return 
+			_Normal.x * a_Point->x + 
+			_Normal.y * a_Point->y + 
+			_Normal.z * a_Point->z + 1.0f;
+	}
+	
+	template < uint8_t _Plane = 0 >
+	static void ViewportClipTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_Rasterizer )( Vector4*, AttribSpan< float >*, uint32_t, void(*)() ), void( *a_Converter )( Vector4* ), void( *a_FragmentShader )() )
+	{
+		Vector4* PIn[ 3 ];
+		Vector4* POut[ 3 ];
+		AttribSpan< float >* VIn[ 3 ];
+		AttribSpan< float >* VOut[ 3 ];
+		int InCount = 0;
+		int OutCount = 0;
+
+		float D0 = DistanceFromPlane< _Plane >( a_P + 0 );
+		float D1 = DistanceFromPlane< _Plane >( a_P + 1 );
+		float D2 = DistanceFromPlane< _Plane >( a_P + 2 );
+
+		if ( D0 >= 0 ) 
+		{ 
+			PIn[ InCount   ] = a_P + 0;
+			VIn[ InCount++ ] = a_V + 0;
+		}
+		else
+		{
+			POut[ OutCount   ] = a_P + 0;
+			VOut[ OutCount++ ] = a_V + 0;
+		}
+
+		if ( D1 >= 0 ) 
+		{ 
+			PIn[ InCount   ] = a_P + 1;
+			VIn[ InCount++ ] = a_V + 1;
+		}
+		else 
+		{
+			POut[ OutCount   ] = a_P + 1;
+			VOut[ OutCount++ ] = a_V + 1;
+		}
+
+		if ( D2 >= 0 )
+		{
+			PIn[ InCount   ] = a_P + 2;
+			VIn[ InCount++ ] = a_V + 2;
+		}
+		else
+		{
+			POut[ OutCount   ] = a_P + 2;
+			VOut[ OutCount++ ] = a_V + 2;
+		}
+
+		static DataStorage< float > VertexData;
+		static Vector4              POutput[ 6 ];
+		static AttribSpan< float >  VOutput[ 6 ];
+		VertexData.Prepare( a_Stride * 6 );
+		VOutput[ 0 ].Set( VertexData.Data() + a_Stride * 0, a_Stride );
+		VOutput[ 1 ].Set( VertexData.Data() + a_Stride * 1, a_Stride );
+		VOutput[ 2 ].Set( VertexData.Data() + a_Stride * 2, a_Stride );
+		VOutput[ 3 ].Set( VertexData.Data() + a_Stride * 3, a_Stride );
+		VOutput[ 4 ].Set( VertexData.Data() + a_Stride * 4, a_Stride );
+		VOutput[ 5 ].Set( VertexData.Data() + a_Stride * 5, a_Stride );
+		uint32_t Clipped = 0;
+		
+		switch ( InCount )
+		{
+			case 0:
+			{
+				return;
+			}
+			case 1:
+			{
+				POutput[ 0 ] = *PIn[ 0 ];
+				VOutput[ 0 ] = *VIn[ 0 ];
+				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 0 ], VIn[ 0 ], VOut[ 0 ], POutput + 1, VOutput + 1 );
+				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 1 ], VIn[ 0 ], VOut[ 1 ], POutput + 2, VOutput + 2 );
+				Clipped = 1;
+				break;
+			}
+			case 2:
+			{
+				POutput[ 0 ] = *PIn[ 0 ];
+				VOutput[ 0 ] = *VIn[ 0 ];
+				POutput[ 1 ] = *PIn[ 1 ];
+				VOutput[ 1 ] = *VIn[ 1 ];
+				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 0 ], VIn[ 0 ], VOut[ 0 ], POutput + 2, VOutput + 2 );
+				POutput[ 3 ] = *PIn[ 1 ];
+				VOutput[ 3 ] = *VIn[ 1 ];
+				POutput[ 4 ] = POutput[ 2 ];
+				VOutput[ 4 ] = VOutput[ 2 ];
+				IntersectPlane< _Plane >( PIn[ 1 ], POut[ 0 ], VIn[ 1 ], VOut[ 0 ], POutput + 5, VOutput + 5 );
+				Clipped = 2;
+				break;
+			}
+			case 3:
+			{
+				POutput[ 0 ] = *PIn[ 0 ];
+				VOutput[ 0 ] = *VIn[ 0 ];
+				POutput[ 1 ] = *PIn[ 1 ];
+				VOutput[ 1 ] = *VIn[ 1 ];
+				POutput[ 2 ] = *PIn[ 2 ];
+				VOutput[ 2 ] = *VIn[ 2 ];
+				Clipped = 1;
+				break;
+			}
+		}
+
+		if constexpr ( _Plane < 3 )
+		{
+			switch ( Clipped )
+			{
+				case 1:
+				{
+					ViewportClipTriangle< _Plane + 1 >( POutput + 0, VOutput + 0, a_Stride, a_Rasterizer, a_Converter, a_FragmentShader );
+					break;
+				}
+				case 2:
+				{
+					ViewportClipTriangle< _Plane + 1 >( POutput + 0, VOutput + 0, a_Stride, a_Rasterizer, a_Converter, a_FragmentShader );
+					ViewportClipTriangle< _Plane + 1 >( POutput + 3, VOutput + 3, a_Stride, a_Rasterizer, a_Converter, a_FragmentShader );
+					break;
+				}
+			}
+		}
+		else
+		{
+			a_Converter( POutput + 0 );
+			a_Converter( POutput + 1 );
+			a_Converter( POutput + 2 );
+			a_Rasterizer( POutput + 0, VOutput + 0, a_Stride, a_FragmentShader );
+
+			if ( Clipped == 1 )
+			{
+				return;
+			}
+
+			a_Converter( POutput + 3 );
+			a_Converter( POutput + 4 );
+			a_Converter( POutput + 5 );
+			a_Rasterizer( POutput + 3, VOutput + 3, a_Stride, a_FragmentShader );
+		}
 	}
 
 	template < uint8_t _Interface >
@@ -1585,17 +1973,30 @@ private:
 		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
 		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
 
+		// Prepare screen space size.
+		static Vector2 FullWindow, HalfWindow;
+		FullWindow = Vector2::One * 0.1f + ConsoleWindow::GetCurrentContext()->GetSize();
+		HalfWindow = 0.5f * FullWindow;
+
+		static constexpr auto ConvertToScreenSpace = []( Vector4* a_P )
+		{
+			a_P->x += 1.0f;
+			a_P->y += 1.0f;
+			a_P->x *= HalfWindow.x;
+			a_P->y *= HalfWindow.y;
+			a_P->y = static_cast< int >( FullWindow.y - a_P->y );
+		};
+
+		// Get spans that will be set to vertex and position storage.
 		static AttribSpan< Vector4 > P[ 3 ];
 		static AttribSpan< float   > V[ 3 ];
-
-		auto& ActiveArray = s_ArrayRegistry[ s_ActiveArray ];
-		Rect ViewPort = ConsoleWindow::GetCurrentContext()->GetScreenBuffer().GetBufferRect();
 
 		// Reset position and vertex storage.
 		s_VertexStorage.Reset();
 		s_PositionStorage.Reset();
 		s_InterpolatedStorage.Prepare( a_Stride );
 
+		// Setup views into position and vertex storages.
 		P[ 0 ].Set( s_PositionStorage.Head() + 0ul, 1 );
 		P[ 1 ].Set( s_PositionStorage.Head() + 1ul, 1 );
 		P[ 2 ].Set( s_PositionStorage.Head() + 2ul, 1 );
@@ -1611,17 +2012,14 @@ private:
 			  , V[ 1 ].Advance( 3 )
 			  , V[ 2 ].Advance( 3 ) )
 		{
-			// Clipping - Improve later - Currently reject if any point outside viewport.
-			if constexpr ( _Clipping )
-			{
-				// Implement clipping algorithm
-			}
-			else
+			// If clipping is off, reject if any point outside viewport.
+			if constexpr ( !_Clipping )
 			{
 				bool Reject = false;
 
 				for ( uint32_t i = 0; i < 3; ++i )
 				{
+					static constexpr Rect ViewPort = { -1, -1, 2, 2 };
 					if ( !ViewPort.Contains( *P[ i ] ) )
 					{
 						Reject = true;
@@ -1634,7 +2032,23 @@ private:
 					continue;
 				}
 			}
-			
+			else
+			{
+				bool reject = false;
+				for ( uint32_t i = 0; i < 3; ++i )
+				{
+					if ( P[ i ]->z <= 0.1f )
+					{
+						reject = true;
+						break;
+					}
+				}
+				if ( reject ) continue;
+
+				P[ 0 ]->z *= P[ 0 ]->w;
+				P[ 1 ]->z *= P[ 1 ]->w;
+				P[ 2 ]->z *= P[ 2 ]->w;
+			}
 
 			// Culling - Improve later - if enabled and correct orientation, continue.
 			if constexpr ( _CullFront || _CullBack )
@@ -1658,203 +2072,17 @@ private:
 				}
 			}
 
-			// Correct Y
-			P[ 0 ]->y = -P[ 0 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			P[ 1 ]->y = -P[ 1 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-			P[ 2 ]->y = -P[ 2 ]->y - 1.0f + ConsoleWindow::GetCurrentContext()->GetHeight();
-
-			// Sort corners.
-			if ( P[ 0 ]->y < P[ 1 ]->y )
+			// If clipping is enabled, clip the triangle and further process generated triangles.
+			if constexpr ( _Clipping )
 			{
-				P[ 0 ].Swap( P[ 1 ] );
-				V[ 0 ].Swap( V[ 1 ] );
-			}
-
-			if ( P[ 0 ]->y < P[ 2 ]->y )
-			{
-				P[ 0 ].Swap( P[ 2 ] );
-				V[ 0 ].Swap( V[ 2 ] );
-			}
-
-			if ( P[ 1 ]->y < P[ 2 ]->y )
-			{
-				P[ 1 ].Swap( P[ 2 ] );
-				V[ 1 ].Swap( V[ 2 ] );
-			}
-
-			// Align y.
-			P[ 0 ]->y = static_cast< int >( P[ 0 ]->y );
-			P[ 1 ]->y = static_cast< int >( P[ 1 ]->y );
-			P[ 2 ]->y = static_cast< int >( P[ 2 ]->y );
-
-			if ( P[ 0 ]->y == P[ 2 ]->y )
-			{
-				continue;
-			}
-
-			// Setup Position and Attribute values.
-			float SpanX, SpanY, Y;
-			static DataStorage< Vector4 > Positions;
-			static AttribSpan < Vector4 > PMid, PStep, PStepL, PStepR, PBegin, PL, PR; // 7
-			static DataStorage< float >   Attributes;
-			static AttribSpan < float >   VMid, VStep, VStepL, VStepR, VBegin, VL, VR; // 7
-			static AttribSpan < float >   InterpolatedValues;
-
-			Positions.Prepare( 7 );
-			Attributes.Prepare( 7, a_Stride * sizeof( float ) ); 
-			InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
-
-			PMid  .Set( Positions .Head() + 0ul, 1                   );
-			PStep .Set( Positions .Head() + 1ul, 1                   );
-			PStepL.Set( Positions .Head() + 2ul, 1                   );
-			PStepR.Set( Positions .Head() + 3ul, 1                   );
-			PBegin.Set( Positions .Head() + 4ul, 1                   );
-			PL    .Set( Positions .Head() + 5ul, 1                   );
-			PR    .Set( Positions .Head() + 6ul, 1                   );
-			VMid  .Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
-			VStep .Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
-			VStepL.Set( Attributes.Head() + 2ul * a_Stride, a_Stride );
-			VStepR.Set( Attributes.Head() + 3ul * a_Stride, a_Stride );
-			VBegin.Set( Attributes.Head() + 4ul * a_Stride, a_Stride );
-			VL    .Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
-			VR    .Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
-
-			// Find Mid point in screen space.
-			float L = ( P[ 1 ]->y - P[ 2 ]->y ) / ( P[ 0 ]->y - P[ 2 ]->y );
-			*PMid = Math::Lerp( L, *P[ 2 ], *P[ 0 ] );
-			PMid->y = static_cast< int >( PMid->y );
-
-			// Calculate Vertex attributes mid point.
-			for ( uint32_t i = 0; i < a_Stride; ++i )
-			{
-				VMid[ i ] = Math::Lerp( L, V[ 2 ][ i ], V[ 0 ][ i ] );
-			}
-
-			// Swap  vertex 1 and Mid if Mid is not on right.
-			if ( PMid->x < P[ 1 ]->x )
-			{
-				PMid.Swap( P[ 1 ] );
-				VMid.Swap( V[ 1 ] );
-			}
-
-			if ( P[ 2 ]->y != P[ 1 ]->y )
-			{
-				SpanY = 1.0f / ( P[ 1 ]->y - P[ 2 ]->y );
-				*PStepL = *P[ 1 ] - *P[ 2 ];
-				*PStepL *= SpanY;
-				*PStepR = *PMid - *P[ 2 ];
-				*PStepR *= SpanY;
-				*PL = *P[ 2 ];
-				*PR = *P[ 2 ];
-				VStepL = V[ 1 ];
-				VStepL -= V[ 2 ];
-				VStepL *= SpanY;
-				VStepR = VMid;
-				VStepR -= V[ 2 ];
-				VStepR *= SpanY;
-				VL = V[ 2 ];
-				VR = V[ 2 ];
-				Y = P[ 2 ]->y;
-
-				for ( ; Y < P[ 1 ]->y; ++Y )
-				{
-					*PL += *PStepL;
-					*PR += *PStepR;
-					VL += VStepL;
-					VR += VStepR;
-					SpanX = 1.0f / ( PR->x - PL->x );
-					*PBegin = *PL;
-					*PStep = ( *PR - *PL ) * SpanX;
-					VBegin = VL;
-					VStep  = VR;
-					VStep -= VL;
-					VStep *= SpanX;
-
-					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
-					{
-						if constexpr ( _DepthTest )
-						{
-							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
-							{
-								continue;
-							}
-						}
-
-						InterpolatedValues = VBegin;
-
-						if constexpr ( _Perspective )
-						{
-							InterpolatedValues /= PBegin->w;
-						}
-
-						//_FragCoord = PBegin;
-						a_FragmentShader();
-						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
-					}
-				}
+				ViewportClipTriangle( &P[ 0 ][ 0 ], V, a_Stride, RasterizeTriangle< _Interface >, ConvertToScreenSpace, a_FragmentShader );
 			}
 			else
 			{
-				Y = P[ 1 ]->y;
-				*PL = *P[ 1 ];
-				*PR = *PMid;
-				VL = V[ 1 ];
-				VR = VMid;
-			}
-
-			if ( P[ 1 ]->y != P[ 0 ]->y )
-			{
-				SpanY = 1.0f / ( P[ 0 ]->y - P[ 1 ]->y );
-				*PStepL = *P[ 0 ] - *P[ 1 ]; 
-				*PStepL *= SpanY;
-				*PStepR = *P[ 0 ] - *PMid; 
-				*PStepR *= SpanY;
-				VStepL = V[ 0 ];
-				VStepL -= V[ 1 ];
-				VStepL *= SpanY;
-				VStepR = V[ 0 ];
-				VStepR -= VMid;
-				VStepR *= SpanY;
-
-				for ( ; Y < P[ 0 ]->y; ++Y )
-				{
-					*PL += *PStepL;
-					*PR += *PStepR;
-					VL += VStepL;
-					VR += VStepR;
-					SpanX = 1.0f / ( PR->x - PL->x );
-					*PBegin = *PL;
-					*PStep = ( *PR - *PL ) * SpanX;
-					VBegin = VL;
-					VStep = VR;
-					VStep -= VL;
-					VStep *= SpanX;
-
-					for ( ; PBegin->x < static_cast< int >( PR->x ); *PBegin += *PStep, VBegin += VStep )
-					{
-
-						if constexpr ( _DepthTest )
-						{
-							if ( !s_DepthBuffer.TestAndCommit( PBegin->x, PBegin->y, PBegin->z / PBegin->w ) )
-							{
-								continue;
-							}
-						}
-						
-						InterpolatedValues = VBegin;
-
-						if constexpr ( _Perspective )
-						{
-							InterpolatedValues /= PBegin->w;
-						}
-
-						//_FragCoord = PBegin;
-						a_FragmentShader();
-						Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-						ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
-					}
-				}
+				ConvertToScreenSpace( &P[ 0 ][ 0 ] );
+				ConvertToScreenSpace( &P[ 1 ][ 0 ] );
+				ConvertToScreenSpace( &P[ 2 ][ 0 ] );
+				RasterizeTriangle< _Interface >( &P[ 0 ][ 0 ], V, a_Stride, a_FragmentShader );
 			}
 		}
 	}
@@ -1865,8 +2093,8 @@ private:
 		auto& ActiveProgram = s_ShaderProgramRegistry[ s_ActiveShaderProgram ];
 		uint32_t AttribStride = s_VaryingStrides[ ActiveProgram[ ShaderType::VERTEX_SHADER ] ] / sizeof( float );
 
-		ProcessVertices < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
-		ProcessFragments< _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
+		ProcessVertices     < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::VERTEX_SHADER ] );
+		ProcessFragments    < _Interface >( a_Begin, a_Begin + a_Count, AttribStride, ActiveProgram[ ShaderType::FRAGMENT_SHADER ] );
 	}
 
 	template < size_t... Idxs >
@@ -2372,6 +2600,11 @@ private:
 	inline static UniformMap                      s_UniformMap;
 	inline static DataStorage< float >            s_VertexStorage;
 	inline static DataStorage< Vector4 >          s_PositionStorage;
+
+	// Clipping storages.
+	inline static DataStorage< float >            s_ClippedVertexStorage;
+	inline static DataStorage< Vector4 >          s_ClippedPositionStorage;
+
 	inline static DataStorage< float >            s_InterpolatedStorage;
 	inline static StrideRegistry                  s_VaryingStrides;
 	inline static RenderState                     s_RenderState;

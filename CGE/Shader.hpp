@@ -133,7 +133,7 @@ public:
 	static Shader Default;
 	static Shader Diffuse;
 	static Shader Specular;
-	static Shader Normals;
+	static Shader Normal;
 	static Shader Phong;
 	// More lighting models.
 };

@@ -7,6 +7,16 @@ struct TRect
 	Vector< T, 2 > Origin;
 	Vector< T, 2 > Size;
 
+	constexpr TRect()
+		: Origin()
+		, Size()
+	{ }
+
+	constexpr TRect( T a_X, T a_Y, T a_W, T a_H )
+		: Origin( a_X, a_Y )
+		, Size( a_W, a_H )
+	{ }
+
 	inline T GetLeft() const
 	{
 		return Origin.x;

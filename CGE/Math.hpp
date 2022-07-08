@@ -1280,13 +1280,13 @@ struct Vector< T, 2 > : public IVector< T, 2 >
 	}
 
 	template < typename U >
-	Vector( U a_X, U a_Y )
+	constexpr Vector( U a_X, U a_Y )
 		: x( static_cast< T >( a_X ) )
 		, y( static_cast< T >( a_Y ) )
 	{ }
 
 	template < typename U, size_t S0, size_t I0, typename... V >
-	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
+	constexpr Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
 		size_t Size = Math::Min( S0, static_cast< size_t >( 2 ) );
 		size_t i = 0;
@@ -1379,10 +1379,10 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 		} swizzle;
 	};
 
-	Vector() = default;
+	constexpr Vector() = default;
 
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
-	Vector( U a_Scalar )
+	constexpr Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 3; ++i )
 		{
@@ -1391,14 +1391,14 @@ struct Vector< T, 3 > : public IVector< T, 3 >
 	}
 
 	template < typename U >
-	Vector( U a_X, U a_Y, U a_Z )
+	constexpr Vector( U a_X, U a_Y, U a_Z )
 		: x( static_cast< T >( a_X ) )
 		, y( static_cast< T >( a_Y ) )
 		, z( static_cast< T >( a_Z ) )
 	{ }
 
 	template < typename U, size_t S0, size_t I0, typename... V >
-	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
+	constexpr Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
 		size_t Size = Math::Min( S0, static_cast< size_t >( 3 ) );
 		size_t i = 0;
@@ -1802,10 +1802,10 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 		} swizzle;
 	};
 
-	Vector() = default;
+	constexpr Vector() = default;
 
 	template < typename U, typename = std::enable_if_t< std::is_arithmetic_v< U > > >
-	Vector( U a_Scalar )
+	constexpr Vector( U a_Scalar )
 	{
 		for ( size_t i = 0; i < 4; ++i )
 		{
@@ -1814,7 +1814,7 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 	}
 
 	template < typename U >
-	Vector( U a_X, U a_Y, U a_Z, U a_W )
+	constexpr Vector( U a_X, U a_Y, U a_Z, U a_W )
 		: x( static_cast< T >( a_X ) )
 		, y( static_cast< T >( a_Y ) )
 		, z( static_cast< T >( a_Z ) )
@@ -1822,7 +1822,7 @@ struct Vector< T, 4 > : public IVector< T, 4 >
 	{ }
 
 	template < typename U, size_t S0, size_t I0, typename... V >
-	Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
+	constexpr Vector( const IVector< U, S0, I0 >& a_Vector, V&&... a_Trailing )
 	{
 		size_t Size = Math::Min( S0, static_cast< size_t >( 3 ) );
 		size_t i = 0;
