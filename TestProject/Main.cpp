@@ -1,18 +1,6 @@
-#include "Texture.hpp"
-#include "Mesh.hpp"
-#include "Input.hpp"
-#include "Light.hpp"
-#include "MeshRenderer.hpp"
-#include "Transform.hpp"
-#include "GameObject.hpp"
-#include "Camera.hpp"
-#include "File.hpp"
-#include "Resource.hpp"
-#include "ConsoleWindow.hpp"
-#include "Rendering.hpp"
-#include "Math.hpp"
 #include "CGE.hpp"
-#include "Prefab.hpp"
+#include "Component.hpp"
+#include "GameObject.hpp"
 
 int main()
 {
@@ -48,7 +36,7 @@ int main()
 
 	Action<> GameLoop = [&]()
 	{
-		Sleep( 1 );
+		Transform* ThisTransform = this->GetOwner()->GetTransform();
 
 		Transform* CameraTransform = CameraObject.GetTransform();
 
@@ -69,7 +57,4 @@ int main()
 		if ( Input::IsKeyDown( KeyCode::E ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalUp()       * 0.1f );
 	};
 
-	CGE::Run( GameLoop );
-	
-	return 0;
 }
