@@ -9,3 +9,5 @@ add_subdirectory(CGE)
 add_subdirectory(ResourcePackager)
 add_subdirectory(TestProject)
 
+file(COPY ${PROJECT_SOURCE_DIR}/TestProject/Resources DESTINATION ${PROJECT_BINARY_DIR}/TestProject/)
+
