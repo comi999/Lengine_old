@@ -245,6 +245,26 @@ enum class RenderMode : uint8_t
 	TRIANGLE
 };
 
+enum class ClipPlane : uint8_t
+{
+	CLIP_PLANE0, 
+	CLIP_PLANE1, 
+	CLIP_PLANE2, 
+	CLIP_PLANE3, 
+	CLIP_PLANE4,
+	CLIP_PLANE5,
+	CLIP_PLANE6,
+	CLIP_PLANE7,
+	CLIP_PLANE8,
+	CLIP_PLANE9,
+	CLIP_PLANE10,
+	CLIP_PLANE11,
+	CLIP_PLANE12,
+	CLIP_PLANE13,
+	CLIP_PLANE14, 
+	CLIP_PLANE15
+};
+
 #define DefineShader( Name ) \
 void Shader_##Name ();       \
 template <> void* Internal::ShaderAddress< "Shader_"#Name##_H > = Shader_##Name; \
@@ -352,18 +372,8 @@ public:
 	// Vertex out variables.
 	inline static Vector4 Position;
 
-	// Fragment in variables.
-private:
-
-	inline static Vector4 _FragCoord;
-
-public:
-
-	inline static const Vector4& FragCoord = _FragCoord;
-
 	// Fragment out variables.
 	inline static Vector4 FragColour;
-	inline static float& FragDepth = FragColour.z;
 
 	// Shader functions
 	static ShaderHandle CreateShader( ShaderType a_ShaderType );
@@ -407,6 +417,8 @@ public:
 
 	static void GetBooleanv( RenderSetting a_RenderSetting, bool* a_Value );
 	// Need the other Get functions.
+
+	static void ClipPlane( const double* a_Equation );
 
 	// Textures
 	static void ActiveTexture( uint32_t a_ActiveTexture );	
@@ -1109,6 +1121,88 @@ private:
 		SeekFunction      m_SeekFunction;
 		AttributeIterator m_VertexAttributes[ 8 ];
 	};
+	class ClipPlaneRegistry
+	{
+	public:
+
+		void Enable( uint32_t a_Index )
+		{
+			if ( m_Offset[ a_Index ] != uint8_t( -1 ) )
+			{
+				return;
+			}
+
+			m_Offset[ a_Index ] = m_Size;
+			m_Enabled[ m_Size++ ] = m_Planes[ a_Index ];
+		}
+
+		void Disable( uint32_t a_Index )
+		{
+			if ( m_Offset[ a_Index ] == uint8_t( -1 ) )
+			{
+				return;
+			}
+
+			uint32_t Index = m_Offset[ a_Index ];
+			m_Offset[ a_Index ] = uint8_t( -1 );
+			--m_Size;
+
+			for ( uint32_t i = Index; i < m_Size; ++i )
+			{
+				m_Enabled[ i ] = m_Enabled[ i + 1 ];
+			}
+
+			for ( uint8_t& i : m_Offset )
+			{
+				if ( i >= m_Size && i != uint8_t( -1 ) )
+				{
+					--i;
+				}
+			}
+		}
+
+		inline const Plane& Get( uint32_t a_Index ) const
+		{
+			return m_Planes[ a_Index ];
+		}
+
+		inline void Set( uint32_t a_Index, const Plane& a_Plane )
+		{
+			m_Planes[ a_Index ] = a_Plane;
+			
+			if ( m_Offset[ a_Index ] != uint8_t( -1 ) )
+			{
+				m_Enabled[ m_Offset[ a_Index ] ] = a_Plane;
+			}
+		}
+
+		inline const Plane* Data() const
+		{
+			return m_Enabled.data();
+		}
+
+		inline const Plane* Raw() const
+		{
+			return m_Planes.data();
+		}
+
+		inline size_t Size() const
+		{
+			return m_Size;
+		}
+
+		inline constexpr size_t Capacity() const
+		{
+			return m_Planes.size();
+		}
+
+	private:
+
+		uint8_t                   m_Size;
+		std::array< uint8_t, 16 > m_Offset;
+		std::array< Plane,   16 > m_Enabled;
+		std::array< Plane,   16 > m_Planes;
+	};
 	class UniformMap
 	{
 	public:
@@ -1436,14 +1530,14 @@ private:
 	public:
 
 		RenderState()
-			: AlphaBlend( false )
-			, Perspective( true )
-			, Viewport( false )
-			, CullFace( false )
-			, FrontCull( false )
-			, BackCull( true )
-			, DepthTest( true )
-			, Clip( true )
+			: AlphaBlend ( false ) // Unimplemented
+			, Perspective( false )  
+			, Viewport   ( false ) // Unimplemented
+			, CullFace   ( false ) 
+			, FrontCull  ( false )
+			, BackCull   ( true )
+			, DepthTest  ( true )
+			, Clip       ( true )
 		{ }
 
 		bool AlphaBlend  : 1;
@@ -1513,72 +1607,18 @@ private:
 		Vector2Int m_Size;
 		float*     m_Buffer;
 	};
-	
-	template < uint8_t _Interface >
-	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
-	{
-		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
-		static constexpr bool _Unused0	   = _Interface & ( 1u << 2u );
-		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
-
-		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
-		s_PositionStorage.Prepare( a_End - a_Begin );
-		s_AttributeRegistry = a_Begin;
-		AttribSpan< float > AttribView;
-
-		// If perspective divide is enabled, setup the attribute view.
-		if constexpr ( _Perspective )
-		{
-			AttribView.Set( s_VertexStorage.Data(), a_Stride );
-		}
-
-		for ( ; a_Begin < a_End; ++a_Begin )
-		{
-			a_VertexShader();
-
-			// Perspective divide x and y but if clipping is on, 
-			// leave z for after near plane clipping.
-			Position.w = 1.0f / Position.w;
-			Position.x *= Position.w;
-			Position.y *= Position.w;
-
-			// If clipping is off, it is ok to perspective divide
-			// z coordinate here.
-			if constexpr ( !_Clipping )
-			{
-				Position.z *= Position.w;
-			}
-
-			s_PositionStorage = Position;
-			++s_AttributeRegistry;
-			++s_VertexStorage;
-			++s_PositionStorage;
-
-			// Divide all attributes by w as well for perspective correctness.
-			if constexpr ( _Perspective )
-			{
-				AttribView *= Position.w;
-				AttribView.Advance();
-			}
-		}
-	}
 
 	template < uint8_t _Interface >
-	static void RasterizeTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_FragmentShader )() )
+	static void RasterizeTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_FragmentShader )( ) )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
-		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
-		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+		static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
 
 		// Sort corners.
 		if ( a_P[ 0 ].y < a_P[ 1 ].y )
@@ -1616,22 +1656,22 @@ private:
 		Attributes.Prepare( 7, a_Stride * sizeof( float ) );
 		InterpolatedValues.Set( s_InterpolatedStorage.Data(), a_Stride );
 
-		PMid  .Set( Positions .Head() + 0ul, 1 );
-		PStep .Set( Positions .Head() + 1ul, 1 );
-		PStepL.Set( Positions .Head() + 2ul, 1 );
-		PStepR.Set( Positions .Head() + 3ul, 1 );
-		PBegin.Set( Positions .Head() + 4ul, 1 );
-		PL    .Set( Positions .Head() + 5ul, 1 );
-		PR    .Set( Positions .Head() + 6ul, 1 );
-		VMid  .Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
-		VStep .Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
+		PMid.Set( Positions.Head() + 0ul, 1 );
+		PStep.Set( Positions.Head() + 1ul, 1 );
+		PStepL.Set( Positions.Head() + 2ul, 1 );
+		PStepR.Set( Positions.Head() + 3ul, 1 );
+		PBegin.Set( Positions.Head() + 4ul, 1 );
+		PL.Set( Positions.Head() + 5ul, 1 );
+		PR.Set( Positions.Head() + 6ul, 1 );
+		VMid.Set( Attributes.Head() + 0ul * a_Stride, a_Stride );
+		VStep.Set( Attributes.Head() + 1ul * a_Stride, a_Stride );
 		VStepL.Set( Attributes.Head() + 2ul * a_Stride, a_Stride );
 		VStepR.Set( Attributes.Head() + 3ul * a_Stride, a_Stride );
 		VBegin.Set( Attributes.Head() + 4ul * a_Stride, a_Stride );
-		VL    .Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
-		VR    .Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
+		VL.Set( Attributes.Head() + 5ul * a_Stride, a_Stride );
+		VR.Set( Attributes.Head() + 6ul * a_Stride, a_Stride );
 
- 		// Find Mid point in screen space.
+		// Find Mid point in screen space.
 		float L = ( a_P[ 1 ].y - a_P[ 2 ].y ) / ( a_P[ 0 ].y - a_P[ 2 ].y );
 		*PMid = Math::Lerp( L, a_P[ 2 ], a_P[ 0 ] );
 		PMid->y = static_cast< int >( PMid->y );
@@ -1695,10 +1735,8 @@ private:
 						InterpolatedValues /= PBegin->w;
 					}
 
-					//_FragCoord = PBegin;
 					a_FragmentShader();
-					Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
+					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
 				}
 
 				*PL += *PStepL;
@@ -1718,7 +1756,7 @@ private:
 
 		if ( a_P[ 1 ].y != a_P[ 0 ].y )
 		{
-			SpanY = 1.0f / ( a_P[ 0 ].y - a_P[ 1 ].y );
+   			SpanY = 1.0f / ( a_P[ 0 ].y - a_P[ 1 ].y );
 			*PStepL = a_P[ 0 ] - a_P[ 1 ];
 			*PStepL *= SpanY;
 			*PStepR = a_P[ 0 ] - *PMid;
@@ -1758,10 +1796,8 @@ private:
 						InterpolatedValues /= PBegin->w;
 					}
 
-					//_FragCoord = PBegin;
 					a_FragmentShader();
-					Colour Fragment( 255 * FragColour[ 0 ], 255 * FragColour[ 1 ], 255 * FragColour[ 2 ], 255 * FragColour[ 3 ] );
-					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, Fragment );
+					ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
 				}
 
 				*PL += *PStepL;
@@ -1771,61 +1807,49 @@ private:
 			}
 		}
 	}
-	
-	template < uint8_t _Plane >
-	static void IntersectPlane( Vector4* a_PStart, Vector4* a_PEnd, AttribSpan< float >* a_VStart, AttribSpan< float >* a_VEnd, Vector4* o_POutput, AttribSpan< float >* o_VOutput )
-	{
-		static constexpr Vector3 _Normal = 
-			std::array< Vector3, 6 >( {
-			Vector3(  1,  0,  0 ), // Left
-			Vector3( -1,  0,  0 ), // Right
-			Vector3(  0,  1,  0 ), // Bottom
-			Vector3(  0, -1,  0 ), // Top
-			Vector3(  0,  0,  1 ), // Front
-			Vector3(  0,  0, -1 ), // Back
-		} )[ _Plane ];
 
-		float AD =
-			a_PStart->x * _Normal.x +
-			a_PStart->y * _Normal.y +
-			a_PStart->z * _Normal.z;
-
-		float BD =
-			a_PEnd->x * _Normal.x +
-			a_PEnd->y * _Normal.y +
-			a_PEnd->z * _Normal.z;
-
-		float T = ( AD + 1.0f ) / ( AD - BD );
-		*o_POutput = ( *a_PEnd - *a_PStart ) * T + *a_PStart;
-
-		*o_VOutput = *a_VEnd;
-		*o_VOutput -= *a_VStart;
-		*o_VOutput *= T;
-		*o_VOutput += *a_VStart;
-	}
-
-	template < uint8_t _Plane >
-	static float DistanceFromPlane( Vector4* a_Point )
-	{
-		static constexpr Vector3 _Normal = 
-			std::array< Vector3, 6 >( {
-			Vector3(  1,  0,  0 ), // Left
-			Vector3( -1,  0,  0 ), // Right
-			Vector3(  0,  1,  0 ), // Bottom
-			Vector3(  0, -1,  0 ), // Top
-			Vector3(  0,  0,  1 ), // Front
-			Vector3(  0,  0, -1 ), // Back
-		} )[ _Plane ];
-
-		return 
-			_Normal.x * a_Point->x + 
-			_Normal.y * a_Point->y + 
-			_Normal.z * a_Point->z + 1.0f;
-	}
-	
 	template < uint8_t _Plane = 0 >
-	static void ViewportClipTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_Rasterizer )( Vector4*, AttribSpan< float >*, uint32_t, void(*)() ), void( *a_Converter )( Vector4* ), void( *a_FragmentShader )() )
+	static void ViewportClipTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_Rasterizer )( Vector4*, AttribSpan< float >*, uint32_t, void( * )( ) ), void( *a_Converter )( Vector4* ), void( *a_FragmentShader )( ) )
 	{
+		static constexpr Vector4 _Normal =
+			std::array< Vector4, 6 >( {
+			Vector4{  1,  0,  0,  1 }, // Left
+			Vector4{ -1,  0,  0,  1 }, // Right
+			Vector4{  0,  1,  0,  1 }, // Bottom
+			Vector4{  0, -1,  0,  1 }, // Top 
+			Vector4{  0,  0,  1,  1 }, // Front
+			Vector4{  0,  0, -1,  1 }, // Back
+		} )[ _Plane ];
+
+		static constexpr auto IntersectPlane = [](
+			Vector4* a_PStart,
+			Vector4* a_PEnd,
+			Vector4* o_POutput,
+			AttribSpan< float >* a_VStart,
+			AttribSpan< float >* a_VEnd,
+			AttribSpan< float >* o_VOutput )
+		{
+			float AD =
+				a_PStart->x * _Normal.x +
+				a_PStart->y * _Normal.y + 
+				a_PStart->z * _Normal.z + 
+				a_PStart->w;
+
+			float BD =
+				a_PEnd->x * _Normal.x +
+				a_PEnd->y * _Normal.y +
+				a_PEnd->z * _Normal.z +
+				a_PEnd->w;
+
+			float T = AD / ( AD - BD );
+			*o_POutput = ( *a_PEnd - *a_PStart ) * T + *a_PStart;
+
+			*o_VOutput = *a_VEnd;
+			*o_VOutput -= *a_VStart;
+			*o_VOutput *= T;
+			*o_VOutput += *a_VStart;
+		};
+
 		Vector4* PIn[ 3 ];
 		Vector4* POut[ 3 ];
 		AttribSpan< float >* VIn[ 3 ];
@@ -1833,41 +1857,18 @@ private:
 		int InCount = 0;
 		int OutCount = 0;
 
-		float D0 = DistanceFromPlane< _Plane >( a_P + 0 );
-		float D1 = DistanceFromPlane< _Plane >( a_P + 1 );
-		float D2 = DistanceFromPlane< _Plane >( a_P + 2 );
-
-		if ( D0 >= 0 ) 
-		{ 
-			PIn[ InCount   ] = a_P + 0;
-			VIn[ InCount++ ] = a_V + 0;
-		}
-		else
+		for ( uint32_t i = 0; i < 3; ++i )
 		{
-			POut[ OutCount   ] = a_P + 0;
-			VOut[ OutCount++ ] = a_V + 0;
-		}
-
-		if ( D1 >= 0 ) 
-		{ 
-			PIn[ InCount   ] = a_P + 1;
-			VIn[ InCount++ ] = a_V + 1;
-		}
-		else 
-		{
-			POut[ OutCount   ] = a_P + 1;
-			VOut[ OutCount++ ] = a_V + 1;
-		}
-
-		if ( D2 >= 0 )
-		{
-			PIn[ InCount   ] = a_P + 2;
-			VIn[ InCount++ ] = a_V + 2;
-		}
-		else
-		{
-			POut[ OutCount   ] = a_P + 2;
-			VOut[ OutCount++ ] = a_V + 2;
+			if ( _Normal.x * a_P[ i ].x + _Normal.y * a_P[ i ].y + _Normal.z * a_P[ i ].z >= -a_P[ i ].w )
+			{
+				PIn[ InCount   ] = a_P + i;
+				VIn[ InCount++ ] = a_V + i;
+			}
+			else
+			{
+				POut[ OutCount   ] = a_P + i;
+				VOut[ OutCount++ ] = a_V + i;
+			}
 		}
 
 		static DataStorage< float > VertexData;
@@ -1881,7 +1882,7 @@ private:
 		VOutput[ 4 ].Set( VertexData.Data() + a_Stride * 4, a_Stride );
 		VOutput[ 5 ].Set( VertexData.Data() + a_Stride * 5, a_Stride );
 		uint32_t Clipped = 0;
-		
+
 		switch ( InCount )
 		{
 			case 0:
@@ -1892,8 +1893,8 @@ private:
 			{
 				POutput[ 0 ] = *PIn[ 0 ];
 				VOutput[ 0 ] = *VIn[ 0 ];
-				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 0 ], VIn[ 0 ], VOut[ 0 ], POutput + 1, VOutput + 1 );
-				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 1 ], VIn[ 0 ], VOut[ 1 ], POutput + 2, VOutput + 2 );
+				IntersectPlane( PIn[ 0 ], POut[ 0 ], POutput + 1, VIn[ 0 ], VOut[ 0 ], VOutput + 1 );
+				IntersectPlane( PIn[ 0 ], POut[ 1 ], POutput + 2, VIn[ 0 ], VOut[ 1 ], VOutput + 2 );
 				Clipped = 1;
 				break;
 			}
@@ -1903,12 +1904,12 @@ private:
 				VOutput[ 0 ] = *VIn[ 0 ];
 				POutput[ 1 ] = *PIn[ 1 ];
 				VOutput[ 1 ] = *VIn[ 1 ];
-				IntersectPlane< _Plane >( PIn[ 0 ], POut[ 0 ], VIn[ 0 ], VOut[ 0 ], POutput + 2, VOutput + 2 );
+				IntersectPlane( PIn[ 0 ], POut[ 0 ], POutput + 2, VIn[ 0 ], VOut[ 0 ], VOutput + 2 );
 				POutput[ 3 ] = *PIn[ 1 ];
 				VOutput[ 3 ] = *VIn[ 1 ];
 				POutput[ 4 ] = POutput[ 2 ];
 				VOutput[ 4 ] = VOutput[ 2 ];
-				IntersectPlane< _Plane >( PIn[ 1 ], POut[ 0 ], VIn[ 1 ], VOut[ 0 ], POutput + 5, VOutput + 5 );
+				IntersectPlane( PIn[ 1 ], POut[ 0 ], POutput + 5, VIn[ 1 ], VOut[ 0 ], VOutput + 5 );
 				Clipped = 2;
 				break;
 			}
@@ -1925,7 +1926,7 @@ private:
 			}
 		}
 
-		if constexpr ( _Plane < 3 )
+		if constexpr ( _Plane < 4 )
 		{
 			switch ( Clipped )
 			{
@@ -1948,7 +1949,7 @@ private:
 			a_Converter( POutput + 1 );
 			a_Converter( POutput + 2 );
 			a_Rasterizer( POutput + 0, VOutput + 0, a_Stride, a_FragmentShader );
-
+			
 			if ( Clipped == 1 )
 			{
 				return;
@@ -1958,6 +1959,54 @@ private:
 			a_Converter( POutput + 4 );
 			a_Converter( POutput + 5 );
 			a_Rasterizer( POutput + 3, VOutput + 3, a_Stride, a_FragmentShader );
+		}
+	}
+
+	template < uint8_t _Interface >
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
+	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0	   = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+
+		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
+		s_PositionStorage.Prepare( a_End - a_Begin );
+		s_AttributeRegistry = a_Begin;
+		AttribSpan< float > AttribView;
+
+		// If perspective divide is enabled, setup the attribute view.
+		if constexpr ( _Perspective )
+		{
+			AttribView.Set( s_VertexStorage.Data(), a_Stride );
+		}
+
+		for ( ; a_Begin < a_End; ++a_Begin )
+		{
+			a_VertexShader();
+
+			// Perspective divide.
+			//Position.w = 1.0f / Position.w;
+			//Position.x *= Position.w;
+			//Position.y *= Position.w;
+			//Position.z *= Position.w;
+
+			s_PositionStorage = Position;
+			++s_AttributeRegistry;
+			++s_VertexStorage;
+			++s_PositionStorage;
+
+			// Divide all attributes by w as well for perspective correctness.
+			if constexpr ( _Perspective )
+			{
+				//AttribView *= Position.w;
+				AttribView /= Position.w;
+				AttribView.Advance();
+			}
 		}
 	}
 
@@ -1980,6 +2029,11 @@ private:
 
 		static constexpr auto ConvertToScreenSpace = []( Vector4* a_P )
 		{
+			a_P->w = 1.0f / a_P->w;
+			a_P->x *= a_P->w;
+			a_P->y *= a_P->w;
+			a_P->z *= a_P->w;
+
 			a_P->x += 1.0f;
 			a_P->y += 1.0f;
 			a_P->x *= HalfWindow.x;
@@ -2012,45 +2066,7 @@ private:
 			  , V[ 1 ].Advance( 3 )
 			  , V[ 2 ].Advance( 3 ) )
 		{
-			// If clipping is off, reject if any point outside viewport.
-			if constexpr ( !_Clipping )
-			{
-				bool Reject = false;
-
-				for ( uint32_t i = 0; i < 3; ++i )
-				{
-					static constexpr Rect ViewPort = { -1, -1, 2, 2 };
-					if ( !ViewPort.Contains( *P[ i ] ) )
-					{
-						Reject = true;
-						break;
-					}
-				}
-
-				if ( Reject )
-				{
-					continue;
-				}
-			}
-			else
-			{
-				bool reject = false;
-				for ( uint32_t i = 0; i < 3; ++i )
-				{
-					if ( P[ i ]->z <= 0.1f )
-					{
-						reject = true;
-						break;
-					}
-				}
-				if ( reject ) continue;
-
-				P[ 0 ]->z *= P[ 0 ]->w;
-				P[ 1 ]->z *= P[ 1 ]->w;
-				P[ 2 ]->z *= P[ 2 ]->w;
-			}
-
-			// Culling - Improve later - if enabled and correct orientation, continue.
+			// Culling - if enabled and incorrect orientation, continue.
 			if constexpr ( _CullFront || _CullBack )
 			{
 				float NormalZ = Math::Cross( Vector3( *P[ 1 ] - *P[ 0 ] ), Vector3( *P[ 2 ] - *P[ 0 ] ) ).z;
@@ -2072,18 +2088,7 @@ private:
 				}
 			}
 
-			// If clipping is enabled, clip the triangle and further process generated triangles.
-			if constexpr ( _Clipping )
-			{
-				ViewportClipTriangle( &P[ 0 ][ 0 ], V, a_Stride, RasterizeTriangle< _Interface >, ConvertToScreenSpace, a_FragmentShader );
-			}
-			else
-			{
-				ConvertToScreenSpace( &P[ 0 ][ 0 ] );
-				ConvertToScreenSpace( &P[ 1 ][ 0 ] );
-				ConvertToScreenSpace( &P[ 2 ][ 0 ] );
-				RasterizeTriangle< _Interface >( &P[ 0 ][ 0 ], V, a_Stride, a_FragmentShader );
-			}
+			ViewportClipTriangle( &P[ 0 ][ 0 ], V, a_Stride, RasterizeTriangle< _Interface >, ConvertToScreenSpace, a_FragmentShader );
 		}
 	}
 

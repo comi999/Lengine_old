@@ -1,0 +1,21 @@
+{
+  "Resources": {
+    "spear": {
+      "Type": "prefab",
+      "Path": "/Spear/soulspear.obj"
+    },
+    "house": {
+      "Type": "prefab",
+      "Path": "/House/farmhouse.obj"
+    },
+    "landscape": {
+      "Type": "texture",
+      "Path": "/Other/landscape.bmp"
+    },
+    "plane": {
+      "Type": "mesh",
+      "Path": "/Other/plane.obj"
+    }
+  }
+}
+

@@ -26,6 +26,13 @@ struct Colour
 		, A( a_Alpha )
 	{ }
 
+	Colour( const Vector4& a_Vector )
+		: R( 255 * a_Vector.x )
+		, G( 255 * a_Vector.y )
+		, B( 255 * a_Vector.z )
+		, A( 255 * a_Vector.w )
+	{ }
+
 	Colour operator +( Colour a_RHS ) const
 	{
 		static const float Denom = 1.0f / 255.0f;

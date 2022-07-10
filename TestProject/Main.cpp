@@ -16,7 +16,7 @@
 
 int main()
 {
-	auto Window = ConsoleWindow::Create( "Title goes here.", { 100, 100 }, { 16, 16 } );
+	auto Window = ConsoleWindow::Create( "Title goes here.", { 64, 64 }, { 16, 16 } );
 	ConsoleWindow::MakeContextCurrent( Window );
 	CGE::Init();
 
@@ -29,18 +29,17 @@ int main()
 
 		MeshRenderer* renederer = object.GetComponentInChild< MeshRenderer >();
 		renederer->GetMaterial().Assure()->SetShader( Shader::Diffuse );
-		object.GetTransform()->SetGlobalScale( Vector3::One );// * 0.01f );
+		object.GetTransform()->SetGlobalScale( Vector3::One );
 	}
 
-	Rendering::Enable( RenderSetting::CULL_FACE );
-	Rendering::CullFace( CullFaceMode::FRONT );
+	Rendering::Disable( RenderSetting::CULL_FACE );
 
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
 	CameraComponent->SetAspect( 1.0f );
 	CameraComponent->SetFOV( Math::Radians( 75.0f ) );
 	CameraComponent->SetNearZ( 0.1f );
-	CameraComponent->SetFarZ( 1000.0f );
+	CameraComponent->SetFarZ( 100.0f );
 	Camera::SetMainCamera( CameraComponent );
 	auto renderers = Component::GetComponents< Renderer >();
 
