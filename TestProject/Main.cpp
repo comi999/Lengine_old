@@ -1,6 +1,7 @@
 #include "CGE.hpp"
 #include "Component.hpp"
 #include "GameObject.hpp"
+#include "Prefab.hpp"
 
 int main()
 {
@@ -8,7 +9,7 @@ int main()
 	ConsoleWindow::MakeContextCurrent( Window );
 	CGE::Init();
 
-	auto prefab = Resource::Load< Prefab >( "house"_H );
+	auto prefab = Resource::Load< Prefab >( "spear"_H );
 
 	for ( int i = 0; i < 1; ++i )
 	{
@@ -36,8 +37,6 @@ int main()
 
 	Action<> GameLoop = [&]()
 	{
-		Transform* ThisTransform = this->GetOwner()->GetTransform();
-
 		Transform* CameraTransform = CameraObject.GetTransform();
 
 		if ( Input::IsKeyDown( KeyCode::Left  ) ) CameraRotation.y += 0.1f;
@@ -56,5 +55,7 @@ int main()
 		if ( Input::IsKeyDown( KeyCode::Q ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalDown()     * 0.1f );
 		if ( Input::IsKeyDown( KeyCode::E ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalUp()       * 0.1f );
 	};
+
+	CGE::Run( GameLoop );
 
 }
