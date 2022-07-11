@@ -71,7 +71,7 @@ public:
 
 	inline bool IsValid() const
 	{
-		return m_ID == static_cast< GameObjectID >( -1 );
+		return m_ID != static_cast< GameObjectID >( -1 );
 	}
 
 	template < typename T >
