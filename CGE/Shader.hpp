@@ -135,5 +135,7 @@ public:
 	static Shader Specular;
 	static Shader Normal;
 	static Shader Phong;
+	static Shader UnlitFlatColour;
+	static Shader LitFlatColour;
 	// More lighting models.
 };

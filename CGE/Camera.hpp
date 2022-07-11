@@ -77,12 +77,12 @@ public:
 
 	inline static void SetMainCamera( const Camera* a_Camera )
 	{
-		s_MainCamera = a_Camera;
+		s_MainCamera = a_Camera ? a_Camera->GetOwner() : GameObjectID( -1 );
 	}
 
 	inline static const Camera* GetMainCamera()
 	{
-		return s_MainCamera;
+		return s_MainCamera != GameObjectID( -1 ) ? GameObject::FindByID( s_MainCamera ).GetComponent< Camera >() : nullptr;
 	}
 
 private:
@@ -94,5 +94,5 @@ private:
 	float   m_FarZ;
 	bool    m_Dirty;
 
-	inline static const Camera* s_MainCamera = nullptr;
+	inline static GameObjectID s_MainCamera = GameObjectID( -1 );
 };

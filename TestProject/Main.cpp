@@ -20,19 +20,26 @@ int main()
 	ConsoleWindow::MakeContextCurrent( Window );
 	CGE::Init();
 
-	auto prefab = Resource::Load< Prefab >( "house"_H );
+	auto prefab = Resource::Load< Prefab >( "spear"_H );
+
+	Material RedMaterial = Material::LitFlatColour;
+
+	RedMaterial.SetProperty( "diffuse_colour"_H, ( Vector4 )Colour::RED );
 
 	for ( int i = 0; i < 1; ++i )
 	{
 
 		GameObject object = Prefab::Instantiate( *prefab );
 
-		MeshRenderer* renederer = object.GetComponentInChild< MeshRenderer >();
-		renederer->GetMaterial().Assure()->SetShader( Shader::Diffuse );
+		MeshRenderer* renderer = object.GetComponentInChild< MeshRenderer >();
+		//renederer->GetMaterial().Assure()->SetShader( Shader::Diffuse );
+		renderer->SetMaterial( RedMaterial );
 		object.GetTransform()->SetGlobalScale( Vector3::One );
 	}
 
-	Rendering::Disable( RenderSetting::CULL_FACE );
+	GameObject SunObject = GameObject::Instantiate( "Sun"_N );
+	Light* LightComponent = SunObject.AddComponent< Light >();
+	Light::SetSun( LightComponent );
 
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
@@ -46,9 +53,14 @@ int main()
 	Vector2 CameraRotation = Vector2::Zero;
 	CameraObject.GetTransform()->SetLocalPosition( Vector3( 0.0f, 2.0f, -3.0f ) );
 
+	float i = 0.0f;
+
 	Action<> GameLoop = [&]()
 	{
 		Sleep( 1 );
+		i += Time::GetDeltaTime();
+
+		SunObject.GetComponent< Light >()->SetDirection( Vector3( Math::Cos( i ), 0.0f, Math::Sin( i ) ) );
 
 		Transform* CameraTransform = CameraObject.GetTransform();
 

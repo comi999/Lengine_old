@@ -76,12 +76,12 @@ public:
 		a_Queue += Instruction;
 	}
 
-	ResourceHandle< Mesh > GetMesh()
+	const Mesh* GetMesh() const
 	{
 		return m_Mesh;
 	}
 
-	ResourceHandle< Material > GetMaterial()
+	const Material* GetMaterial() const
 	{
 		return m_Material;
 	}

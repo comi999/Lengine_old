@@ -10,6 +10,14 @@ class GameObject
 {
 public:
 
+	constexpr GameObject()
+		: m_ID( -1 )
+	{ }
+
+	constexpr GameObject( GameObjectID a_ID )
+		: m_ID( a_ID )
+	{ }
+
 	static GameObject Instantiate()
 	{
 		entt::entity NewEntity = ComponentBase::GetRegistry().create();
@@ -164,12 +172,12 @@ public:
 		return Component::GetExactComponent< Alias >( m_ID );
 	}
 
-	inline GameObjectID GetID() const
+	inline constexpr GameObjectID GetID() const
 	{
 		return m_ID;
 	}
 
-	operator GameObjectID() const
+	constexpr operator GameObjectID() const
 	{
 		return m_ID;
 	}

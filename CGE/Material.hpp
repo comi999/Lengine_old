@@ -118,9 +118,16 @@ private:
 	{
 		m_Size = a_Count;
 
+		if ( m_RequiresDelete )
+		{
+			delete[] m_Data;
+			m_RequiresDelete = false;
+		}
+
 		if ( sizeof( T ) * a_Count > sizeof( m_Data ) )
 		{
 			m_Data = new T[ a_Count ];
+			m_RequiresDelete = true;
 			memcpy( m_Data, a_Values, a_Count * sizeof( T ) );
 		}
 		else
@@ -263,6 +270,7 @@ private:
 	size_t  m_Size;
 	Type    m_Type;
 	void*   m_Data;
+	bool    m_RequiresDelete;
 	int32_t m_Location;
 };
 
@@ -552,4 +560,9 @@ private:
 	const Shader*                      m_Shader;
 	std::map< Hash, MaterialProperty > m_Attributes;
 	std::map< Hash, TextureProperty  > m_Textures;
+
+public:
+
+	static Material UnlitFlatColour;
+	static Material LitFlatColour;
 };

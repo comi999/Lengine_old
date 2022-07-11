@@ -9,6 +9,7 @@
 #include "RenderQueue.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
+#include "Light.hpp"
 
 class RenderPipeline
 {
@@ -190,7 +191,33 @@ private:
 			{
 				Rendering::UniformMatrix4fv( PVMLocation, 1, false, &PVM[ 0 ] );
 			}
+
+			int32_t ModelLocation = Rendering::GetUniformLocation( s_ActiveMaterial->GetShader().GetProgramHandle(), "u_Model" );
+
+			if ( ModelLocation >= 0 )
+			{
+				Rendering::UniformMatrix4fv( ModelLocation, 1, false, s_ActiveModel->Data );
+			}
 		}
+
+		// Set Sun
+		if ( int32_t SunLocation = Rendering::GetUniformLocation( s_ActiveMaterial->GetShader().GetProgramHandle(), "u_SunLight" ); SunLocation >= 0 )
+		{
+			Vector3 SunDirection;
+
+			if ( const Light* Sun = Light::GetSun() )
+			{
+				SunDirection = Sun->GetDirection();
+			}
+			else
+			{
+				SunDirection = Vector3::Zero;
+			}
+
+			Rendering::Uniform3f( SunLocation, SunDirection.x, SunDirection.y, SunDirection.z );
+		}
+
+		
 
 		// Draw code.
 		if ( s_ActiveMesh )

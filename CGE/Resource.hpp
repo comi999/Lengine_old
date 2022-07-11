@@ -33,6 +33,11 @@ public:
 		, m_Handle( nullptr )
 	{ }
 
+	ResourceHandle( const T& a_Resource )
+		: m_Name( a_Resource.GetName() )
+		, m_Handle( std::make_shared< T >( a_Resource ) )
+	{ }
+
 	inline Hash GetHash() const
 	{
 		return m_Name;
