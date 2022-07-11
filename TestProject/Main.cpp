@@ -1,17 +1,6 @@
-#include "Texture.hpp"
-#include "Mesh.hpp"
-#include "Input.hpp"
-#include "Light.hpp"
-#include "MeshRenderer.hpp"
-#include "Transform.hpp"
-#include "GameObject.hpp"
-#include "Camera.hpp"
-#include "File.hpp"
-#include "Resource.hpp"
-#include "ConsoleWindow.hpp"
-#include "Rendering.hpp"
-#include "Math.hpp"
 #include "CGE.hpp"
+#include "Component.hpp"
+#include "GameObject.hpp"
 #include "Prefab.hpp"
 
 int main()
@@ -57,11 +46,6 @@ int main()
 
 	Action<> GameLoop = [&]()
 	{
-		Sleep( 1 );
-		i += Time::GetDeltaTime();
-
-		SunObject.GetComponent< Light >()->SetDirection( Vector3( Math::Cos( i ), 0.0f, Math::Sin( i ) ) );
-
 		Transform* CameraTransform = CameraObject.GetTransform();
 
 		if ( Input::IsKeyDown( KeyCode::Left  ) ) CameraRotation.y += 0.1f;
@@ -82,6 +66,5 @@ int main()
 	};
 
 	CGE::Run( GameLoop );
-	
-	return 0;
+
 }
