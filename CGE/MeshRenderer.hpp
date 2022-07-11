@@ -17,8 +17,8 @@
 DefineComponent( MeshRenderer, Renderer )
 {
 public:
-	
-	void OnRender( RenderQueue& a_Queue ) const override
+
+	void OnRender( RenderQueue & a_Queue ) const override
 	{
 		if ( !Camera::GetMainCamera() )
 		{
@@ -78,12 +78,12 @@ public:
 
 	const Mesh* GetMesh() const
 	{
-		return m_Mesh;
+		return m_Mesh.Assure();
 	}
 
 	const Material* GetMaterial() const
 	{
-		return m_Material;
+		return m_Material.Assure();
 	}
 
 	void SetMesh( ResourceHandle< Mesh > a_Mesh )
@@ -102,21 +102,21 @@ private:
 	friend class Serialization;
 
 	template < typename _Serializer >
-	void Serialize( _Serializer& a_Serializer ) const
+	void Serialize( _Serializer & a_Serializer ) const
 	{
 		a_Serializer << m_Mesh << m_Material;
 	}
 
 	template < typename _Deserializer >
-	void Deserialize( _Deserializer& a_Deserializer )
+	void Deserialize( _Deserializer & a_Deserializer )
 	{
 		a_Deserializer >> m_Mesh >> m_Material;
 	}
 
 	template < typename _Sizer >
-	void SizeOf( _Sizer& a_Sizer ) const
+	void SizeOf( _Sizer & a_Sizer ) const
 	{
-		a_Sizer & m_Mesh & m_Material;
+		a_Sizer& m_Mesh& m_Material;
 	}
 
 	ResourceHandle< Mesh     > m_Mesh;

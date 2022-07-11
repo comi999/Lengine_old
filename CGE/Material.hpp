@@ -20,7 +20,7 @@ public:
 		, m_Type( Type::INT )
 		, m_Data( nullptr )
 		, m_Location( -1 )
-	{ }
+	{}
 
 	~MaterialProperty()
 	{
@@ -269,7 +269,7 @@ private:
 	Name    m_Name;
 	size_t  m_Size;
 	Type    m_Type;
-	void*   m_Data;
+	void* m_Data;
 	bool    m_RequiresDelete;
 	int32_t m_Location;
 };
@@ -315,7 +315,7 @@ private:
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
-		a_Sizer & m_Name & m_Resource;
+		a_Sizer& m_Name& m_Resource;
 	}
 
 	Name                        m_Name;
@@ -330,7 +330,7 @@ public:
 
 	Material()
 		: m_Shader( &Shader::Default )
-	{ }
+	{}
 
 	template < typename T >
 	inline void AddProperty( const Name& a_Key, const T& a_Value )
@@ -338,7 +338,7 @@ public:
 		auto& NewProperty = m_Attributes[ a_Key.HashCode() ];
 		NewProperty.SetName( a_Key );
 		NewProperty.Set( a_Value );
-		
+
 		if ( !m_Shader->GetProgramHandle() )
 		{
 			return;
@@ -365,7 +365,7 @@ public:
 	bool SetProperty( Hash a_Key, const T& a_Value )
 	{
 		auto Iter = m_Attributes.find( a_Key );
-		
+
 		if ( Iter != m_Attributes.end() )
 		{
 			Iter->second.Set( a_Value );
@@ -451,7 +451,7 @@ public:
 
 	void SetShader( const Shader& a_Shader )
 	{
-		m_Shader = &a_Shader;		
+		m_Shader = &a_Shader;
 	}
 
 private:
@@ -488,21 +488,69 @@ private:
 			{
 				case MaterialProperty::Type::INT:
 				{
-					Rendering::Uniform1iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
+					switch ( Begin->second.m_Size )
+					{
+						case 1:
+						{
+							Rendering::Uniform1iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
+							break;
+						}
+						case 2:
+						{
+							Rendering::Uniform2iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
+							break;
+						}
+						case 3:
+						{
+							Rendering::Uniform3iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
+							break;
+						}
+						case 4:
+						{
+							Rendering::Uniform4iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
+							break;
+						}
+						default:
+							break;
+					}
 					break;
 				}
 				case MaterialProperty::Type::FLOAT:
 				{
-					Rendering::Uniform1fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
+					switch ( Begin->second.m_Size )
+					{
+						case 1:
+						{
+							Rendering::Uniform1fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
+							break;
+						}
+						case 2:
+						{
+							Rendering::Uniform2fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
+							break;
+						}
+						case 3:
+						{
+							Rendering::Uniform3fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
+							break;
+						}
+						case 4:
+						{
+							Rendering::Uniform4fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
+							break;
+						}
+						default:
+							break;
+					}
 					break;
 				}
 			}
 		}
 
-		for ( auto 
-			  Begin = const_cast< Material* >( this )->m_Textures.begin(), 
-			  End = const_cast< Material* >( this )->m_Textures.end(); 
-			  Begin !=  End; ++Begin )
+		for ( auto
+			  Begin = const_cast< Material* >( this )->m_Textures.begin(),
+			  End = const_cast< Material* >( this )->m_Textures.end();
+			  Begin != End; ++Begin )
 		{
 			if ( Begin->second.m_Location < 0 )
 			{
@@ -553,11 +601,11 @@ private:
 	template < typename _Sizer >
 	void SizeOf( _Sizer& a_Sizer ) const
 	{
-		a_Sizer & *static_cast< const Resource* >( this );
-		a_Sizer & m_Attributes & m_Textures;
+		a_Sizer&* static_cast< const Resource* >( this );
+		a_Sizer& m_Attributes& m_Textures;
 	}
 
-	const Shader*                      m_Shader;
+	const Shader* m_Shader;
 	std::map< Hash, MaterialProperty > m_Attributes;
 	std::map< Hash, TextureProperty  > m_Textures;
 

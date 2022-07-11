@@ -79,9 +79,9 @@ enum class BufferTarget : uint8_t
 
 enum class BufferFlag : uint8_t
 {
-	COLOUR_BUFFER_BIT  = 1u << 0,
-	DEPTH_BUFFER_BIT   = 1u << 1,
-	ACCUM_BUFFER_BIT   = 1u << 2,
+	COLOUR_BUFFER_BIT = 1u << 0,
+	DEPTH_BUFFER_BIT = 1u << 1,
+	ACCUM_BUFFER_BIT = 1u << 2,
 	STENCIL_BUFFER_BIT = 1u << 3
 };
 
@@ -99,31 +99,31 @@ enum class TextureTarget : uint8_t
 	TEXTURE_2D_ARRAY,
 	TEXTURE_2D_MULTISAMPLE,
 	TEXTURE_2D_MULTISAMPLE_ARRAY,
-	TEXTURE_CUBE_MAP, 
+	TEXTURE_CUBE_MAP,
 	TEXTURE_CUBE_MAP_ARRAY,
 	TEXTURE_RECTANGLE,
 };
 
 enum class TextureParameter : uint8_t
 {
-	DEPTH_STENCIL_TEXTURE_MODE, 
-	TEXTURE_BASE_LEVEL, 
+	DEPTH_STENCIL_TEXTURE_MODE,
+	TEXTURE_BASE_LEVEL,
 	TEXTURE_BORDER_COLOUR,
-	TEXTURE_COMPARE_FUNC, 
-	TEXTURE_COMPARE_MODE, 
-	TEXTURE_LOD_BIAS, 
-	TEXTURE_MIN_FILTER, 
-	TEXTURE_MAG_FILTER, 
-	TEXTURE_MIN_LOD, 
-	TEXTURE_MAX_LOD, 
-	TEXTURE_MAX_LEVEL, 
-	TEXTURE_SWIZZLE_R, 
-	TEXTURE_SWIZZLE_G, 
-	TEXTURE_SWIZZLE_B, 
-	TEXTURE_SWIZZLE_A, 
+	TEXTURE_COMPARE_FUNC,
+	TEXTURE_COMPARE_MODE,
+	TEXTURE_LOD_BIAS,
+	TEXTURE_MIN_FILTER,
+	TEXTURE_MAG_FILTER,
+	TEXTURE_MIN_LOD,
+	TEXTURE_MAX_LOD,
+	TEXTURE_MAX_LEVEL,
+	TEXTURE_SWIZZLE_R,
+	TEXTURE_SWIZZLE_G,
+	TEXTURE_SWIZZLE_B,
+	TEXTURE_SWIZZLE_A,
 	TEXTURE_SWIZZLE_RGBA,
-	TEXTURE_WRAP_S, 
-	TEXTURE_WRAP_T, 
+	TEXTURE_WRAP_S,
+	TEXTURE_WRAP_T,
 	TEXTURE_WRAP_R
 };
 
@@ -134,9 +134,9 @@ enum class TextureSetting : uint32_t
 	STENCIL_INDEX,
 
 	// Wrap modes
-	CLAMP_TO_EDGE, 
-	CLAMP_TO_BORDER, 
-	MIRRORED_REPEAT, 
+	CLAMP_TO_EDGE,
+	CLAMP_TO_BORDER,
+	MIRRORED_REPEAT,
 	REPEAT,
 	MIRROR_CLAMP_TO_EDGE,
 
@@ -173,9 +173,9 @@ enum class TextureSetting : uint32_t
 	ONE,
 
 	// Texture data format
-	UNSIGNED_BYTE, 
-	UNSIGNED_SHORT_5_6_5, 
-	UNSIGNED_SHORT_4_4_4_4, 
+	UNSIGNED_BYTE,
+	UNSIGNED_SHORT_5_6_5,
+	UNSIGNED_SHORT_4_4_4_4,
 	UNSIGNED_SHORT_5_5_5_1,
 };
 
@@ -247,10 +247,10 @@ enum class RenderMode : uint8_t
 
 enum class ClipPlane : uint8_t
 {
-	CLIP_PLANE0, 
-	CLIP_PLANE1, 
-	CLIP_PLANE2, 
-	CLIP_PLANE3, 
+	CLIP_PLANE0,
+	CLIP_PLANE1,
+	CLIP_PLANE2,
+	CLIP_PLANE3,
 	CLIP_PLANE4,
 	CLIP_PLANE5,
 	CLIP_PLANE6,
@@ -261,7 +261,7 @@ enum class ClipPlane : uint8_t
 	CLIP_PLANE11,
 	CLIP_PLANE12,
 	CLIP_PLANE13,
-	CLIP_PLANE14, 
+	CLIP_PLANE14,
 	CLIP_PLANE15
 };
 
@@ -279,23 +279,25 @@ void Shader_##Name ()
 
 
 
-namespace Internal {
-template < Hash _ShaderName >
-void* ShaderAddress = nullptr;
-
-struct ShaderFuncLookup
+namespace Internal
 {
-	inline static std::map< Hash, void* > Value;
-};
+	template < Hash _ShaderName >
+	void* ShaderAddress = nullptr;
 
-template < Hash _ShaderName >
-struct RegisterShader
-{
-	inline static bool Registered = [](){
-		ShaderFuncLookup::Value.emplace( _ShaderName, ShaderAddress< _ShaderName > );
-		return true;
-	}();
-};
+	struct ShaderFuncLookup
+	{
+		inline static std::map< Hash, void* > Value;
+	};
+
+	template < Hash _ShaderName >
+	struct RegisterShader
+	{
+		inline static bool Registered = []()
+		{
+			ShaderFuncLookup::Value.emplace( _ShaderName, ShaderAddress< _ShaderName > );
+			return true;
+		}( );
+	};
 
 } // namespace Internal
 
@@ -331,12 +333,12 @@ private:
 
 	friend class Rendering;
 
-	static void Empty() { }
+	static void Empty() {}
 
 public:
 
 	ShaderType Type = ShaderType::INVALID;
-	void( *Callback )() = nullptr;
+	void( *Callback )( ) = nullptr;
 };
 
 class ShaderProgram
@@ -345,7 +347,7 @@ private:
 
 	friend class Rendering;
 
-	typedef void( *ShaderCallback )();
+	typedef void( *ShaderCallback )( );
 
 	struct ShaderEntry
 	{
@@ -409,7 +411,7 @@ public:
 	static void EnableVertexAttribArray( uint32_t a_Position );
 	static void DisableVertexAttribArray( uint32_t a_Position );
 	static void VertexAttribPointer( uint32_t a_Index, uint32_t a_Size, DataType a_DataType, bool a_Normalized, size_t a_Stride, void* a_Offset );
-	static void DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_DataType, const void*  a_Indices );
+	static void DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_DataType, const void* a_Indices );
 	static void Enable( RenderSetting a_RenderSetting );
 	static void Disable( RenderSetting a_RenderSetting );
 	static void CullFace( CullFaceMode a_CullFace );
@@ -421,7 +423,7 @@ public:
 	static void ClipPlane( const double* a_Equation );
 
 	// Textures
-	static void ActiveTexture( uint32_t a_ActiveTexture );	
+	static void ActiveTexture( uint32_t a_ActiveTexture );
 	static void GenTextures( size_t a_Count, TextureHandle* a_Handles );
 	static void BindTexture( TextureTarget a_TextureTarget, TextureHandle a_Handle );
 	static void TexParameterf( TextureTarget a_TextureTarget, TextureParameter a_TextureParameter, float a_Value );
@@ -437,7 +439,7 @@ public:
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, uint32_t a_Value );
 	static void TextureParameterui( TextureHandle a_Handle, TextureParameter a_TextureParameter, const uint32_t* a_Value );
 	// Need to look into the Tex/ture/ParameterI* variants.
-	
+
 	//static void TexImage1D( /*something*/ );
 	static void TexImage2D( TextureTarget a_TextureTarget, uint8_t a_MipMapLevel, TextureFormat a_InternalFormat, int32_t a_Width, int32_t a_Height, int32_t a_Border, TextureFormat a_TextureFormat, TextureSetting a_DataLayout, const void* a_Data );
 	//static void TexImage3D( /*something*/ );
@@ -502,7 +504,7 @@ private:
 			{
 				s_UniformMap[ _Name ] = &Value();
 				return true;
-			}();
+			}( );
 		}
 	};
 
@@ -681,7 +683,7 @@ private:
 		void Destroy( ShaderProgramHandle a_Handle )
 		{
 			m_Availability[ a_Handle - 1 ] = false;
-		
+
 			for ( uint32_t i = 0; i < 2; ++i )
 			{
 				m_ShaderPrograms[ a_Handle - 1 ].m_Shaders[ i ].Set = false;
@@ -716,8 +718,8 @@ private:
 		uint32_t     Offset;
 		uint32_t     Stride;
 		uint8_t      Normalized : 1;
-		uint8_t      Size       : 4;
-		uint8_t      Type       : 3;
+		uint8_t      Size : 4;
+		uint8_t      Type : 3;
 	};
 	class AttributeIterator
 	{
@@ -728,7 +730,7 @@ private:
 			, m_Stride( 0 )
 			, m_Begin( nullptr )
 			, m_Data( nullptr )
-		{ }
+		{}
 
 		AttributeIterator( const VertexAttribute& a_VertexAttribute )
 		{
@@ -738,7 +740,7 @@ private:
 						( a_VertexAttribute.Size << 1 ) |
 						( a_VertexAttribute.Normalized ) ];
 
-			m_Begin = 
+			m_Begin =
 				//s_BufferRegistry[ a_VertexAttribute.Buffer ].data() +
 				s_BufferRegistry[ a_VertexAttribute.Buffer ] +
 				a_VertexAttribute.Offset;
@@ -810,14 +812,14 @@ private:
 	private:
 
 		template < DataType _DataType > struct DataTypeImpl { using Type = void; };
-		template <> struct DataTypeImpl< DataType::UNSIGNED_BYTE  > { using Type = uint8_t;  };
-		template <> struct DataTypeImpl< DataType::BYTE           > { using Type = int8_t;   };
+		template <> struct DataTypeImpl< DataType::UNSIGNED_BYTE  > { using Type = uint8_t; };
+		template <> struct DataTypeImpl< DataType::BYTE           > { using Type = int8_t; };
 		template <> struct DataTypeImpl< DataType::UNSIGNED_SHORT > { using Type = uint16_t; };
-		template <> struct DataTypeImpl< DataType::SHORT          > { using Type = int16_t;  };
+		template <> struct DataTypeImpl< DataType::SHORT          > { using Type = int16_t; };
 		template <> struct DataTypeImpl< DataType::UNSIGNED_INT   > { using Type = uint32_t; };
-		template <> struct DataTypeImpl< DataType::INT            > { using Type = int32_t;  };
-		template <> struct DataTypeImpl< DataType::FLOAT          > { using Type = float;    };
-		template <> struct DataTypeImpl< DataType::DOUBLE         > { using Type = double;   };
+		template <> struct DataTypeImpl< DataType::INT            > { using Type = int32_t; };
+		template <> struct DataTypeImpl< DataType::FLOAT          > { using Type = float; };
+		template <> struct DataTypeImpl< DataType::DOUBLE         > { using Type = double; };
 
 		template < DataType _DataType >
 		using GetDataType = typename DataTypeImpl< _DataType >::Type;
@@ -896,33 +898,33 @@ private:
 			, TextureSwizzleA( 3 )
 			, Data( nullptr )
 			, Dimensions( 0 )
-		{ }
+		{}
 
 		uint8_t     DepthStencilTextureMode : 1;
 		int32_t     TextureBaseLevel;
 		Vector4     TextureBorderColour;
-		uint8_t     TextureCompareFunc      : 3;
-		uint8_t     TextureCompareMode      : 1;
+		uint8_t     TextureCompareFunc : 3;
+		uint8_t     TextureCompareMode : 1;
 		float       TextureLODBias;
-		int8_t      TextureMagFilter        : 1;
-		int8_t      TextureMinFilter        : 3;
+		int8_t      TextureMagFilter : 1;
+		int8_t      TextureMinFilter : 3;
 		float       TextureMinLOD;
 		float       TextureMaxLOD;
 		int32_t     TextureMaxLevel;
-		int8_t      TextureSwizzleR         : 3;
-		int8_t      TextureSwizzleG         : 3;
-		int8_t      TextureSwizzleB         : 3;
-		int8_t      TextureSwizzleA         : 3;
-		uint8_t     TextureWrapS            : 3;
-		uint8_t     TextureWrapT            : 3;
-		uint8_t     TextureWrapR            : 3;
+		int8_t      TextureSwizzleR : 3;
+		int8_t      TextureSwizzleG : 3;
+		int8_t      TextureSwizzleB : 3;
+		int8_t      TextureSwizzleA : 3;
+		uint8_t     TextureWrapS : 3;
+		uint8_t     TextureWrapT : 3;
+		uint8_t     TextureWrapR : 3;
 		const void* Data;
 		Vector2Int  Dimensions;
 		uint8_t     Format;
 	};
 
 	//typedef std::vector< uint8_t >           Buffer;
-	typedef const uint8_t*                   Buffer;
+	typedef const uint8_t* Buffer;
 	typedef std::array< VertexAttribute, 8 > Array;
 	typedef std::map< void*, uint32_t >      StrideRegistry;
 	typedef std::array< TextureHandle, 10  > TextureUnit;
@@ -1116,7 +1118,7 @@ private:
 			a_AttributeRegistry->m_VertexAttributes[ 7 ] = Index;
 		}
 
-		const void*       m_Indices;
+		const void* m_Indices;
 		uint32_t          m_Position;
 		SeekFunction      m_SeekFunction;
 		AttributeIterator m_VertexAttributes[ 8 ];
@@ -1169,7 +1171,7 @@ private:
 		inline void Set( uint32_t a_Index, const Plane& a_Plane )
 		{
 			m_Planes[ a_Index ] = a_Plane;
-			
+
 			if ( m_Offset[ a_Index ] != uint8_t( -1 ) )
 			{
 				m_Enabled[ m_Offset[ a_Index ] ] = a_Plane;
@@ -1200,8 +1202,8 @@ private:
 
 		uint8_t                   m_Size;
 		std::array< uint8_t, 16 > m_Offset;
-		std::array< Plane,   16 > m_Enabled;
-		std::array< Plane,   16 > m_Planes;
+		std::array< Plane, 16 > m_Enabled;
+		std::array< Plane, 16 > m_Planes;
 	};
 	class UniformMap
 	{
@@ -1231,7 +1233,7 @@ private:
 		ShaderLookup m_ShaderLookup;
 		UniformArray m_Uniforms;
 	};
-	
+
 	template < typename T = uint8_t >
 	class DataStorage
 	{
@@ -1240,13 +1242,13 @@ private:
 		DataStorage()
 			: m_Head( nullptr )
 			, m_Stride( sizeof( T ) )
-		{ }
+		{}
 
 		template < typename U >
 		DataStorage( const DataStorage< U >& a_DataStorage )
 		{
-			m_Data   = a_DataStorage.m_Data;
-			m_Head   = m_Data.data();
+			m_Data = a_DataStorage.m_Data;
+			m_Head = m_Data.data();
 			m_Stride = a_DataStorage.m_Stride;
 		}
 
@@ -1255,7 +1257,7 @@ private:
 			: m_Data( std::move( a_DataStorage.m_Data ) )
 			, m_Head( a_DataStorage.m_Head )
 			, m_Stride( a_DataStorage.m_Stride )
-		{ }
+		{}
 
 		DataStorage( size_t a_Size, size_t a_Stride = sizeof( T ) )
 		{
@@ -1282,7 +1284,7 @@ private:
 		DataStorage operator++( int )
 		{
 			DataStorage Temp( *this );
-			++*this;
+			++* this;
 			return Temp;
 		}
 
@@ -1327,12 +1329,12 @@ private:
 			return reinterpret_cast< T* >( m_Head );
 		}
 
-		inline operator T& ()
+		inline operator T& ( )
 		{
 			return *Head();
 		}
 
-		inline operator T& const () const
+		inline operator T& const ( ) const
 		{
 			return *Head();
 		}
@@ -1347,10 +1349,10 @@ private:
 	private:
 
 		std::vector< uint8_t > m_Data;
-		uint8_t*               m_Head;
+		uint8_t* m_Head;
 		size_t                 m_Stride;
 	};
-	
+
 	template < typename T >
 	class AttribSpan
 	{
@@ -1359,17 +1361,17 @@ private:
 		AttribSpan()
 			: m_Origin( nullptr )
 			, m_Size( 0 )
-		{ }
+		{}
 
 		AttribSpan( T* a_Origin, size_t a_Size )
 			: m_Origin( a_Origin )
 			, m_Size( a_Size )
-		{ }
+		{}
 
 		AttribSpan( AttribSpan&& a_AttribSpan )
 			: m_Origin( a_AttribSpan.m_Origin )
 			, m_Size( a_AttribSpan.m_Size )
-		{ }
+		{}
 
 		AttribSpan& operator=( const AttribSpan& a_AttribSpan )
 		{
@@ -1521,33 +1523,33 @@ private:
 
 	private:
 
-		T*     m_Origin;
+		T* m_Origin;
 		size_t m_Size;
 	};
-	
+
 	class RenderState
 	{
 	public:
 
 		RenderState()
-			: AlphaBlend ( false ) // Unimplemented
-			, Perspective( false )  
-			, Viewport   ( false ) // Unimplemented
-			, CullFace   ( false ) 
-			, FrontCull  ( false )
-			, BackCull   ( true )
-			, DepthTest  ( true )
-			, Clip       ( true )
-		{ }
+			: AlphaBlend( false ) // Unimplemented
+			, Perspective( false )
+			, Viewport( false ) // Unimplemented
+			, CullFace( false )
+			, FrontCull( false )
+			, BackCull( true )
+			, DepthTest( true )
+			, Clip( true )
+		{}
 
-		bool AlphaBlend  : 1;
+		bool AlphaBlend : 1;
 		bool Perspective : 1;
-		bool Viewport    : 1;
-		bool CullFace    : 1;
-		bool FrontCull   : 1;
-		bool BackCull    : 1;
-		bool DepthTest   : 1;
-		bool Clip        : 1;
+		bool Viewport : 1;
+		bool CullFace : 1;
+		bool FrontCull : 1;
+		bool BackCull : 1;
+		bool DepthTest : 1;
+		bool Clip : 1;
 	};
 	class DepthBuffer
 	{
@@ -1556,7 +1558,7 @@ private:
 		DepthBuffer()
 			: m_Size( 0 )
 			, m_Buffer( nullptr )
-		{ }
+		{}
 
 		~DepthBuffer()
 		{
@@ -1582,7 +1584,7 @@ private:
 		bool TestAndCommit( uint32_t a_X, uint32_t a_Y, float a_Z )
 		{
 			float& Point = m_Buffer[ a_Y * m_Size.x + a_X ];
-			
+
 			if ( s_DepthCompareFunc( a_Z, Point ) )
 			{
 				Point = a_Z;
@@ -1594,7 +1596,7 @@ private:
 
 		void Reset( float a_Depth )
 		{
-			float *Begin = m_Buffer, *End = m_Buffer + ( m_Size.x * m_Size.y );
+			float* Begin = m_Buffer, * End = m_Buffer + ( m_Size.x * m_Size.y );
 
 			for ( ; Begin != End; ++Begin )
 			{
@@ -1605,8 +1607,53 @@ private:
 	private:
 
 		Vector2Int m_Size;
-		float*     m_Buffer;
+		float* m_Buffer;
 	};
+
+	template < uint8_t _Interface >
+	inline static bool CullCheck( Vector4* a_P )
+	{
+		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
+		static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
+
+		// Culling - if enabled and incorrect orientation, continue.
+		if constexpr ( _CullFront || _CullBack )
+		{
+			/*Vector3 W = ( 1.0f / a_P[ 0 ].w, 1.0f / a_P[ 1 ].w, 1.0f / a_P[ 2 ].w );
+			float NormalZ =
+				a_P[ 0 ].x * W[ 0 ] * ( a_P[ 1 ].y * W[ 1 ] - a_P[ 2 ].y * W[ 2 ] ) +
+				a_P[ 1 ].x * W[ 1 ] * ( a_P[ 2 ].y * W[ 2 ] - a_P[ 0 ].y * W[ 0 ] ) +
+				a_P[ 2 ].x * W[ 2 ] * ( a_P[ 0 ].y * W[ 0 ] - a_P[ 1 ].y * W[ 1 ] );*/
+
+			Vector4 A = a_P[ 1 ] / a_P[ 1 ].w - a_P[ 0 ] / a_P[ 0 ].w;
+			Vector4 B = a_P[ 2 ] / a_P[ 2 ].w - a_P[ 0 ] / a_P[ 0 ].w;
+			float NormalZ = Math::Cross( Vector3( A ), Vector3( B ) ).z;
+
+			if constexpr ( _CullFront )
+			{
+				if ( NormalZ < 0.0f )
+				{
+					return false;
+				}
+			}
+
+			if constexpr ( _CullBack )
+			{
+				if ( NormalZ > 0.0f )
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 
 	template < uint8_t _Interface >
 	static void RasterizeTriangle( Vector4* a_P, AttribSpan< float >* a_V, uint32_t a_Stride, void( *a_FragmentShader )( ) )
@@ -1756,7 +1803,7 @@ private:
 
 		if ( a_P[ 1 ].y != a_P[ 0 ].y )
 		{
-   			SpanY = 1.0f / ( a_P[ 0 ].y - a_P[ 1 ].y );
+			SpanY = 1.0f / ( a_P[ 0 ].y - a_P[ 1 ].y );
 			*PStepL = a_P[ 0 ] - a_P[ 1 ];
 			*PStepL *= SpanY;
 			*PStepR = a_P[ 0 ] - *PMid;
@@ -1819,7 +1866,7 @@ private:
 			Vector4{  0, -1,  0,  1 }, // Top 
 			Vector4{  0,  0,  1,  1 }, // Front
 			Vector4{  0,  0, -1,  1 }, // Back
-		} )[ _Plane ];
+									  } )[ _Plane ];
 
 		static constexpr auto IntersectPlane = [](
 			Vector4* a_PStart,
@@ -1831,8 +1878,8 @@ private:
 		{
 			float AD =
 				a_PStart->x * _Normal.x +
-				a_PStart->y * _Normal.y + 
-				a_PStart->z * _Normal.z + 
+				a_PStart->y * _Normal.y +
+				a_PStart->z * _Normal.z +
 				a_PStart->w;
 
 			float BD =
@@ -1861,12 +1908,12 @@ private:
 		{
 			if ( _Normal.x * a_P[ i ].x + _Normal.y * a_P[ i ].y + _Normal.z * a_P[ i ].z >= -a_P[ i ].w )
 			{
-				PIn[ InCount   ] = a_P + i;
+				PIn[ InCount ] = a_P + i;
 				VIn[ InCount++ ] = a_V + i;
 			}
 			else
 			{
-				POut[ OutCount   ] = a_P + i;
+				POut[ OutCount ] = a_P + i;
 				VOut[ OutCount++ ] = a_V + i;
 			}
 		}
@@ -1949,7 +1996,7 @@ private:
 			a_Converter( POutput + 1 );
 			a_Converter( POutput + 2 );
 			a_Rasterizer( POutput + 0, VOutput + 0, a_Stride, a_FragmentShader );
-			
+
 			if ( Clipped == 1 )
 			{
 				return;
@@ -1963,16 +2010,16 @@ private:
 	}
 
 	template < uint8_t _Interface >
-	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )() )
+	static void ProcessVertices( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_VertexShader )( ) )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
-		static constexpr bool _Unused0	   = _Interface & ( 1u << 2u );
-		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+		static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
 
 		s_VertexStorage.Prepare( a_End - a_Begin, a_Stride * sizeof( float ) );
 		s_PositionStorage.Prepare( a_End - a_Begin );
@@ -2011,16 +2058,16 @@ private:
 	}
 
 	template < uint8_t _Interface >
-	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )() )
+	static void ProcessFragments( uint32_t a_Begin, uint32_t a_End, uint32_t a_Stride, void( *a_FragmentShader )( ) )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
-		static constexpr bool _Clipping    = _Interface & ( 1u << 6u );
-		static constexpr bool _CullFront   = _Interface & ( 1u << 5u );
-		static constexpr bool _CullBack    = _Interface & ( 1u << 4u );
-		static constexpr bool _DepthTest   = _Interface & ( 1u << 3u );
-		static constexpr bool _Unused0     = _Interface & ( 1u << 2u );
-		static constexpr bool _Unused1     = _Interface & ( 1u << 1u );
-		static constexpr bool _Unused2     = _Interface & ( 1u << 0u );
+		static constexpr bool _Clipping = _Interface & ( 1u << 6u );
+		static constexpr bool _CullFront = _Interface & ( 1u << 5u );
+		static constexpr bool _CullBack = _Interface & ( 1u << 4u );
+		static constexpr bool _DepthTest = _Interface & ( 1u << 3u );
+		static constexpr bool _Unused0 = _Interface & ( 1u << 2u );
+		static constexpr bool _Unused1 = _Interface & ( 1u << 1u );
+		static constexpr bool _Unused2 = _Interface & ( 1u << 0u );
 
 		// Prepare screen space size.
 		static Vector2 FullWindow, HalfWindow;
@@ -2054,9 +2101,9 @@ private:
 		P[ 0 ].Set( s_PositionStorage.Head() + 0ul, 1 );
 		P[ 1 ].Set( s_PositionStorage.Head() + 1ul, 1 );
 		P[ 2 ].Set( s_PositionStorage.Head() + 2ul, 1 );
-		V[ 0 ].Set( s_VertexStorage  .Head() + 0ul * a_Stride, a_Stride );
-		V[ 1 ].Set( s_VertexStorage  .Head() + 1ul * a_Stride, a_Stride );
-		V[ 2 ].Set( s_VertexStorage  .Head() + 2ul * a_Stride, a_Stride );
+		V[ 0 ].Set( s_VertexStorage.Head() + 0ul * a_Stride, a_Stride );
+		V[ 1 ].Set( s_VertexStorage.Head() + 1ul * a_Stride, a_Stride );
+		V[ 2 ].Set( s_VertexStorage.Head() + 2ul * a_Stride, a_Stride );
 
 		for ( ; a_Begin < a_End; a_Begin += 3
 			  , P[ 0 ].Advance( 3 )
@@ -2066,26 +2113,9 @@ private:
 			  , V[ 1 ].Advance( 3 )
 			  , V[ 2 ].Advance( 3 ) )
 		{
-			// Culling - if enabled and incorrect orientation, continue.
-			if constexpr ( _CullFront || _CullBack )
+			if ( !CullCheck< _Interface >( &P[ 0 ][ 0 ] ) )
 			{
-				float NormalZ = Math::Cross( Vector3( *P[ 1 ] - *P[ 0 ] ), Vector3( *P[ 2 ] - *P[ 0 ] ) ).z;
-
-				if constexpr ( _CullFront )
-				{
-					if ( NormalZ < 0.0f )
-					{
-						continue;
-					}
-				}
-
-				if constexpr ( _CullBack )
-				{
-					if ( NormalZ > 0.0f )
-					{
-						continue;
-					}
-				}
+				continue;
 			}
 
 			ViewportClipTriangle( &P[ 0 ][ 0 ], V, a_Stride, RasterizeTriangle< _Interface >, ConvertToScreenSpace, a_FragmentShader );
@@ -2127,14 +2157,14 @@ private:
 
 		uint8_t Interface = 0;
 
-		if ( s_RenderState.Perspective                         ) Interface |= ( 1u << 7u );
-		if ( s_RenderState.Clip                                ) Interface |= ( 1u << 6u );
+		if ( s_RenderState.Perspective ) Interface |= ( 1u << 7u );
+		if ( s_RenderState.Clip ) Interface |= ( 1u << 6u );
 		if ( s_RenderState.CullFace && s_RenderState.FrontCull ) Interface |= ( 1u << 5u );
-		if ( s_RenderState.CullFace && s_RenderState.BackCull  ) Interface |= ( 1u << 4u );
-		if ( s_RenderState.DepthTest                           ) Interface |= ( 1u << 3u );
-		if ( true                                              ) Interface |= ( 1u << 2u ); // Unused
-		if ( true                                              ) Interface |= ( 1u << 1u ); // Unused
-		if ( true                                              ) Interface |= ( 1u << 0u ); // Unused
+		if ( s_RenderState.CullFace && s_RenderState.BackCull ) Interface |= ( 1u << 4u );
+		if ( s_RenderState.DepthTest ) Interface |= ( 1u << 3u );
+		if ( true ) Interface |= ( 1u << 2u ); // Unused
+		if ( true ) Interface |= ( 1u << 1u ); // Unused
+		if ( true ) Interface |= ( 1u << 0u ); // Unused
 
 		s_DrawProcessorFunc = GetDrawProcessor( Interface );
 	}
@@ -2150,210 +2180,212 @@ private:
 			case TextureParameter::DEPTH_STENCIL_TEXTURE_MODE:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::DEPTH_COMPONENT: Target.DepthStencilTextureMode = 0; break;
-					case ( uint32_t )TextureSetting::STENCIL_INDEX:   Target.DepthStencilTextureMode = 1; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::DEPTH_COMPONENT: Target.DepthStencilTextureMode = 0; break;
+						case ( uint32_t )TextureSetting::STENCIL_INDEX:   Target.DepthStencilTextureMode = 1; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_BASE_LEVEL:
 				if constexpr ( !std::is_pointer_v< T > )
-				Target.TextureBaseLevel = a_Value; break;
+					Target.TextureBaseLevel = a_Value; break;
 			case TextureParameter::TEXTURE_BORDER_COLOUR:
 			{
-				if constexpr ( std::is_pointer_v< T > ) {
-				const float* Value = reinterpret_cast< const float* >( a_Value );
-				Target.TextureBorderColour = {
-					Value[ 0 ],
-					Value[ 1 ],
-					Value[ 2 ],
-					Value[ 3 ]
-				}; }
+				if constexpr ( std::is_pointer_v< T > )
+				{
+					const float* Value = reinterpret_cast< const float* >( a_Value );
+					Target.TextureBorderColour = {
+						Value[ 0 ],
+						Value[ 1 ],
+						Value[ 2 ],
+						Value[ 3 ]
+					};
+				}
 				break;
 			}
 			case TextureParameter::TEXTURE_COMPARE_FUNC:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::LEQUAL:    Target.TextureCompareFunc = 0; break;
-					case ( uint32_t )TextureSetting::GEQUAL:    Target.TextureCompareFunc = 1; break;
-					case ( uint32_t )TextureSetting::LESS:      Target.TextureCompareFunc = 2; break;
-					case ( uint32_t )TextureSetting::GREATER:   Target.TextureCompareFunc = 3; break;
-					case ( uint32_t )TextureSetting::EQUAL:     Target.TextureCompareFunc = 4; break;
-					case ( uint32_t )TextureSetting::NOT_EQUAL: Target.TextureCompareFunc = 5; break;
-					case ( uint32_t )TextureSetting::ALWAYS:    Target.TextureCompareFunc = 6; break;
-					case ( uint32_t )TextureSetting::NEVER:     Target.TextureCompareFunc = 7; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::LEQUAL:    Target.TextureCompareFunc = 0; break;
+						case ( uint32_t )TextureSetting::GEQUAL:    Target.TextureCompareFunc = 1; break;
+						case ( uint32_t )TextureSetting::LESS:      Target.TextureCompareFunc = 2; break;
+						case ( uint32_t )TextureSetting::GREATER:   Target.TextureCompareFunc = 3; break;
+						case ( uint32_t )TextureSetting::EQUAL:     Target.TextureCompareFunc = 4; break;
+						case ( uint32_t )TextureSetting::NOT_EQUAL: Target.TextureCompareFunc = 5; break;
+						case ( uint32_t )TextureSetting::ALWAYS:    Target.TextureCompareFunc = 6; break;
+						case ( uint32_t )TextureSetting::NEVER:     Target.TextureCompareFunc = 7; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_COMPARE_MODE:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::NONE:                   Target.TextureCompareMode = 0; break;
-					case ( uint32_t )TextureSetting::COMPARE_REF_TO_TEXTURE: Target.TextureCompareMode = 1; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::NONE:                   Target.TextureCompareMode = 0; break;
+						case ( uint32_t )TextureSetting::COMPARE_REF_TO_TEXTURE: Target.TextureCompareMode = 1; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_LOD_BIAS:
 				if constexpr ( !std::is_pointer_v< T > )
-				Target.TextureLODBias = a_Value; break;
+					Target.TextureLODBias = a_Value; break;
 			case TextureParameter::TEXTURE_MIN_FILTER:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::NEAREST:                Target.TextureMinFilter = 0; break;
-					case ( uint32_t )TextureSetting::LINEAR:                 Target.TextureMinFilter = 1; break;
-					case ( uint32_t )TextureSetting::NEAREST_MIPMAP_NEAREST: Target.TextureMinFilter = 2; break;
-					case ( uint32_t )TextureSetting::LINEAR_MIPMAP_NEAREST:  Target.TextureMinFilter = 3; break;
-					case ( uint32_t )TextureSetting::NEAREST_MIPMAP_LINEAR:  Target.TextureMinFilter = 4; break;
-					case ( uint32_t )TextureSetting::LINEAR_MIPMAP_LINEAR:   Target.TextureMinFilter = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::NEAREST:                Target.TextureMinFilter = 0; break;
+						case ( uint32_t )TextureSetting::LINEAR:                 Target.TextureMinFilter = 1; break;
+						case ( uint32_t )TextureSetting::NEAREST_MIPMAP_NEAREST: Target.TextureMinFilter = 2; break;
+						case ( uint32_t )TextureSetting::LINEAR_MIPMAP_NEAREST:  Target.TextureMinFilter = 3; break;
+						case ( uint32_t )TextureSetting::NEAREST_MIPMAP_LINEAR:  Target.TextureMinFilter = 4; break;
+						case ( uint32_t )TextureSetting::LINEAR_MIPMAP_LINEAR:   Target.TextureMinFilter = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_MAG_FILTER:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::NEAREST: Target.TextureMinFilter = 0; break;
-					case ( uint32_t )TextureSetting::LINEAR:  Target.TextureMinFilter = 1; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::NEAREST: Target.TextureMinFilter = 0; break;
+						case ( uint32_t )TextureSetting::LINEAR:  Target.TextureMinFilter = 1; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_MIN_LOD:
 				if constexpr ( !std::is_pointer_v< T > )
-				Target.TextureMinLOD = a_Value; break;
+					Target.TextureMinLOD = a_Value; break;
 			case TextureParameter::TEXTURE_MAX_LOD:
 				if constexpr ( !std::is_pointer_v< T > )
-				Target.TextureMaxLOD = a_Value; break;
+					Target.TextureMaxLOD = a_Value; break;
 			case TextureParameter::TEXTURE_MAX_LEVEL:
 				if constexpr ( !std::is_pointer_v< T > )
-				Target.TextureMaxLevel = a_Value; break;
+					Target.TextureMaxLevel = a_Value; break;
 			case TextureParameter::TEXTURE_SWIZZLE_R:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleR = 0; break;
-					case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleR = 1; break;
-					case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleR = 2; break;
-					case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleR = 3; break;
-					case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleR = 4; break;
-					case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleR = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleR = 0; break;
+						case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleR = 1; break;
+						case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleR = 2; break;
+						case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleR = 3; break;
+						case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleR = 4; break;
+						case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleR = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_SWIZZLE_G:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleG = 0; break;
-					case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleG = 1; break;
-					case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleG = 2; break;
-					case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleG = 3; break;
-					case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleG = 4; break;
-					case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleG = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleG = 0; break;
+						case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleG = 1; break;
+						case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleG = 2; break;
+						case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleG = 3; break;
+						case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleG = 4; break;
+						case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleG = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_SWIZZLE_B:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleB = 0; break;
-					case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleB = 1; break;
-					case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleB = 2; break;
-					case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleB = 3; break;
-					case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleB = 4; break;
-					case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleB = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleB = 0; break;
+						case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleB = 1; break;
+						case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleB = 2; break;
+						case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleB = 3; break;
+						case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleB = 4; break;
+						case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleB = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_SWIZZLE_A:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleA = 0; break;
-					case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleA = 1; break;
-					case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleA = 2; break;
-					case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleA = 3; break;
-					case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleA = 4; break;
-					case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleA = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleA = 0; break;
+						case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleA = 1; break;
+						case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleA = 2; break;
+						case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleA = 3; break;
+						case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleA = 4; break;
+						case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleA = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_SWIZZLE_RGBA:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleR = 0; Target.TextureSwizzleG = 0; Target.TextureSwizzleB = 0; Target.TextureSwizzleA = 0; break;
-					case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleR = 1; Target.TextureSwizzleG = 1; Target.TextureSwizzleB = 1; Target.TextureSwizzleA = 1; break;
-					case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleR = 2; Target.TextureSwizzleG = 2; Target.TextureSwizzleB = 2; Target.TextureSwizzleA = 2; break;
-					case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleR = 3; Target.TextureSwizzleG = 3; Target.TextureSwizzleB = 3; Target.TextureSwizzleA = 3; break;
-					case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleR = 4; Target.TextureSwizzleG = 4; Target.TextureSwizzleB = 4; Target.TextureSwizzleA = 4; break;
-					case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleR = 5; Target.TextureSwizzleG = 5; Target.TextureSwizzleB = 5; Target.TextureSwizzleA = 5; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::RED:   Target.TextureSwizzleR = 0; Target.TextureSwizzleG = 0; Target.TextureSwizzleB = 0; Target.TextureSwizzleA = 0; break;
+						case ( uint32_t )TextureSetting::GREEN: Target.TextureSwizzleR = 1; Target.TextureSwizzleG = 1; Target.TextureSwizzleB = 1; Target.TextureSwizzleA = 1; break;
+						case ( uint32_t )TextureSetting::BLUE:  Target.TextureSwizzleR = 2; Target.TextureSwizzleG = 2; Target.TextureSwizzleB = 2; Target.TextureSwizzleA = 2; break;
+						case ( uint32_t )TextureSetting::ALPHA: Target.TextureSwizzleR = 3; Target.TextureSwizzleG = 3; Target.TextureSwizzleB = 3; Target.TextureSwizzleA = 3; break;
+						case ( uint32_t )TextureSetting::ZERO:  Target.TextureSwizzleR = 4; Target.TextureSwizzleG = 4; Target.TextureSwizzleB = 4; Target.TextureSwizzleA = 4; break;
+						case ( uint32_t )TextureSetting::ONE:   Target.TextureSwizzleR = 5; Target.TextureSwizzleG = 5; Target.TextureSwizzleB = 5; Target.TextureSwizzleA = 5; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_WRAP_S:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapS = 0; break;
-					case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapS = 1; break;
-					case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapS = 2; break;
-					case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapS = 3; break;
-					case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapS = 4; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapS = 0; break;
+						case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapS = 1; break;
+						case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapS = 2; break;
+						case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapS = 3; break;
+						case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapS = 4; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_WRAP_T:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapT = 0; break;
-					case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapT = 1; break;
-					case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapT = 2; break;
-					case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapT = 3; break;
-					case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapT = 4; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapT = 0; break;
+						case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapT = 1; break;
+						case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapT = 2; break;
+						case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapT = 3; break;
+						case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapT = 4; break;
+						default: break;
+					}
 				break;
 			}
 			case TextureParameter::TEXTURE_WRAP_R:
 			{
 				if constexpr ( std::is_integral_v< T > )
-				switch ( a_Value )
-				{
-					case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapR = 0; break;
-					case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapR = 1; break;
-					case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapR = 2; break;
-					case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapR = 3; break;
-					case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapR = 4; break;
-					default: break;
-				}
+					switch ( a_Value )
+					{
+						case ( uint32_t )TextureSetting::CLAMP_TO_EDGE:        Target.TextureWrapR = 0; break;
+						case ( uint32_t )TextureSetting::CLAMP_TO_BORDER:      Target.TextureWrapR = 1; break;
+						case ( uint32_t )TextureSetting::MIRRORED_REPEAT:      Target.TextureWrapR = 2; break;
+						case ( uint32_t )TextureSetting::REPEAT:               Target.TextureWrapR = 3; break;
+						case ( uint32_t )TextureSetting::MIRROR_CLAMP_TO_EDGE: Target.TextureWrapR = 4; break;
+						default: break;
+					}
 				break;
 			}
 			default:
@@ -2584,14 +2616,14 @@ private:
 		}
 	}
 
-	static bool DepthCompare_LEQUAL		( float a_A, float a_B ) { return a_A <= a_B; }
-	static bool DepthCompare_GEQUAL		( float a_A, float a_B ) { return a_A >= a_B; }
-	static bool DepthCompare_LESS		( float a_A, float a_B ) { return a_A <  a_B; }
-	static bool DepthCompare_GREATER	( float a_A, float a_B ) { return a_A >  a_B; }
-	static bool DepthCompare_EQUAL		( float a_A, float a_B ) { return a_A == a_B; }
-	static bool DepthCompare_NOT_EQUAL	( float a_A, float a_B ) { return a_A != a_B; }
-	static bool DepthCompare_ALWAYS		( float a_A, float a_B ) { return true;       }
-	static bool DepthCompare_NEVER		( float a_A, float a_B ) { return false;      }
+	static bool DepthCompare_LEQUAL( float a_A, float a_B ) { return a_A <= a_B; }
+	static bool DepthCompare_GEQUAL( float a_A, float a_B ) { return a_A >= a_B; }
+	static bool DepthCompare_LESS( float a_A, float a_B ) { return a_A < a_B; }
+	static bool DepthCompare_GREATER( float a_A, float a_B ) { return a_A > a_B; }
+	static bool DepthCompare_EQUAL( float a_A, float a_B ) { return a_A == a_B; }
+	static bool DepthCompare_NOT_EQUAL( float a_A, float a_B ) { return a_A != a_B; }
+	static bool DepthCompare_ALWAYS( float a_A, float a_B ) { return true; }
+	static bool DepthCompare_NEVER( float a_A, float a_B ) { return false; }
 
 	inline static BufferRegistry                  s_BufferRegistry;
 	inline static ArrayRegistry                   s_ArrayRegistry;
@@ -2619,6 +2651,6 @@ private:
 	inline static std::array< TextureUnit, 32 >   s_TextureUnits;
 	inline static uint32_t                        s_ActiveTextureUnit;
 	inline static uint32_t                        s_ActiveTextureTarget;
-	inline static DepthCompareFunc                s_DepthCompareFunc         = DepthCompare_LESS;
-	inline static DrawProcessorFunc               s_DrawProcessorFunc        = DrawProcessor< 0b10011111 >;
+	inline static DepthCompareFunc                s_DepthCompareFunc = DepthCompare_LESS;
+	inline static DrawProcessorFunc               s_DrawProcessorFunc = DrawProcessor< 0b10011111 >;
 };
