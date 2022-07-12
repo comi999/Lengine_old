@@ -2,6 +2,7 @@
 #include "Component.hpp"
 #include "GameObject.hpp"
 #include "Prefab.hpp"
+#include "AudioClip.hpp"
 #include "AudioSource.hpp"
 #include "AudioListener.hpp"
 
@@ -12,6 +13,7 @@ int main()
 	CGE::Init();
 
 	auto prefab = Resource::Load< Prefab >( "spear"_H );
+	auto audioClip = Resource::Load<AudioClip>("sound"_H);
 
 	for ( int i = 0; i < 1; ++i )
 	{
@@ -19,7 +21,7 @@ int main()
 		GameObject object = Prefab::Instantiate( *prefab );
 
 		auto audioSource = object.AddComponent<AudioSource>();
-		audioSource->LoadWav("sound.wav");
+		audioSource->LoadWav(audioClip);
 		audioSource->Play();
 		audioSource->SetLooping(true);
 

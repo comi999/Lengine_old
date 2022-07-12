@@ -5,7 +5,9 @@
 #include "soloud.h"
 #include "soloud_wav.h"
 #include "soloud_audiosource.h"
+#include "AudioClip.hpp"
 #include "Transform.hpp"
+#include "Resource.hpp"
 
 DefineComponent(AudioSource, Component)
 {
@@ -48,10 +50,13 @@ public:
         return handle;
     }
 
-    void LoadWav(const char* path)
+    void LoadWav(ResourceHandle<AudioClip>& resource)
     {
+        audioClip = resource;
+        auto* clip = audioClip.Assure();
+
         auto wav = std::make_unique<SoLoud::Wav>();
-        wav->load(path);
+        wav->loadMem(clip->data, clip->length, false, false);
 
         audioSource = std::move(wav);
 
@@ -114,6 +119,7 @@ private:
         audioSource->set3dMinMaxDistance(minDistance, maxDistance);
     }
 
+    ResourceHandle<AudioClip> audioClip;
     std::unique_ptr<SoLoud::AudioSource> audioSource;
     SoLoud::handle handle = 0;
     ATTENUATION_MODELS attenuation = EXPONENTIAL_DISTANCE;
