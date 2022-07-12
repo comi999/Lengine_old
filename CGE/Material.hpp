@@ -57,6 +57,14 @@ public:
 		}
 	}
 
+	MaterialProperty( MaterialProperty&& a_MaterialProperty )
+		: m_Name( a_MaterialProperty.m_Name )
+		, m_Size( a_MaterialProperty.m_Size )
+		, m_Type( a_MaterialProperty.m_Type )
+		, m_Data( a_MaterialProperty.m_Data )
+		, m_Location( -1 )
+	{ }
+
 	~MaterialProperty()
 	{
 		Clear();
