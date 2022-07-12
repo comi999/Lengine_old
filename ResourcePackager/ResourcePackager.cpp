@@ -74,7 +74,7 @@ uint32_t GetResourceLoader( const std::string& a_File )
 		case ".jfif"_H: return 2; // STBI
 		case ".mp3"_H:  return 3; // AudioClip
 		case ".ogg"_H:  return 3; // AudioClip
-		case ".flac"_H:  return 3; // AudioClip
+		case ".flac"_H: return 3; // AudioClip
 		case ".wav"_H:  return 3; // AudioClip
 	}
 

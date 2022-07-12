@@ -17,6 +17,14 @@ public:
 		, m_Parent( GameObjectID( -1 ) )
 	{ }
 
+	void OnDestroy()
+	{
+		for ( Transform& ChildTransform : *this )
+		{
+			Component::Destroy< Transform >( ChildTransform.GetOwnerID() );
+		}
+	}
+
 	inline void SetDirty()
 	{
 		m_IsDirty = true;
@@ -720,22 +728,22 @@ private:
 
 		inline pointer operator->()
 		{
-			return GameObject::FindByID( *m_Iterator ).GetTransform();
+			return Component::GetComponent< Transform >( *m_Iterator );
 		}
 
 		inline const pointer* operator->() const
 		{
-			return GameObject::FindByID( *m_Iterator ).GetTransform();
+			return Component::GetComponent< Transform >( *m_Iterator );
 		}
 
 		inline reference operator*()
 		{
-			return *GameObject::FindByID( *m_Iterator ).GetTransform();
+			return *Component::GetComponent< Transform >( *m_Iterator );
 		}
 
 		inline const reference operator*() const
 		{
-			return *GameObject::FindByID( *m_Iterator ).GetTransform();
+			return *Component::GetComponent< Transform >( *m_Iterator );
 		}
 
 		inline bool operator==( const IteratorImpl& a_Iterator ) const

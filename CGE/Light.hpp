@@ -22,12 +22,20 @@ public:
 
 	static void SetSun( const Light* a_Light )
 	{
-		s_Sun = a_Light ? a_Light->GetOwner().GetID() : GameObjectID( -1 );
+		s_Sun = a_Light ? a_Light->GetOwner().GetID() : GameObject::Null;
 	}
 
 	static const Light* GetSun()
 	{
-		return s_Sun != GameObjectID( -1 ) ? GameObject::FindByID( s_Sun ).GetComponent< Light >() : nullptr;
+		GameObject SunObject = GameObject::FindByID( s_Sun );
+
+		if ( !SunObject.IsValid() )
+		{
+			s_Sun = GameObject::Null;
+			return nullptr;
+		}
+
+		return SunObject.GetComponent< Light >();
 	}
 
 private:

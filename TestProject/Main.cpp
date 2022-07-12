@@ -13,11 +13,11 @@ int main()
 	CGE::Init();
 
 	auto prefab = Resource::Load< Prefab >( "spear"_H );
-	auto audioClip = Resource::Load<AudioClip>("sound"_H);
+	auto audioClip = Resource::Load< AudioClip >( "strange"_H );
+
 
 	for ( int i = 0; i < 1; ++i )
 	{
-
 		GameObject object = Prefab::Instantiate( *prefab );
 
 		auto audioSource = object.AddComponent<AudioSource>();
@@ -29,7 +29,6 @@ int main()
 		renderer->GetMaterial()->SetShader( Shader::Diffuse );
 		object.GetTransform()->SetGlobalScale( Vector3::One );
 	}
-
 	GameObject SunObject = GameObject::Instantiate( "Sun"_N );
 	Light* LightComponent = SunObject.AddComponent< Light >();
 	Light::SetSun( LightComponent );

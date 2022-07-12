@@ -15,6 +15,10 @@
     "plane": {
       "Type": "mesh",
       "Path": "./Other/plane.obj"
+    },
+    "strange": {
+      "Type": "audioclip",
+      "Path": "./Other/strange.mp3"
     }
   }
 }

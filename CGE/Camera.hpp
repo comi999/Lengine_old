@@ -77,12 +77,20 @@ public:
 
 	inline static void SetMainCamera( const Camera* a_Camera )
 	{
-		s_MainCamera = a_Camera ? a_Camera->GetOwner() : GameObjectID( -1 );
+		s_MainCamera = a_Camera ? a_Camera->GetOwner() : GameObject::Null;
 	}
 
 	inline static const Camera* GetMainCamera()
 	{
-		return s_MainCamera != GameObjectID( -1 ) ? GameObject::FindByID( s_MainCamera ).GetComponent< Camera >() : nullptr;
+		GameObject MainCameraObject = GameObject::FindByID( s_MainCamera );
+
+		if ( !MainCameraObject.IsValid() )
+		{
+			s_MainCamera = GameObject::Null;
+			return nullptr;
+		}
+
+		return MainCameraObject.GetComponent< Camera >();
 	}
 
 private:

@@ -35,6 +35,7 @@ public:
             a_Action.Invoke();
 
             // Update calls.
+            ComponentBase::TickAllComponents();
             Scene::Tick();
             Time::Tick();
             RenderPipeline::Tick();

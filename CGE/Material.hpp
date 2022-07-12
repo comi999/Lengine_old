@@ -9,6 +9,7 @@ public:
 
 	enum class Type
 	{
+		NONE,
 		INT,
 		FLOAT,
 		STRING
@@ -20,7 +21,7 @@ public:
 		, m_Type( Type::INT )
 		, m_Data( nullptr )
 		, m_Location( -1 )
-	{}
+	{ }
 
 	~MaterialProperty()
 	{
@@ -82,9 +83,15 @@ public:
 	}
 
 	template < typename T >
+	inline T* Get()
+	{
+		return static_cast< T* >( m_Size * sizeof( T ) > sizeof( m_Data ) ? m_Data : &m_Data );
+	}
+
+	template < typename T >
 	inline const T* Get() const
 	{
-		return static_cast< const T* >( m_Size * sizeof( T ) < sizeof( m_Data ) ? &m_Data : m_Data );
+		return const_cast< MaterialProperty* >( this )->Get< T >();
 	}
 
 	template < typename T, size_t S >
@@ -100,12 +107,20 @@ public:
 
 	void Clear()
 	{
+		if ( !m_Size )
+		{
+			return;
+		}
+
 		switch ( m_Type )
 		{
-			case MaterialProperty::Type::INT: if ( sizeof( int ) * m_Size > sizeof( m_Data ) ) delete[] m_Data; break;
-			case MaterialProperty::Type::FLOAT: if ( sizeof( float ) * m_Size > sizeof( m_Data ) ) delete[] m_Data; break;
-			case MaterialProperty::Type::STRING: delete[] m_Data; break;
+			case Type::INT:    if ( sizeof( int   ) * m_Size > sizeof( m_Data ) ) delete[] m_Data; break;
+			case Type::FLOAT:  if ( sizeof( float ) * m_Size > sizeof( m_Data ) ) delete[] m_Data; break;
+			case Type::STRING: if ( sizeof( char  ) * m_Size > sizeof( m_Data ) ) delete[] m_Data; break;
 		}
+
+		m_Size = 0;
+		m_Type = Type::NONE;
 	}
 
 private:
@@ -116,18 +131,12 @@ private:
 	template < typename T >
 	void SetImpl( const T* a_Values, size_t a_Count )
 	{
+		Clear();
 		m_Size = a_Count;
-
-		if ( m_RequiresDelete )
-		{
-			delete[] m_Data;
-			m_RequiresDelete = false;
-		}
 
 		if ( sizeof( T ) * a_Count > sizeof( m_Data ) )
 		{
 			m_Data = new T[ a_Count ];
-			m_RequiresDelete = true;
 			memcpy( m_Data, a_Values, a_Count * sizeof( T ) );
 		}
 		else
@@ -146,16 +155,16 @@ private:
 
 		switch ( m_Type )
 		{
-			case MaterialProperty::Type::INT:    InPlace = sizeof( int ) * m_Size < sizeof( m_Data ); break;
-			case MaterialProperty::Type::FLOAT:  InPlace = sizeof( float ) * m_Size < sizeof( m_Data ); break;
-			case MaterialProperty::Type::STRING: InPlace = sizeof( char ) * m_Size < sizeof( m_Data ); break;
+			case Type::INT:    InPlace = sizeof( int   ) * m_Size <= sizeof( m_Data ); break;
+			case Type::FLOAT:  InPlace = sizeof( float ) * m_Size <= sizeof( m_Data ); break;
+			case Type::STRING: InPlace = sizeof( char  ) * m_Size <= sizeof( m_Data ); break;
 		}
 
 		const void* Data = InPlace ? &m_Data : m_Data;
 
 		switch ( m_Type )
 		{
-			case MaterialProperty::Type::INT:
+			case Type::INT:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{
@@ -164,7 +173,7 @@ private:
 
 				break;
 			}
-			case MaterialProperty::Type::FLOAT:
+			case Type::FLOAT:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{
@@ -173,7 +182,7 @@ private:
 
 				break;
 			}
-			case MaterialProperty::Type::STRING:
+			case Type::STRING:
 			{
 				for ( size_t i = 0; i < Count; ++i )
 				{
@@ -253,14 +262,14 @@ private:
 	template < typename T >
 	void SizeOf( T& a_Sizer ) const
 	{
-		a_Sizer& m_Size& m_Type;
+		a_Sizer & m_Size & m_Type;
 		size_t TypeSize = 0;
 
 		switch ( m_Type )
 		{
-			case MaterialProperty::Type::INT:    TypeSize = sizeof( int );   break;
-			case MaterialProperty::Type::FLOAT:  TypeSize = sizeof( float ); break;
-			case MaterialProperty::Type::STRING: TypeSize = sizeof( int );   break;
+			case Type::INT:    TypeSize = sizeof( int   ); break;
+			case Type::FLOAT:  TypeSize = sizeof( float ); break;
+			case Type::STRING: TypeSize = sizeof( char  ); break;
 		}
 
 		a_Sizer += TypeSize * m_Size;
@@ -269,8 +278,7 @@ private:
 	Name    m_Name;
 	size_t  m_Size;
 	Type    m_Type;
-	void* m_Data;
-	bool    m_RequiresDelete;
+	void*   m_Data;
 	int32_t m_Location;
 };
 

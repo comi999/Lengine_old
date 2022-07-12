@@ -10,6 +10,8 @@ class GameObject
 {
 public:
 
+	inline static constexpr GameObjectID Null = -1;
+
 	constexpr GameObject()
 		: m_ID( -1 )
 	{ }
@@ -64,14 +66,14 @@ public:
 		return GameObject::FindByID( Alias::FindByName( a_Name ) );
 	}
 
-	inline static void Destroy( GameObjectID a_GameObjectID )
+	inline static void Destroy( GameObject a_GameObject )
 	{
-		// implementation
+		Component::Destroy< Transform >( a_GameObject );
 	}
 
 	inline bool IsValid() const
 	{
-		return m_ID != static_cast< GameObjectID >( -1 );
+		return m_ID != Null && ComponentBase::GetRegistry().valid( entt::entity( m_ID ) );
 	}
 
 	template < typename T >
@@ -180,6 +182,16 @@ public:
 	constexpr operator GameObjectID() const
 	{
 		return m_ID;
+	}
+
+	inline bool operator==( GameObjectID a_ID ) const
+	{
+		return m_ID == a_ID;
+	}
+
+	inline bool operator!=( GameObjectID a_ID ) const
+	{
+		return m_ID != a_ID;
 	}
 
 private:

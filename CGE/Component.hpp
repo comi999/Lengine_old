@@ -21,6 +21,7 @@ class ComponentBase
 {
 private:
 
+	friend class CGE;
 	friend class GameObject;
 	friend class Prefab;
 	template < typename > friend class IComponent;
@@ -36,6 +37,28 @@ private:
 		static entt::registry Registry;
 		return Registry;
 	}
+
+	template < typename _Component >
+	static std::list< GameObjectID >& GetGraveyard()
+	{
+		static std::list< GameObjectID > Graveyard;
+		return Graveyard;
+	}
+
+	static void TickAllComponents()
+	{
+		for ( auto TickFunction : s_TickList )
+		{
+			TickFunction();
+		}
+	}
+
+	inline static void RegisterTickFunction( void( *a_TickFunction )( ) )
+	{
+		s_TickList.push_back( a_TickFunction );
+	}
+
+	inline static std::vector< void( * )( ) > s_TickList;
 
 	GameObjectID m_ID;
 };
@@ -80,6 +103,11 @@ public:
 	inline const GameObject& GetOwner() const
 	{
 		return reinterpret_cast< const GameObject& >( m_ID );
+	}
+
+	inline GameObjectID GetOwnerID() const
+	{
+		return m_ID;
 	}
 
 	template < typename T >
@@ -145,14 +173,22 @@ public:
 	}
 
 	template < typename T >
-	static bool DestroyComponent( GameObjectID a_ID )
+	static bool Destroy( GameObjectID a_ID )
 	{
-		if ( a_ID == static_cast< GameObjectID >( -1 ) )
+		static std::list< GameObjectID >& Graveyard = ComponentBase::GetGraveyard< T >();
+
+		if ( a_ID == GameObjectID( -1 ) || !ComponentBase::GetRegistry().valid( entt::entity( a_ID ) ) )
 		{
 			return false;
 		}
 
-		return ComponentBase::GetRegistry().remove_if_exists< T >( entt::entity( a_ID ) );
+		if ( T* ThisComponent = Component::GetExactComponent< T >( a_ID ) )
+		{
+			Graveyard.push_back( a_ID );
+			return true;
+		}
+
+		return false;
 	}
 
 	inline Transform* GetTransform()
@@ -234,59 +270,100 @@ private:
 		return true;
 	}
 
+	template < typename _Component >
+	struct HasOnCreate
+	{
+	private:
+
+		template < typename U > static char test( decltype( &U::OnCreate ) );
+		template < typename U > static long test( ... );
+
+	public:
+
+		static constexpr bool Value = sizeof( test< _Component >( 0 ) ) == sizeof( char );
+	};
+
+	template < typename _Component >
+	struct HasOnDestroy
+	{
+	private:
+
+		template < typename U > static char test( decltype( &U::OnDestroy ) );
+		template < typename U > static long test( ... );
+
+	public:
+
+		static constexpr bool Value = sizeof( test< _Component >( 0 ) ) == sizeof( char );
+	};
+
+	template < typename _Component >
+	static void OnCreateImpl( _Component& a_Component )
+	{
+		a_Component.OnCreate();
+	}
+
+	template < typename _Component >
+	static void OnDestroyImpl( _Component& a_Component )
+	{
+		a_Component.OnDestroy();
+	}
+
+	template < typename _Component >
+	static void InvokeOnCreate( entt::registry& a_Registry, entt::entity a_Entity )
+	{
+		OnCreateImpl< _Component >( a_Registry.get< _Component >( a_Entity ) );
+	}
+
+	template < typename _Component >
+	static void InvokeOnDestroy( entt::registry& a_Registry, entt::entity a_Entity )
+	{
+		OnDestroyImpl< _Component >( a_Registry.get< _Component >( a_Entity ) );
+	}
+
+	static void Tick()
+	{
+		static std::list< GameObjectID >& Graveyard = ComponentBase::GetGraveyard< LeadingType >();
+
+		// Destroy all marked for destruction.
+		while ( !Graveyard.empty() )
+		{
+			// If component type is Transform or Alias (no GameObject can live without either), then destroy
+			// entire GameObject.
+			if constexpr ( std::is_same_v< LeadingType, Alias > || std::is_same_v< LeadingType, Transform > )
+			{
+				ComponentBase::GetRegistry().destroy( entt::entity( Graveyard.front() ) );
+			}
+			else
+			{
+				ComponentBase::GetRegistry().erase< LeadingType >( entt::entity( Graveyard.front() ) );
+			}
+
+			Graveyard.pop_front();
+		}
+	}
+
 	static void Setup()
 	{
-		auto n = typeid( LeadingType ).name();
+		ComponentBase::RegisterTickFunction( Tick );
 		ComponentBase::GetTypeMap().RegisterTypes< InheritanceTrace >();
 		ComponentBase::GetTypeMap().RegisterFunction< LeadingType >( "AddComponent"_H, AddComponent< LeadingType > );
 		ComponentBase::GetTypeMap().RegisterFunction< LeadingType >( "BufferSerializeComponent"_H,   SerializeComponent  < BufferSerializer,   LeadingType > );
 		ComponentBase::GetTypeMap().RegisterFunction< LeadingType >( "BufferDeserializeComponent"_H, DeserializeComponent< BufferDeserializer, LeadingType > );
 		ComponentBase::GetTypeMap().RegisterFunction< LeadingType >( "GetComponent"_H,  GetExactComponent < LeadingType > );
 		ComponentBase::GetTypeMap().RegisterFunction< LeadingType >( "GetComponents"_H, GetExactComponents< LeadingType > );
+		
+		if constexpr ( HasOnCreate< LeadingType >::Value )
+		{
+			ComponentBase::GetRegistry().on_construct< LeadingType >().connect< InvokeOnCreate< LeadingType > >();
+		}
+
+		if constexpr ( HasOnDestroy< LeadingType >::Value )
+		{
+			ComponentBase::GetRegistry().on_destroy< LeadingType >().connect< InvokeOnDestroy< LeadingType > >();
+		}
 	}
+
+private:
 
 	inline static OnStart s_Setup = Setup;
 };
-
-// Fake components just for testing.
-template < typename T >
-class IGraphic : public IComponent< IGraphic< T > >
-{
-
-};
-
-typedef IGraphic< void > Graphic;
-
-template < typename T >
-class IInteractable : public IGraphic< IInteractable< T > >
-{
-
-};
-
-typedef IInteractable< void > Interactable;
-
-template < typename T >
-class IButton : public IInteractable< IButton< T > >
-{
-
-};
-
-typedef IButton< void > Button;
-
-template < typename T >
-class IImage : public IGraphic< IImage< T > >
-{ };
-
-typedef IImage< void > Image;
-
-template < typename T >
-class ISprite : public IGraphic< ISprite< T > >
-{ };
-
-typedef ISprite< void > Sprite;
-
-template < typename T >
-class IAnimatedTile : public IGraphic< IAnimatedTile< T > >
-{ };
-
-typedef IAnimatedTile< void > AnimatedTile;
