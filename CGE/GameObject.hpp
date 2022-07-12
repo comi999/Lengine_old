@@ -151,7 +151,7 @@ public:
 	template < typename T >
 	inline bool DestroyComponent()
 	{
-		return Component::DestroyComponent< T >( m_ID );
+		return Component::Destroy< T >( m_ID );
 	}
 
 	inline Transform* GetTransform()
