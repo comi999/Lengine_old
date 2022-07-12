@@ -5,28 +5,28 @@ struct Colour
 {
 	typedef unsigned char Channel;
 
-	Colour()
+	constexpr Colour()
 		: R( 255 )
 		, G( 255 )
 		, B( 255 )
 		, A( 255 )
 	{ }
 
-	Colour( Colour a_Colour, Channel a_Alpha )
+	constexpr Colour( Colour a_Colour, Channel a_Alpha )
 		: R( a_Colour.R )
 		, G( a_Colour.G )
 		, B( a_Colour.B )
 		, A( a_Alpha )
 	{ }
 
-	Colour( Channel a_Red, Channel a_Green, Channel a_Blue, Channel a_Alpha = 255 )
+	constexpr Colour( Channel a_Red, Channel a_Green, Channel a_Blue, Channel a_Alpha = 255 )
 		: R( a_Red )
 		, G( a_Green )
 		, B( a_Blue )
 		, A( a_Alpha )
 	{ }
 
-	Colour( const Vector4& a_Vector )
+	constexpr Colour( const Vector4& a_Vector )
 		: R( 255 * a_Vector.x )
 		, G( 255 * a_Vector.y )
 		, B( 255 * a_Vector.z )

@@ -23,6 +23,40 @@ public:
 		, m_Location( -1 )
 	{ }
 
+	MaterialProperty( const MaterialProperty& a_MaterialProperty )
+		: m_Name( a_MaterialProperty.m_Name )
+		, m_Size( a_MaterialProperty.m_Size )
+		, m_Type( a_MaterialProperty.m_Type )
+		, m_Data( nullptr )
+		, m_Location( -1 )
+	{
+		if ( !m_Size )
+		{
+			return;
+		}
+
+		size_t TypeSize = 0;
+
+		switch ( m_Type )
+		{
+			case MaterialProperty::Type::INT:   TypeSize += sizeof( int   ); break;
+			case MaterialProperty::Type::FLOAT: TypeSize += sizeof( float ); break;
+			case MaterialProperty::Type::STRING:TypeSize += sizeof( char  ); break;
+		}
+
+		TypeSize *= m_Size;
+
+		if ( TypeSize > sizeof( m_Data ) )
+		{
+			m_Data = new uint8_t[ TypeSize ];
+			memcpy( m_Data, a_MaterialProperty.m_Data, TypeSize );
+		}
+		else
+		{
+			memcpy( &m_Data, &a_MaterialProperty.m_Data, TypeSize );
+		}
+	}
+
 	~MaterialProperty()
 	{
 		Clear();
