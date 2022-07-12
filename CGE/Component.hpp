@@ -76,6 +76,7 @@ namespace Internal
 	int ComponentHash;
 };
 
+#define ThisLine__ __FILE__
 #define DefineComponent( Name, Base ) \
 template < typename T > \
 class I##Name; \

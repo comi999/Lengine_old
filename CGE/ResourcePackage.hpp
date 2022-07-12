@@ -76,6 +76,11 @@ public:
 
 	void Init( const std::string& a_Path )
 	{
+		if ( !Directory().ContainsFile( a_Path.c_str() ) )
+		{
+			return;
+		}
+
 		m_File = a_Path;
 		File ResourceFile( m_File.c_str() );
 		_ASSERT_EXPR( ResourceFile.Open(), "Can not open package file." );
