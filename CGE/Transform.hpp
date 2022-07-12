@@ -19,6 +19,11 @@ public:
 
 	void OnDestroy()
 	{
+		if ( m_Parent != GameObjectID( -1 ) )
+		{
+			DetachFromParent( false );
+		}
+
 		for ( Transform& ChildTransform : *this )
 		{
 			Component::Destroy< Transform >( ChildTransform.GetOwnerID() );
