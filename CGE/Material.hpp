@@ -380,6 +380,7 @@ public:
 
 	Material()
 		: m_Shader( &Shader::Default )
+		, m_FoundLocations( false )
 	{}
 
 	template < typename T >
@@ -513,9 +514,13 @@ private:
 	// All of the uniform functions really should be delegated to the Shader object.
 	void Apply() const
 	{
-		if ( !m_Shader->GetProgramHandle() )
+		if ( !m_FoundLocations )
 		{
-			const_cast< Shader* >( const_cast< Material* >( this )->m_Shader )->Compile();
+			if ( !m_Shader->GetProgramHandle() )
+			{
+				const_cast< Shader* >( const_cast< Material* >( this )->m_Shader )->Compile();
+			}
+
 			const_cast< Material* >( this )->FindLocations();
 			Rendering::UseProgram( GetShader().GetProgramHandle() );
 		}
@@ -655,7 +660,8 @@ private:
 		a_Sizer& m_Attributes& m_Textures;
 	}
 
-	const Shader* m_Shader;
+	const Shader*                      m_Shader;
+	bool                               m_FoundLocations;
 	std::map< Hash, MaterialProperty > m_Attributes;
 	std::map< Hash, TextureProperty  > m_Textures;
 
