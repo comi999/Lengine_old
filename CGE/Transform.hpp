@@ -840,7 +840,7 @@ private:
 
 	inline void SetParentImpl( Transform* a_Transform, bool a_RetainGlobalTransform, size_t a_ChildIndex = -1 )
 	{
-		GameObjectID ThisID = *this->GetOwner();
+		GameObjectID ThisID = this->GetOwnerID();
 
 		// unset parent
 		if ( m_Parent != static_cast< GameObjectID >( -1 ) )
@@ -867,7 +867,7 @@ private:
 			}
 
 			a_Transform->m_Children.push_back( ThisID );
-			m_Parent = *a_Transform->GetOwner();
+			m_Parent = a_Transform->GetOwnerID();
 		}
 		else
 		{
