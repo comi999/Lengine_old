@@ -11,8 +11,10 @@ public:
     static void Deinitialize();
 
     static SoLoud::handle Play(SoLoud::AudioSource& source);
-    static void SetLooping(SoLoud::handle handle, bool looping);
-    static void UpdateAudioSourcePosition(SoLoud::handle handle, Transform& transform);
+    static SoLoud::handle Play3d(SoLoud::AudioSource& source, const Vector3 position);
+    static bool IsPlaying(const SoLoud::handle& handle);
+    static void SetLooping(const SoLoud::handle& handle, const bool looping);
+    static void UpdateAudioSourcePosition(const SoLoud::handle& handle, const Transform& transform);
 
 private:
     static SoLoud::Soloud s_SoLoud;
