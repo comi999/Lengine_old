@@ -26,6 +26,7 @@ public:
 
 		for ( Transform& ChildTransform : *this )
 		{
+			ChildTransform.m_Parent = GameObjectID( -1 );
 			Component::Destroy< Transform >( ChildTransform.GetOwnerID() );
 		}
 	}
