@@ -81,7 +81,7 @@ public:
 		return m_Mesh.Assure();
 	}
 
-	const Material* GetMaterial() const
+	Material* GetMaterial()
 	{
 		return m_Material.Assure();
 	}

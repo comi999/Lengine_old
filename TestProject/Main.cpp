@@ -2,6 +2,7 @@
 #include "Component.hpp"
 #include "GameObject.hpp"
 #include "Prefab.hpp"
+#include "AudioSource.hpp"
 
 int main()
 {
@@ -11,18 +12,18 @@ int main()
 
 	auto prefab = Resource::Load< Prefab >( "spear"_H );
 
-	Material RedMaterial = Material::LitFlatColour;
-
-	RedMaterial.SetProperty( "diffuse_colour"_H, ( Vector4 )Colour::RED );
-
 	for ( int i = 0; i < 1; ++i )
 	{
 
 		GameObject object = Prefab::Instantiate( *prefab );
 
+		auto audioSource = object.AddComponent<AudioSource>();
+		audioSource->LoadWav("sound.wav");
+		audioSource->Play();
+		audioSource->SetLooping(true);
+
 		MeshRenderer* renderer = object.GetComponentInChild< MeshRenderer >();
-		//renederer->GetMaterial().Assure()->SetShader( Shader::Diffuse );
-		renderer->SetMaterial( RedMaterial );
+		renderer->GetMaterial()->SetShader( Shader::Diffuse );
 		object.GetTransform()->SetGlobalScale( Vector3::One );
 	}
 
