@@ -152,7 +152,7 @@ public:
 			return false;
 		}
 
-		return ComponentBase::GetRegistry().remove_if_exists< T >( a_ID );
+		return ComponentBase::GetRegistry().remove_if_exists< T >( entt::entity( a_ID ) );
 	}
 
 	inline Transform* GetTransform()
