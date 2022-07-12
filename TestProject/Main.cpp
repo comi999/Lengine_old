@@ -2,6 +2,9 @@
 #include "Component.hpp"
 #include "GameObject.hpp"
 #include "Prefab.hpp"
+#include "AudioClip.hpp"
+#include "AudioSource.hpp"
+#include "AudioListener.hpp"
 
 int main()
 {
@@ -10,19 +13,20 @@ int main()
 	CGE::Init();
 
 	auto prefab = Resource::Load< Prefab >( "spear"_H );
-
-	Material RedMaterial = Material::LitFlatColour;
-
-	RedMaterial.SetProperty( "diffuse_colour"_H, ( Vector4 )Colour::RED );
+	auto audioClip = Resource::Load<AudioClip>("sound"_H);
 
 	for ( int i = 0; i < 1; ++i )
 	{
 
 		GameObject object = Prefab::Instantiate( *prefab );
 
+		auto audioSource = object.AddComponent<AudioSource>();
+		audioSource->LoadWav(audioClip);
+		audioSource->Play();
+		audioSource->SetLooping(true);
+
 		MeshRenderer* renderer = object.GetComponentInChild< MeshRenderer >();
-		//renederer->GetMaterial().Assure()->SetShader( Shader::Diffuse );
-		renderer->SetMaterial( RedMaterial );
+		renderer->GetMaterial()->SetShader( Shader::Diffuse );
 		object.GetTransform()->SetGlobalScale( Vector3::One );
 	}
 
@@ -32,6 +36,7 @@ int main()
 
 	GameObject CameraObject = GameObject::Instantiate( "Camera"_N );
 	Camera* CameraComponent = CameraObject.AddComponent< Camera >();
+	CameraObject.AddComponent<AudioListener>();
 	CameraComponent->SetAspect( 1.0f );
 	CameraComponent->SetFOV( Math::Radians( 75.0f ) );
 	CameraComponent->SetNearZ( 0.1f );
@@ -57,12 +62,12 @@ int main()
 
 		CameraTransform->SetLocalRotation( Quaternion::ToQuaternion( Vector3( CameraRotation, 0.0f ) ) );
 
-		if ( Input::IsKeyDown( KeyCode::A ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalLeft()     * 0.1f );
-		if ( Input::IsKeyDown( KeyCode::D ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalRight()    * 0.1f );
-		if ( Input::IsKeyDown( KeyCode::W ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalForward()  * 0.1f );
-		if ( Input::IsKeyDown( KeyCode::S ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalBackward() * 0.1f );
-		if ( Input::IsKeyDown( KeyCode::Q ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalDown()     * 0.1f );
-		if ( Input::IsKeyDown( KeyCode::E ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalUp()       * 0.1f );
+		if ( Input::IsKeyDown( KeyCode::A ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalLeft()     * 1.1f );
+		if ( Input::IsKeyDown( KeyCode::D ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalRight()    * 1.1f );
+		if ( Input::IsKeyDown( KeyCode::W ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalForward()  * 1.1f );
+		if ( Input::IsKeyDown( KeyCode::S ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalBackward() * 1.1f );
+		if ( Input::IsKeyDown( KeyCode::Q ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalDown()     * 1.1f );
+		if ( Input::IsKeyDown( KeyCode::E ) ) CameraTransform->TranslateLocal( CameraTransform->GetLocalUp()       * 1.1f );
 	};
 
 	CGE::Run( GameLoop );

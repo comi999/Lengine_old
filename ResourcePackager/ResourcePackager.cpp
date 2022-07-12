@@ -14,15 +14,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "STBI.hpp"
 
-// Soloud (Audio)
-#include "soloud.h"
-
 // Resource types
 #include "Prefab.hpp"
 #include "Texture.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
-// #include "AudioClip.hpp"
+#include "AudioClip.hpp"
 
 // Component types
 #include "Transform.hpp"
@@ -75,8 +72,10 @@ uint32_t GetResourceLoader( const std::string& a_File )
 		case ".gif"_H:  return 2; // STBI
 		case ".jpeg"_H: return 2; // STBI
 		case ".jfif"_H: return 2; // STBI
-		// case ".mp3"_H:  return 3; // SOLOUD
-		// case ".wav"_H:  return 3; // SOLOUD
+		case ".mp3"_H:  return 3; // AudioClip
+		case ".ogg"_H:  return 3; // AudioClip
+		case ".flac"_H:  return 3; // AudioClip
+		case ".wav"_H:  return 3; // AudioClip
 	}
 
 	return 0;
@@ -558,6 +557,21 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 			TextureData = nullptr;
 			return ThisTemp;
 		}
+		case 3: /*AudioClip*/
+		{
+			AudioClip clip;
+            clip.SetName( a_Entry.ResourceName );
+			auto path = a_Entry.ResourceFilePath.c_str();
+			clip.LoadFromFile(path);
+
+			File ThisTemp = a_TempDirectory.NewFile( ( a_Entry.ResourceName + ConvertToExtension( a_Entry.ResourceType ) ).c_str(), Serialization::GetSizeOf( clip ) );
+			ThisTemp.Open();
+			FileSerializer Serializer( ThisTemp );
+			Serializer << clip;
+			ThisTemp.Close();
+
+			return ThisTemp;
+		}
 	}
 }
 
@@ -604,10 +618,11 @@ bool ResourcePackager::Build() const
 			auto& NewHeader = ResourceHeader.emplace_back( ResourceName, ResourcesSize, "" );
 			std::string ResourceExtension = ResourceFile.GetExtension();
 
-			if      ( ResourceExtension == ".mesh"     ) std::get< 2 >( NewHeader ) = typeid( Mesh      ).name();
-			else if ( ResourceExtension == ".material" ) std::get< 2 >( NewHeader ) = typeid( Material  ).name();
-			else if ( ResourceExtension == ".texture"  ) std::get< 2 >( NewHeader ) = typeid( Texture2D ).name();
-			else if ( ResourceExtension == ".prefab"   ) std::get< 2 >( NewHeader ) = typeid( Prefab    ).name();
+			if      ( ResourceExtension == ".mesh"      ) std::get< 2 >( NewHeader ) = typeid( Mesh      ).name();
+			else if ( ResourceExtension == ".material"  ) std::get< 2 >( NewHeader ) = typeid( Material  ).name();
+			else if ( ResourceExtension == ".texture"   ) std::get< 2 >( NewHeader ) = typeid( Texture2D ).name();
+			else if ( ResourceExtension == ".prefab"    ) std::get< 2 >( NewHeader ) = typeid( Prefab    ).name();
+			else if ( ResourceExtension == ".audioclip" ) std::get< 2 >( NewHeader ) = typeid( AudioClip ).name();
 
 			ResourceFile.Open();
 			ResourcesSize += ResourceFile.Size();

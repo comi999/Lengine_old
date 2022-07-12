@@ -7,6 +7,7 @@
 #include "Time.hpp"
 #include "Scene.hpp"
 #include "RenderPipeline.hpp"
+#include "AudioEngine.hpp"
 
 class CGE
 {
@@ -18,6 +19,7 @@ public:
         Resource::Init();
         Input::Init();
         Rendering::Init();
+        AudioEngine::Init();
     }
 
     // Begin ticking.
@@ -28,6 +30,7 @@ public:
         while ( s_Running )
         {
             Input::Tick();
+            AudioEngine::Tick();
 
             a_Action.Invoke();
 
@@ -39,6 +42,7 @@ public:
             ConsoleWindow::SwapBuffers( ConsoleWindow::GetCurrentContext() );
         }
 
+        AudioEngine::Deinitialize();
         Input::Deinitialize();
     }
 
