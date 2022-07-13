@@ -13,7 +13,8 @@ int main()
 	CGE::Init();
 
 	auto prefab = Resource::Load< Prefab >( "spear"_H );
-	auto audioClip = Resource::Load< AudioClip >( "strange"_H );
+	//auto audioClip = Resource::Load< AudioClip >( "sound"_H );
+	auto audioClip = Resource::Load< SfxrClip >( "door"_H );
 
 
 	for ( int i = 0; i < 1; ++i )
@@ -21,7 +22,8 @@ int main()
 		GameObject object = Prefab::Instantiate( *prefab );
 
 		auto audioSource = object.AddComponent<AudioSource>();
-		audioSource->LoadWav(audioClip);
+		//audioSource->LoadWav(audioClip);
+		audioSource->LoadSfx(audioClip);
 		audioSource->Play();
 		audioSource->SetLooping(true);
 

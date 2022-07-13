@@ -7,6 +7,7 @@
 #include "soloud_wav.h"
 #include "soloud_sfxr.h"
 #include "AudioClip.hpp"
+#include "SfxrClip.hpp"
 #include "Transform.hpp"
 #include "Resource.hpp"
 
@@ -53,8 +54,7 @@ public:
 
     void LoadWav(ResourceHandle<AudioClip>& resource)
     {
-        audioClip = resource;
-        auto* clip = audioClip.Assure();
+        auto* clip = resource.Assure();
 
         auto wav = std::make_unique<SoLoud::Wav>();
         wav->loadMem(clip->data, clip->length, false, false);
@@ -64,10 +64,9 @@ public:
         Update3dParams();
     }
 
-    void LoadSfx(ResourceHandle<AudioClip>& resource)
+    void LoadSfx(ResourceHandle<SfxrClip>& resource)
     {
-        audioClip = resource;
-        auto* clip = audioClip.Assure();
+        auto* clip = resource.Assure();
 
         auto sfxr = std::make_unique<SoLoud::Sfxr>();
         sfxr->loadParamsMem(clip->data, clip->length, false, false);
@@ -133,7 +132,6 @@ private:
         audioSource->set3dMinMaxDistance(minDistance, maxDistance);
     }
 
-    ResourceHandle<AudioClip> audioClip;
     std::unique_ptr<SoLoud::AudioSource> audioSource;
     SoLoud::handle handle = 0;
     ATTENUATION_MODELS attenuation = EXPONENTIAL_DISTANCE;

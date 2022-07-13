@@ -20,6 +20,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "AudioClip.hpp"
+#include "SfxrClip.hpp"
 
 // Component types
 #include "Transform.hpp"
@@ -33,11 +34,12 @@ constexpr uint32_t SupportedTypes = 4;
 
 uint32_t ConvertToType( const std::string& a_Extension )
 {
-	if ( a_Extension == "prefab"    ) return 1; // PREFAB
-	if ( a_Extension == "mesh"      ) return 2; // MESH
-	if ( a_Extension == "material"  ) return 3; // MATERIAL
-	if ( a_Extension == "texture"   ) return 4; // TEXTURE
-	if ( a_Extension == "audioclip" ) return 5; // AUDIOCLIP
+	if ( a_Extension == "prefab"    ) return 1;
+	if ( a_Extension == "mesh"      ) return 2;
+	if ( a_Extension == "material"  ) return 3;
+	if ( a_Extension == "texture"   ) return 4;
+	if ( a_Extension == "audioclip" ) return 5;
+	if ( a_Extension == "sfxrclip" ) return 6;
 
 	return 0; // NONE
 }
@@ -51,6 +53,7 @@ std::string ConvertToExtension( uint32_t a_Type )
 		case 3: return ".material";
 		case 4: return ".texture";
 		case 5: return ".audioclip";
+		case 6: return ".sfxrclip";
 	}
 
 	return "";
@@ -76,7 +79,7 @@ uint32_t GetResourceLoader( const std::string& a_File )
 		case ".ogg"_H:  return 3; // AudioClip
 		case ".flac"_H: return 3; // AudioClip
 		case ".wav"_H:  return 3; // AudioClip
-		case ".sfs"_H:  return 3; // AudioClip
+		case ".sfs"_H:  return 4; // SfxrClip
 	}
 
 	return 0;
@@ -573,6 +576,21 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 
 			return ThisTemp;
 		}
+		case 4: /*SfxrClip*/
+		{
+			SfxrClip clip;
+            clip.SetName( a_Entry.ResourceName );
+			auto path = a_Entry.ResourceFilePath.c_str();
+			clip.LoadFromFile(path);
+
+			File ThisTemp = a_TempDirectory.NewFile( ( a_Entry.ResourceName + ConvertToExtension( a_Entry.ResourceType ) ).c_str(), Serialization::GetSizeOf( clip ) );
+			ThisTemp.Open();
+			FileSerializer Serializer( ThisTemp );
+			Serializer << clip;
+			ThisTemp.Close();
+
+			return ThisTemp;
+		}
 	}
 }
 
@@ -624,6 +642,7 @@ bool ResourcePackager::Build() const
 			else if ( ResourceExtension == ".texture"   ) std::get< 2 >( NewHeader ) = typeid( Texture2D ).name();
 			else if ( ResourceExtension == ".prefab"    ) std::get< 2 >( NewHeader ) = typeid( Prefab    ).name();
 			else if ( ResourceExtension == ".audioclip" ) std::get< 2 >( NewHeader ) = typeid( AudioClip ).name();
+			else if ( ResourceExtension == ".sfxrclip"  ) std::get< 2 >( NewHeader ) = typeid( SfxrClip ).name();
 
 			ResourceFile.Open();
 			ResourcesSize += ResourceFile.Size();

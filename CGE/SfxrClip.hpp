@@ -2,4 +2,4 @@
 
 #include "RawFileResource.hpp"
 
-class AudioClip : public RawFileResource {};
+class SfxrClip : public RawFileResource {};
