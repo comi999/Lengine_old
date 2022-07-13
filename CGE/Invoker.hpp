@@ -67,7 +67,7 @@ public:
 	/// </summary>
 	template < typename Lambda, typename = FunctionTraits::EnableIfLambda< Lambda, void >, typename = DisableIfInvoker< Lambda > >
 	Invoker( Lambda& a_Lambda )
-		: m_Object( reinterpret_cast< void* >( &a_Lambda ) )
+		: m_Object( new std::remove_reference_t< decltype( a_Lambda ) >( a_Lambda ) )
 		, m_Function( nullptr )
 		, m_Invocation( FunctorLambda< Lambda > )
 	{ }
@@ -77,7 +77,7 @@ public:
 	/// </summary>
 	template < typename Lambda, typename = FunctionTraits::EnableIfLambda< Lambda, void >, typename = DisableIfInvoker< Lambda > >
 	Invoker( Lambda&& a_Lambda )
-		: m_Object( reinterpret_cast< void* >( &a_Lambda ) )
+		: m_Object( new std::remove_reference_t< decltype( a_Lambda ) >( a_Lambda ) )
 		, m_Function( nullptr )
 		, m_Invocation( FunctorLambda< Lambda > )
 	{ }
@@ -110,6 +110,14 @@ public:
 		, m_Function( a_StaticFunction )
 		, m_Invocation( FunctorStatic )
 	{ }
+
+	/// <summary>
+	/// Static function constructor.
+	/// </summary>
+	~Invoker()
+	{
+		Rewind();
+	}
 
 	/// <summary>
 	/// Invoke stored function. Will return default value if not set.
@@ -261,8 +269,13 @@ public:
 	/// <summary>
 	/// Clear the stored function.
 	/// </summary>
-	inline void Rewind() const
+	inline void Rewind()
 	{
+		if ( IsLambda() )
+		{
+			delete m_Object;
+		}
+
 		m_Object = nullptr;
 		m_Function = nullptr;
 		m_Invocation = nullptr;
