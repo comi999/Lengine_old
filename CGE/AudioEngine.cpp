@@ -14,9 +14,9 @@ void AudioEngine::Init()
 void AudioEngine::Tick()
 {
     auto audioSources = Component::GetExactComponents<AudioSource>();
-    for (auto it = audioSources.begin(); it != audioSources.end(); ++it)
+    for (auto& audioSource : audioSources)
     {
-        UpdateAudioSourcePosition((*it)->GetHandle(), *(*it)->GetTransform());
+        UpdateAudioSourcePosition(audioSource->GetHandle(), *audioSource->GetTransform());
     }
 
     auto audioListeners = Component::GetExactComponents<AudioListener>();
