@@ -83,7 +83,8 @@ public:
 
 		m_File = a_Path;
 		File ResourceFile( m_File.c_str() );
-		_ASSERT_EXPR( ResourceFile.Open(), "Can not open package file." );
+		auto result = ResourceFile.Open();
+		_ASSERT_EXPR( result, "Can not open package file." );
 		FileDeserializer HeaderDeserializer( ResourceFile );
 		HeaderDeserializer >> m_Header;
 		ResourceFile.Close();

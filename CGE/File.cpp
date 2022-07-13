@@ -335,7 +335,8 @@ void Directory::SetWorkingDirectory( const Directory& a_Directory )
 Directory Directory::Create( const char* a_Path )
 {
 	auto NewDirectory = std::filesystem::path( a_Path );
-	_ASSERT_EXPR( std::filesystem::create_directories( NewDirectory ), "Cannot create directory." );
+	auto result = std::filesystem::create_directories(NewDirectory);
+	_ASSERT_EXPR( result, "Cannot create directory." );
 	return NewDirectory;
 }
 

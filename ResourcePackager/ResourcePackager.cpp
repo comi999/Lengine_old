@@ -30,8 +30,6 @@
 // #include "AudioListener.hpp"
 // #include "AudioProcessor.hpp"
 
-constexpr uint32_t SupportedTypes = 4;
-
 uint32_t ConvertToType( const std::string& a_Extension )
 {
 	if ( a_Extension == "prefab"    ) return 1;
