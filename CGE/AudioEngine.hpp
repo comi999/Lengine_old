@@ -12,6 +12,7 @@ public:
 
     static SoLoud::handle Play(SoLoud::AudioSource& source);
     static SoLoud::handle Play3d(SoLoud::AudioSource& source, const Vector3 position);
+    static void Stop(const SoLoud::handle& handle);
     static bool IsPlaying(const SoLoud::handle& handle);
     static void SetLooping(const SoLoud::handle& handle, const bool looping);
     static void UpdateAudioSourcePosition(const SoLoud::handle& handle, const Transform& transform);

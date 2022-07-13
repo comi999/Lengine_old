@@ -57,6 +57,11 @@ SoLoud::handle AudioEngine::Play3d(SoLoud::AudioSource& source, const Vector3 po
     return s_SoLoud.play3d(source, position.x, position.y, position.z);
 }
 
+void AudioEngine::Stop(const SoLoud::handle& handle)
+{
+    s_SoLoud.stop(handle);
+}
+
 bool AudioEngine::IsPlaying(const SoLoud::handle& handle)
 {
     return s_SoLoud.isValidVoiceHandle(handle);

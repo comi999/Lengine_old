@@ -32,9 +32,14 @@ public:
         handle = AudioEngine::Play3d(*audioSource.get(), position);
     }
 
+    void Stop()
+    {
+        AudioEngine::Stop(handle);
+    }
+
     bool IsPlaying()
     {
-        return AudioEngine::
+        return AudioEngine::IsPlaying(handle);
     }
 
     void SetLooping(bool looping)
