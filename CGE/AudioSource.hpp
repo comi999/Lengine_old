@@ -3,8 +3,9 @@
 #include <memory>
 #include "Component.hpp"
 #include "soloud.h"
-#include "soloud_wav.h"
 #include "soloud_audiosource.h"
+#include "soloud_wav.h"
+#include "soloud_sfxr.h"
 #include "AudioClip.hpp"
 #include "Transform.hpp"
 #include "Resource.hpp"
@@ -59,6 +60,19 @@ public:
         wav->loadMem(clip->data, clip->length, false, false);
 
         audioSource = std::move(wav);
+
+        Update3dParams();
+    }
+
+    void LoadSfx(ResourceHandle<AudioClip>& resource)
+    {
+        audioClip = resource;
+        auto* clip = audioClip.Assure();
+
+        auto sfxr = std::make_unique<SoLoud::Sfxr>();
+        sfxr->loadParamsMem(clip->data, clip->length, false, false);
+
+        audioSource = std::move(sfxr);
 
         Update3dParams();
     }
