@@ -160,6 +160,7 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 			{
 				a_Entry.ResourceSource = Importer.ReadFile( 
 					a_Entry.ResourceFilePath,
+					aiPostProcessSteps::aiProcess_GenNormals |
 					aiPostProcessSteps::aiProcess_CalcTangentSpace |
 					aiPostProcessSteps::aiProcess_Triangulate |
 					aiPostProcessSteps::aiProcess_JoinIdenticalVertices |
