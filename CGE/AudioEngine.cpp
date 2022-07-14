@@ -71,3 +71,14 @@ void AudioEngine::SetLooping(const SoLoud::handle& handle, const bool looping)
 {
     s_SoLoud.setLooping(handle, looping);
 }
+
+void AudioEngine::SetLoopPoint(const SoLoud::handle& handle, const double loopPoint)
+{
+    s_SoLoud.setLoopPoint(handle, loopPoint);
+}
+
+void AudioEngine::SetVolume(const SoLoud::handle& handle, const float volume)
+{
+    s_SoLoud.setVolume(handle, volume);
+}
+

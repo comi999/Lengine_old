@@ -30,8 +30,23 @@ public:
 
     void Play()
     {
-        auto position = GetTransform()->GetGlobalPosition();
-        handle = AudioEngine::Play3d(*audioSource.get(), position);
+        if (IsPlaying())
+        {
+            return;
+        }
+
+        if (is3d)
+        {
+            auto position = GetTransform()->GetGlobalPosition();
+            handle = AudioEngine::Play3d(*audioSource.get(), position);
+        }
+        else
+        {
+            handle = AudioEngine::Play(*audioSource.get());
+        }
+        AudioEngine::SetLooping(handle, looping);
+        AudioEngine::SetLoopPoint(handle, loopPoint);
+        AudioEngine::SetVolume(handle, volume);
     }
 
     void Stop()
@@ -47,11 +62,12 @@ public:
     void SetLooping(bool looping)
     {
         AudioEngine::SetLooping(handle, looping);
+        this->looping = looping;
     }
 
     bool IsLooping()
     {
-        return AudioEngine->GetLooping(handle);
+        return looping;
     }
 
     SoLoud::handle GetHandle()
@@ -127,6 +143,38 @@ public:
         return rolloffFactor;
     }
 
+    void Set3d(bool value)
+    {
+        is3d = value;
+    }
+
+    bool Get3d()
+    {
+        return is3d;
+    }
+
+    void SetVolume(float newVolume)
+    {
+        AudioEngine::SetVolume(handle, newVolume);
+        volume = newVolume;
+    }
+
+    float GetVolume()
+    {
+        return volume;
+    }
+
+    void SetLoopPoint(float newLoopPoint)
+    {
+        AudioEngine::SetLoopPoint(handle, newLoopPoint);
+        loopPoint = newLoopPoint;
+    }
+
+    float GetLoopPoint()
+    {
+        return loopPoint;
+    }
+
 private: 
     void Update3dParams()
     {
@@ -145,4 +193,8 @@ private:
     float rolloffFactor = 0.5f;
     float minDistance = 1.0f;
     float maxDistance = 100.0f;
+    bool is3d = true;
+    bool looping = false;
+    double loopPoint = 0.0f;
+    float volume = 1.0f;
 };

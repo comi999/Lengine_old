@@ -15,6 +15,8 @@ public:
     static void Stop(const SoLoud::handle& handle);
     static bool IsPlaying(const SoLoud::handle& handle);
     static void SetLooping(const SoLoud::handle& handle, const bool looping);
+    static void SetLoopPoint(const SoLoud::handle& handle, const double loopPoint);
+    static void SetVolume(const SoLoud::handle& handle, const float volume);
     static void UpdateAudioSourcePosition(const SoLoud::handle& handle, const Transform& transform);
 
 private:
