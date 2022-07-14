@@ -372,6 +372,7 @@ private:
 	ResourceHandle< Texture2D > m_Resource;
 	TextureHandle               m_Handle;
 	int32_t                     m_Location;
+	int32_t                     m_TextureUnit;
 };
 
 class Material : public Resource
@@ -602,6 +603,8 @@ private:
 			}
 		}
 
+		static int ActiveTextureUnit = 0;
+
 		for ( auto
 			  Begin = const_cast< Material* >( this )->m_Textures.begin(),
 			  End = const_cast< Material* >( this )->m_Textures.end();
@@ -614,13 +617,16 @@ private:
 
 			if ( !Begin->second.m_Handle )
 			{
+
+
 				Rendering::GenTextures( 1, &Begin->second.m_Handle );
-				Rendering::ActiveTexture( 0 );
+				Rendering::ActiveTexture( ActiveTextureUnit );
 				Rendering::BindTexture( TextureTarget::TEXTURE_2D, Begin->second.m_Handle );
 				Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), Begin->second.m_Resource.Assure()->GetWidth(), Begin->second.m_Resource.Assure()->GetHeight(), 0, TextureFormat( 0 ), TextureSetting( 0 ), Begin->second.m_Resource.Assure()->GetData() );
+				Begin->second.m_TextureUnit = ActiveTextureUnit++;
 			}
 
-			Rendering::Uniform1i( Begin->second.m_Location, 0 );
+			Rendering::Uniform1i( Begin->second.m_Location, Begin->second.m_TextureUnit );
 		}
 	}
 

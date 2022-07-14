@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <set>
 #include "Component.hpp"
 #include "Mesh.hpp"
 #include "Frustum.hpp"
@@ -10,6 +11,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "Light.hpp"
+#include "MeshRenderer.hpp"
 
 class RenderPipeline
 {
@@ -200,8 +202,8 @@ private:
 			}
 		}
 
-		// Set Sun
-		if ( int32_t SunLocation = Rendering::GetUniformLocation( s_ActiveMaterial->GetShader().GetProgramHandle(), "u_SunLight" ); SunLocation >= 0 )
+		// Set Sun0 Direction
+		if ( int32_t Sun0DirectionLocation = Rendering::GetUniformLocation( s_ActiveMaterial->GetShader().GetProgramHandle(), "u_SunDirection0" ); Sun0DirectionLocation >= 0 )
 		{
 			Vector3 SunDirection;
 
@@ -214,7 +216,24 @@ private:
 				SunDirection = Vector3::Zero;
 			}
 
-			Rendering::Uniform3f( SunLocation, SunDirection.x, SunDirection.y, SunDirection.z );
+			Rendering::Uniform3f( Sun0DirectionLocation, SunDirection.x, SunDirection.y, SunDirection.z );
+		}
+
+		// Set Sun0 Ambient
+		if ( int32_t Sun0AmbientLocation = Rendering::GetUniformLocation( s_ActiveMaterial->GetShader().GetProgramHandle(), "u_SunAmbient0" ); Sun0AmbientLocation >= 0 )
+		{
+			Vector3 SunAmbient;
+
+			if ( const Light* Sun = Light::GetSun() )
+			{
+				SunAmbient = Sun->GetAmbient();
+			}
+			else
+			{
+				SunAmbient = Vector3::Zero;
+			}
+
+			Rendering::Uniform3f( Sun0AmbientLocation, SunAmbient.x, SunAmbient.y, SunAmbient.z );
 		}
 
 		

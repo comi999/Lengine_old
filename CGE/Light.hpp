@@ -20,12 +20,22 @@ public:
 		return m_Direction;
 	}
 
+	void SetAmbient( const Vector3& a_Ambient )
+	{
+		m_Ambient = a_Ambient;
+	}
+
+	const Vector3& GetAmbient() const
+	{
+		return m_Ambient;
+	}
+
 	static void SetSun( const Light* a_Light )
 	{
 		s_Sun = a_Light ? a_Light->GetOwner().GetID() : GameObject::Null;
 	}
 
-	static const Light* GetSun()
+	static Light* GetSun()
 	{
 		GameObject SunObject = GameObject::FindByID( s_Sun );
 
@@ -41,5 +51,6 @@ public:
 private:
 
 	Vector3 m_Direction;
+	Vector3 m_Ambient;
 	inline static GameObjectID s_Sun = GameObjectID( -1 );
 };

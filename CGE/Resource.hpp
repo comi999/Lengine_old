@@ -271,7 +271,7 @@ public:
 	static ResourceHandle< T > Find( Hash a_Name )
 	{
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ 0, ResourceHandle< T >{} };
+		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ 0, entt::resource_handle< T >{} };
 	}
 
 	template < typename T >

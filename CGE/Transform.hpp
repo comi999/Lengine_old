@@ -38,12 +38,12 @@ public:
 
 	inline Transform* GetParent()
 	{
-		return m_Parent == GameObjectID( -1 ) ? nullptr : reinterpret_cast< GameObject* >( &m_Parent )->GetTransform();
+		return m_Parent == GameObjectID( -1 ) ? nullptr : Component::GetComponent< Transform >( m_Parent );
 	}
 
 	inline const Transform* GetParent() const
 	{
-		return m_Parent == GameObjectID( -1 ) ? nullptr : reinterpret_cast< GameObject* >( &m_Parent )->GetTransform();
+		return m_Parent == GameObjectID( -1 ) ? nullptr : Component::GetComponent< Transform >( m_Parent );
 	}
 
 	inline void SetParent( Transform* a_Parent, bool a_RetainGlobalTransform = true )
@@ -253,7 +253,7 @@ public:
 		}
 		else
 		{
-			m_LocalMatrix = Math::Multiply( Math::Inverse( GameObject::FindByID( m_Parent ).GetTransform()->m_GlobalMatrix ), m_GlobalMatrix );
+			m_LocalMatrix = Math::Multiply( Math::Inverse( Component::GetComponent< Transform >( m_Parent )->m_GlobalMatrix ), m_GlobalMatrix );
 			m_LocalPosition = Matrix4::ExtractTranslation( m_LocalMatrix );
 		}
 
@@ -851,7 +851,7 @@ public:
 
 		for ( auto Begin = m_Children.begin(), End = m_Children.end(); Begin != End; ++Begin )
 		{
-			GameObject::FindByID( *Begin ).GetTransform()->UpdateTransform();
+			Component::GetComponent< Transform >( *Begin )->UpdateTransform();
 		}
 	}
 	

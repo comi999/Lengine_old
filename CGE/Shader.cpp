@@ -94,12 +94,13 @@ DefineShader( Vertex_Lit_Flat_Colour )
 DefineShader( Fragment_Lit_Flat_Colour )
 {
 	Uniform( Vector4, diffuse_colour );
-	Uniform( Vector3, u_SunLight );
+	Uniform( Vector3, u_SunDirection0 );
+	Uniform( Vector3, u_SunAmbient0 );
 	Varying_In( Vector3, Normal );
 
-	float Intensity = Math::Clamp( -Math::Dot( u_SunLight, Normal ), 0.0f, 1.0f );
-	Rendering::FragColour.x = Intensity * diffuse_colour.x;
-	Rendering::FragColour.y = Intensity * diffuse_colour.y;
-	Rendering::FragColour.z = Intensity * diffuse_colour.z;
+	float Intensity = Math::Clamp( -Math::Dot( u_SunDirection0, Normal ), 0.3f, 1.0f );
+	Rendering::FragColour.x = Intensity * diffuse_colour.x * u_SunAmbient0.x;
+	Rendering::FragColour.y = Intensity * diffuse_colour.y * u_SunAmbient0.y;
+	Rendering::FragColour.z = Intensity * diffuse_colour.z * u_SunAmbient0.z;
 	Rendering::FragColour.w = diffuse_colour.w;
 }
