@@ -835,6 +835,25 @@ public:
 	{
 		return rend();
 	}
+
+	void UpdateTransform()
+	{
+		if ( m_IsDirty )
+		{
+			m_LocalMatrix = Matrix4::CreateTransform( m_LocalPosition, m_LocalRotation, m_LocalScale );
+			m_IsDirty = false;
+		}
+
+		if ( m_Parent != GameObjectID( -1 ) )
+		{
+			m_GlobalMatrix = Math::Multiply( GetParent()->GetGlobalMatrix(), m_LocalMatrix );
+		}
+
+		for ( auto Begin = m_Children.begin(), End = m_Children.end(); Begin != End; ++Begin )
+		{
+			GameObject::FindByID( *Begin ).GetTransform()->UpdateTransform();
+		}
+	}
 	
 private:
 
@@ -872,25 +891,6 @@ private:
 		else
 		{
 			m_Parent = static_cast< GameObjectID >( -1 );
-		}
-	}
-
-	void UpdateTransform()
-	{
-		if ( m_IsDirty )
-		{
-			m_LocalMatrix = Matrix4::CreateTransform( m_LocalPosition, m_LocalRotation, m_LocalScale );
-			m_IsDirty = false;
-		}
-
-		if ( m_Parent != GameObjectID( -1 ) )
-		{
-			m_GlobalMatrix = Math::Multiply( GetParent()->GetGlobalMatrix(), m_LocalMatrix );
-		}
-
-		for ( auto Begin = m_Children.begin(), End = m_Children.end(); Begin != End; ++Begin )
-		{
-			GameObject::FindByID( *Begin ).GetTransform()->UpdateTransform();
 		}
 	}
 
