@@ -6,6 +6,7 @@
 #include "soloud_audiosource.h"
 #include "soloud_wav.h"
 #include "soloud_sfxr.h"
+#include "AudioEngine.hpp"
 #include "AudioClip.hpp"
 #include "SfxrClip.hpp"
 #include "Transform.hpp"
