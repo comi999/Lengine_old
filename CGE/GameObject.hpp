@@ -43,7 +43,7 @@ public:
 		entt::entity NewEntity = ComponentBase::GetRegistry().create();
 		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
 		NewGameObject.AddComponent< Alias >();
-		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent );
+		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent, false );
 		return NewGameObject;
 	}
 
@@ -52,7 +52,7 @@ public:
 		entt::entity NewEntity = ComponentBase::GetRegistry().create();
 		GameObject NewGameObject = reinterpret_cast< GameObject& >( NewEntity );
 		NewGameObject.AddComponent< Alias >()->SetName( a_Name );
-		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent );
+		NewGameObject.AddComponent< Transform >()->SetParent( a_Parent, false );
 		return NewGameObject;
 	}
 
