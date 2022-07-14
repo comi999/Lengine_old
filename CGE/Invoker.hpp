@@ -273,7 +273,7 @@ public:
 	{
 		if ( IsLambda() )
 		{
-			delete m_Object;
+			//delete m_Object;
 		}
 
 		m_Object = nullptr;
