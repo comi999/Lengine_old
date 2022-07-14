@@ -1784,7 +1784,7 @@ private:
 
 					a_FragmentShader();
 
-					if ( FragColour.w > 0.0001f ) ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
+					if ( FragColour.w > 0.01f ) ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
 				}
 
 				*PL += *PStepL;
@@ -1845,7 +1845,7 @@ private:
 					}
 
 					a_FragmentShader();
-					if ( FragColour.w > 0.0001f ) ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
+					if ( FragColour.w > 0.01f ) ConsoleWindow::GetCurrentContext()->GetScreenBuffer().SetColour( { PBegin->x, Y }, FragColour );
 				}
 
 				*PL += *PStepL;
