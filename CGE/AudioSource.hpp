@@ -8,6 +8,7 @@
 #include "soloud_sfxr.h"
 #include "AudioEngine.hpp"
 #include "AudioClip.hpp"
+#include "AudioEngine.hpp"
 #include "SfxrClip.hpp"
 #include "Transform.hpp"
 #include "Resource.hpp"
