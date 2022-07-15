@@ -139,14 +139,48 @@ public:
 	template < typename T >
 	std::list< T* > GetComponentsInChildren( bool a_ExactOnly = false )
 	{
-		return std::list< T* >();
+		auto& ThisTransform = *GetTransform();
+		std::list< T* > Collated;
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			if ( T* ChildComponent = ChildTransform.GetOwner()->GetComponent< T >( a_ExactOnly ) )
+			{
+				Collated.push_back( ChildComponent );
+			}
+		}
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			auto ChildCollated = ChildTransform.GetOwner()->GetComponentsInChildren< T >( a_ExactOnly );
+			Collated.splice( Collated.end(), ChildCollated, ChildCollated.begin(), ChildCollated.end() );
+		}
+
+		return Collated;
 	}
 
-	template < typename T >
+	/*template < typename T >
 	std::list< const T* > GetComponentsInChildren( bool a_ExactOnly ) const
 	{
-		return std::list< const T* >();
-	}
+		auto& ThisTransform = *GetTransform();
+		std::list< const T* > Collated;
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			if ( const T* ChildComponent = ChildTransform.GetOwner()->GetComponent< T >( a_ExactOnly ) )
+			{
+				Collated.push_back( ChildComponent );
+			}
+		}
+
+		for ( auto& ChildTransform : ThisTransform )
+		{
+			auto ChildCollated = const_cast< const Transform& >( ChildTransform ).GetOwner()->GetComponentsInChildren< T >( a_ExactOnly );
+			Collated.splice( Collated.end(), ChildCollated, ChildCollated.begin(), ChildCollated.end() );
+		}
+
+		return Collated;
+	}*/
 
 	template < typename T >
 	inline bool DestroyComponent()
