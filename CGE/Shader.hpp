@@ -137,5 +137,6 @@ public:
 	static Shader Phong;
 	static Shader UnlitFlatColour;
 	static Shader LitFlatColour;
+	static Shader Spotlight;
 	// More lighting models.
 };
