@@ -80,7 +80,7 @@ public:
 		s_MainCamera = a_Camera ? a_Camera->GetOwner() : GameObject::Null;
 	}
 
-	inline static const Camera* GetMainCamera()
+	inline static Camera* GetMainCamera()
 	{
 		GameObject MainCameraObject = GameObject::FindByID( s_MainCamera );
 
