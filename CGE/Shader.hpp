@@ -132,6 +132,7 @@ public:
 
 	static Shader Default;
 	static Shader Diffuse;
+	static Shader LitDiffuse;
 	static Shader Specular;
 	static Shader Normal;
 	static Shader Phong;
