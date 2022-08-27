@@ -16,7 +16,6 @@ file(COPY ${PROJECT_SOURCE_DIR}/Resources DESTINATION ${PROJECT_BINARY_DIR})
 #####################################################
 # SETUP LENGINE-CORE
 #####################################################
-# add_subdirectory(Lengine-Core)
 file(GLOB LENGINE_CORE_SOURCE_FILES ./Lengine-Core/*.cpp)
 file(GLOB LENGINE_CORE_HEADER_FILES ./Lengine-Core/*.hpp)
 source_group("Source Files" FILES ${LENGINE_CORE_SOURCE_FILES})
@@ -62,7 +61,7 @@ target_include_directories(Lengine-ResourcePackager PUBLIC
 	Dependencies/stb/include)
 
 #####################################################
-# SETUP LENGINE-RESOURCE-PACKAGER
+# SETUP LENGINE-EXAMPLE
 #####################################################
 file(GLOB LENGINE_EXAMPLE_SOURCE_FILES ./Lengine-Example/*.cpp)
 file(GLOB LENGINE_EXAMPLE_HEADER_FILES ./Lengine-Example/*.hpp)
