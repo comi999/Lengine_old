@@ -157,7 +157,7 @@ public:
 	bool Load()
 	{
 		std::fstream File;
-		File.open( "colours.map", std::ios::binary | std::ios::in );
+		File.open( "./Resources/colours.map", std::ios::binary | std::ios::in );
 
 		if ( !File.is_open() )
 		{
@@ -172,7 +172,7 @@ public:
 	bool Save()
 	{
 		std::fstream File;
-		File.open( "colours.map", std::ios::binary | std::ios::out );
+		File.open( "./Resources/colours.map", std::ios::binary | std::ios::out );
 
 		if ( !File.is_open() )
 		{

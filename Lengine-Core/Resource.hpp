@@ -1,8 +1,9 @@
 #pragma once
+
+#include <entt/resource/cache.hpp>
+#include <entt/resource/loader.hpp>
+
 #include "ResourcePackage.hpp"
-#include "entt/resource/cache.hpp"
-#include "entt/resource/handle.hpp"
-#include "entt/resource/loader.hpp"
 #include "Name.hpp"
 
 // Need to add loading and unloading automatically.
@@ -16,7 +17,7 @@ class ResourceHandle
 {
 private:
 
-	ResourceHandle( Hash a_Name, entt::resource_handle< T > a_Handle )
+	ResourceHandle( Hash a_Name, entt::resource< T > a_Handle )
 		: m_Name( a_Name )
 		, m_Handle( a_Handle )
 	{ }
@@ -50,12 +51,12 @@ public:
 
 	inline T* Get()
 	{
-		return &m_Handle.get();
+		return &*m_Handle;
 	}
 
 	inline const T* Get() const
 	{
-		return &m_Handle.get();
+		return &*m_Handle;
 	}
 
 	inline T* Assure()
@@ -67,7 +68,7 @@ public:
 
 		if ( m_Handle )
 		{
-			return &m_Handle.get();
+			return &*m_Handle;
 		}
 
 		return Load();
@@ -106,7 +107,7 @@ public:
 	{
 		if ( m_Handle )
 		{
-			m_Handle = entt::resource_handle< T >{};
+			m_Handle = entt::resource< T >{};
 		}
 
 		m_Name = a_Name;
@@ -125,12 +126,12 @@ public:
 
 	inline T* operator->()
 	{
-		return IsLoaded() ? &m_Handle.get() : nullptr;
+		return IsLoaded() ? &*m_Handle : nullptr;
 	}
 
 	inline const T* operator->() const
 	{
-		return IsLoaded() ? &m_Handle.get() : nullptr;
+		return IsLoaded() ? &*m_Handle : nullptr;
 	}
 
 private:
@@ -157,24 +158,26 @@ private:
 		a_Sizer & m_Name;
 	}
 
-	Hash                       m_Name;
-	entt::resource_handle< T > m_Handle;
+	Hash                m_Name;
+	entt::resource< T > m_Handle;
 };
 
 template < typename T >
-using ResourceCache = entt::resource_cache< T >;
-
-template < typename T >
-class EResourceLoader : public entt::resource_loader< EResourceLoader< T >, T >
+class ResourceLoader
 {
 public:
 
-	entt::resource_handle< T > load( Hash a_Name ) const
+	using result_type = std::shared_ptr< T >;
+
+	result_type operator()( Hash a_Name ) const
 	{
 		auto NewResource = std::make_shared< T >();
-		return Resource::LoadBin( a_Name, *NewResource ) ? NewResource : entt::resource_handle< T >{};
+		return Resource::LoadBin( a_Name, *NewResource ) ? NewResource : result_type{};
 	}
 };
+
+template < typename T >
+using ResourceCache = entt::resource_cache< T, ResourceLoader< T > >;
 
 class ResourceRepository
 {
@@ -271,14 +274,14 @@ public:
 	static ResourceHandle< T > Find( Hash a_Name )
 	{
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ 0, entt::resource_handle< T >{} };
+		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache[ a_Name ] } : ResourceHandle< T >{ 0, entt::resource< T >{} };
 	}
 
 	template < typename T >
 	static ResourceHandle< T > Load( Hash a_Name )
 	{
 		auto& Cache = s_ResourceRepository.Get< T >();
-		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache.handle( a_Name ) } : ResourceHandle< T >{ a_Name, Cache.load< EResourceLoader< T > >( a_Name, a_Name ) };
+		return Cache.contains( a_Name ) ? ResourceHandle< T >{ a_Name, Cache[ a_Name ] } : ResourceHandle< T >{ a_Name, Cache.load( a_Name, a_Name ).first->second };
 	}
 
 	template < typename T >
@@ -291,7 +294,7 @@ public:
 			return false;
 		}
 
-		Cache.discard( a_Name );
+		Cache.erase( a_Name );
 		return true;
 	}
 
@@ -312,7 +315,7 @@ private:
 	friend class CGE;
 	friend class Serialization;
 	friend class ResourcePackager;
-	template < typename > friend class EResourceLoader;
+	template < typename > friend class ResourceLoader;
 
 	template < typename T >
 	void Serialize( T& a_Serializer ) const

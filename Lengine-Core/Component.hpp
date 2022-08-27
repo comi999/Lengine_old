@@ -1,5 +1,7 @@
 #pragma once
-#include "entt/entt.hpp"
+
+#include <entt/entt.hpp>
+
 #include "Utilities.hpp"
 #include "File.hpp"
 #include "TypeMap.hpp"

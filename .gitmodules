@@ -1,1 +1,16 @@
 
+[submodule "Dependencies/entt"]
+	path = Dependencies/entt
+	url = https://github.com/skypjack/entt.git
+[submodule "Dependencies/glfw"]
+	path = Dependencies/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "Dependencies/assimp"]
+	path = Dependencies/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "Dependencies/soloud"]
+	path = Dependencies/soloud
+	url = https://github.com/jarikomppa/soloud.git
+[submodule "Dependencies/imgui"]
+	path = Dependencies/imgui
+	url = https://github.com/ocornut/imgui.git
