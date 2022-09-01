@@ -3,7 +3,6 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "Transform.hpp"
-#include "Material.hpp"
 #include "Rendering.hpp"
 
 // Remove later

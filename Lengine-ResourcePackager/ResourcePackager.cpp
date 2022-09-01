@@ -37,7 +37,8 @@ uint32_t ConvertToType( const std::string& a_Extension )
 	if ( a_Extension == "material"  ) return 3;
 	if ( a_Extension == "texture"   ) return 4;
 	if ( a_Extension == "audioclip" ) return 5;
-	if ( a_Extension == "sfxrclip" ) return 6;
+	if ( a_Extension == "sfxrclip"  ) return 6;
+	if ( a_Extension == "shader"    ) return 7;
 
 	return 0; // NONE
 }
@@ -52,6 +53,7 @@ std::string ConvertToExtension( uint32_t a_Type )
 		case 4: return ".texture";
 		case 5: return ".audioclip";
 		case 6: return ".sfxrclip";
+		case 7: return ".shader";
 	}
 
 	return "";
@@ -63,21 +65,22 @@ uint32_t GetResourceLoader( const std::string& a_File )
 
 	switch ( CRC32_RT( ResourceFile.GetExtension().c_str() ) )
 	{
-		case ".obj"_H:  return 1; // ASSIMP
-		case ".fbx"_H:  return 1; // ASSIMP
-		case ".ply"_H:  return 1; // ASSIMP
-		case ".png"_H:  return 2; // STBI
-		case ".jpg"_H:  return 2; // STBI
-		case ".bmp"_H:  return 2; // STBI
-		case ".tga"_H:  return 2; // STBI
-		case ".gif"_H:  return 2; // STBI
-		case ".jpeg"_H: return 2; // STBI
-		case ".jfif"_H: return 2; // STBI
-		case ".mp3"_H:  return 3; // AudioClip
-		case ".ogg"_H:  return 3; // AudioClip
-		case ".flac"_H: return 3; // AudioClip
-		case ".wav"_H:  return 3; // AudioClip
-		case ".sfs"_H:  return 4; // SfxrClip
+		case ".obj"_H:    return 1; // ASSIMP
+		case ".fbx"_H:    return 1; // ASSIMP
+		case ".ply"_H:    return 1; // ASSIMP
+		case ".png"_H:    return 2; // STBI
+		case ".jpg"_H:    return 2; // STBI
+		case ".bmp"_H:    return 2; // STBI
+		case ".tga"_H:    return 2; // STBI
+		case ".gif"_H:    return 2; // STBI
+		case ".jpeg"_H:   return 2; // STBI
+		case ".jfif"_H:   return 2; // STBI
+		case ".mp3"_H:    return 3; // AudioClip
+		case ".ogg"_H:    return 3; // AudioClip
+		case ".flac"_H:   return 3; // AudioClip
+		case ".wav"_H:    return 3; // AudioClip
+		case ".sfs"_H:    return 4; // SfxrClip
+		case ".shader"_H: return 5; // Shader
 	}
 
 	return 0;
@@ -589,6 +592,21 @@ File ProcessResourceEntry( ResourceEntry& a_Entry, Directory& a_TempDirectory )
 			ThisTemp.Close();
 
 			return ThisTemp;
+		}
+		case 5: /*Shader*/
+		{
+			//Shader ThisShader;
+   //         ThisShader.SetName( a_Entry.ResourceName );
+			//auto path = a_Entry.ResourceFilePath.c_str();
+			////ThisShader.
+
+			//File ThisTemp = a_TempDirectory.NewFile( ( a_Entry.ResourceName + ConvertToExtension( a_Entry.ResourceType ) ).c_str(), Serialization::GetSizeOf( clip ) );
+			//ThisTemp.Open();
+			//FileSerializer Serializer( ThisTemp );
+			//Serializer << clip;
+			//ThisTemp.Close();
+
+			//return ThisTemp;
 		}
 	}
 }

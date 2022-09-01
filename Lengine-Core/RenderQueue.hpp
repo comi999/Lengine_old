@@ -37,7 +37,7 @@ private:
 		return m_RenderInstructions.empty();
 	}
 
-	friend class RenderPipeline;
+	friend class RenderingPipeline;
 
 	std::list< RenderInstruction > m_RenderInstructions;
 };

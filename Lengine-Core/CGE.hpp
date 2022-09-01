@@ -1,12 +1,14 @@
 #pragma once
+
 #include <Windows.h>
 #include <string>
 #include "ConsoleWindow.hpp"
 #include "Delegate.hpp"
 #include "Input.hpp"
 #include "Time.hpp"
+#include "Resource.hpp"
 #include "Scene.hpp"
-#include "RenderPipeline.hpp"
+#include "RenderingPipeline.hpp"
 #include "AudioEngine.hpp"
 
 class CGE
@@ -18,7 +20,7 @@ public:
         PixelColourMap::Init();
         Resource::Init();
         Input::Init();
-        Rendering::Init();
+        RenderingPipeline::Init();
         AudioEngine::Init();
     }
 
@@ -38,7 +40,8 @@ public:
             ComponentBase::TickAllComponents();
             Scene::Tick();
             Time::Tick();
-            RenderPipeline::Tick();
+            RenderingPipeline::Tick();
+            //RenderingPipeline::Draw();
             
             ConsoleWindow::SwapBuffers( ConsoleWindow::GetCurrentContext() );
         }

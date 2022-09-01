@@ -1,4 +1,5 @@
 #include "ResourcePackager.hpp"
+#include <assimp/scene.h>
 
 int main( int argc, const char** argv)
 {
