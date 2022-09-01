@@ -13,3 +13,9 @@
 [submodule "Dependencies/imgui"]
 	path = Dependencies/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Dependencies/glew"]
+	path = Dependencies/glew
+	url = https://github.com/Perlmint/glew-cmake.git
+[submodule "Dependencies/add"]
+	path = Dependencies/add
+	url = https://github.com/Perlmint/glew-cmake.git
