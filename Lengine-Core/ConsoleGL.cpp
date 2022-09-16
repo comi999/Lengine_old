@@ -195,7 +195,6 @@ void ConsoleGL::DrawElements( RenderMode a_Mode, uint32_t a_Count, DataType a_Da
 {
 	const void* Indices = nullptr;
 	auto Handle = s_BufferTargets[ ( uint32_t )BufferTarget::ELEMENT_ARRAY_BUFFER ];
-	//Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ].data() + ( uint32_t )a_Indices ) : a_Indices; 
 	Indices = s_BufferRegistry.Valid( Handle ) ? ( s_BufferRegistry[ Handle ] + ( uint32_t )a_Indices ) : a_Indices;
 
 	switch ( a_DataType )

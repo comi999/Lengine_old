@@ -60,6 +60,8 @@
 // - As clipping occurs, if in line or triangle mode, lines and triangles are written to an index buffer
 // - Extra points generated from clipping are inserted into an extra buffer.
 
+typedef uint32_t ShaderProgramHandle;
+
 namespace Internal
 {
 	
@@ -1584,7 +1586,7 @@ class DepthBuffer
 	};
 
 template < uint8_t _Interface >
-static inline bool CullCheck( Vector4* a_P )
+static bool CullCheck( Vector4* a_P )
 	{
 		static constexpr bool _Perspective = _Interface & ( 1u << 7u );
 		static constexpr bool _Clipping = _Interface & ( 1u << 6u );

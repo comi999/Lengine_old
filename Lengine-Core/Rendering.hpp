@@ -19,6 +19,7 @@ namespace Rendering
 	void DeleteProgram( ShaderProgramHandle a_ShaderProgramHandle );
 	void ApplyMesh( const Mesh& a_Mesh );
 	void ApplyMaterial( const Material& a_Material );
+	void ApplyTexture( const Texture2D& a_Texture, TextureHandle& o_TextureHandle );
 	void ApplyShader( const Shader& a_Shader );
 	void ApplyUniform( const char* a_Name, uint32_t a_Count, const float* a_Value );
 	void ApplyUniform( const char* a_Name, uint32_t a_Count, const int32_t* a_Value );
@@ -26,4 +27,7 @@ namespace Rendering
 	void ApplyUniform( const char* a_Name, uint32_t a_Count, const Matrix4* a_Value );
 	void Clear();
 	void Draw();
+
+	
+	inline static const Mesh* ActiveMesh;
 };

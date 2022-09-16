@@ -26,7 +26,7 @@ add_compile_definitions(NOMINMAX)
 add_compile_definitions(UNICODE)
 option(SOLOUD_BACKEND_SDL2 "" OFF)
 option(SOLOUD_BACKEND_XAUDIO2 "" ON)
-option(USE_OPENGL "Determines whether or not Lengine will use OpenGL or Console Graphics" ON)
+option(USE_OPENGL "Determines whether or not Lengine will use OpenGL or Console Graphics" OFF)
 find_package(OpenGL REQUIRED)
 
 if(USE_OPENGL)

@@ -396,78 +396,116 @@ class Material : public Resource
 public:
 
 	Material()
-		: m_Shader( &Shader::Default )
-	{}
+		: m_Shader( nullptr )
+		, FrontFaceCull( false )
+		, BackFaceCull( false )
+		, AlphaBlending( false )
+	{ }
+
+	bool FrontFaceCull : 1;
+	bool BackFaceCull  : 1;
+	bool AlphaBlending : 1;
 
 	template < typename T >
-	inline void AddProperty( const Name& a_Key, const T& a_Value )
+	void AddProperty( const Name& a_Key, const T& a_Value )
 	{
-		auto& NewProperty = m_Attributes[ a_Key.HashCode() ];
+		m_Properties.push_back();
+		auto& NewProperty = m_Properties.back();
 		NewProperty.SetName( a_Key );
 		NewProperty.Set( a_Value );
 
-		/*if ( !m_Shader->GetProgramHandle() )
+		if ( !m_Shader || !m_Shader->IsCompiled() )
 		{
 			return;
-		}*/
+		}
 
-		//NewProperty.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), a_Key.Data() );
+		int32_t InputIndex = m_Shader->GetIndex( a_Key.HashCode() );
+
+		if ( InputIndex == -1 )
+		{
+			return;
+		}
+
+		m_Enabled.emplace_back( m_Properties.size() - 1, InputIndex );
 	}
 
 	template < typename T >
 	bool GetProperty( Hash a_Key, T& o_Value ) const
 	{
-		auto Iter = m_Attributes.find( a_Key );
+		auto Iter = std::find( m_Properties.begin(), m_Properties.end(), [&]( const MaterialProperty& a_MaterialProperty ) 
+		{ 
+			return a_MaterialProperty.GetName().HashCode() == a_Key; 
+		} );
 
-		if ( Iter != m_Attributes.end() )
+		if ( Iter == m_Properties.end() )
 		{
-			Iter->second.Get( o_Value );
-			return true;
+			return false;
 		}
-
-		return false;
+		
+		Iter->Get( o_Value );
+		return true;
 	}
 
 	template < typename T >
 	bool SetProperty( Hash a_Key, const T& a_Value )
 	{
-		auto Iter = m_Attributes.find( a_Key );
+		auto Iter = std::find( m_Properties.begin(), m_Properties.end(), [&]( const MaterialProperty& a_MaterialProperty ) 
+		{ 
+			return a_MaterialProperty.GetName().HashCode() == a_Key; 
+		} );
 
-		if ( Iter != m_Attributes.end() )
+		if ( Iter == m_Properties.end() )
 		{
-			Iter->second.Set( a_Value );
-			return true;
+			return false;
 		}
-
-		return false;
+		
+		Iter->Set( o_Value );
+		return true;
 	}
 
 	bool RemoveProperty( Hash a_Key )
 	{
-		auto Iter = m_Attributes.find( a_Key );
-
-		if ( Iter != m_Attributes.end() )
+		auto Iter = std::find( m_Properties.begin(), m_Properties.end(), [&]( const MaterialProperty& a_MaterialProperty )
 		{
-			m_Attributes.erase( Iter );
-			return true;
+			return a_MaterialProperty.GetName().HashCode() == a_Key;
+		} );
+
+		if ( Iter == m_Properties.end() )
+		{
+			return false;
 		}
 
-		return false;
+		int32_t PropertyIndex = Iter - m_Properties.begin();
+
+		auto ToRemove = std::find( m_Enabled.begin(), m_Enabled.end(), [&]( const std::pair< int32_t, int32_t >& a_IndexPair )
+		{
+			return a_IndexPair.first == PropertyIndex;
+		} );
+
+		if ( ToRemove != m_Enabled.end() )
+		{
+			m_Enabled.erase( ToRemove );
+		}
+
+		return true;
 	}
 
 	inline bool HasProperty( Hash a_Key ) const
 	{
-		return m_Attributes.find( a_Key ) != m_Attributes.end();
+		return std::find( m_Properties.begin(), m_Properties.end(), [&]( const MaterialProperty& a_MaterialProperty )
+		{
+			return a_MaterialProperty.GetName().HashCode() == a_Key;
+		} ) == m_Properties.end();
 	}
 
 	inline auto GetPropertyBegin() const
 	{
-		return m_Attributes.begin();
+		return m_Properties.begin();
 	}
 
 	inline auto GetPropertyEnd() const
 	{
-		return m_Attributes.begin();
+		return m_Properties.begin();
 	}
 
 	void AddTexture( const Name& a_Key, ResourceHandle< Texture2D > a_Texture )
@@ -531,14 +569,59 @@ public:
 		return m_Textures.end();
 	}
 
-	const Shader& GetShader() const
+	const Shader* GetShader() const
 	{
-		return m_Shader ? *m_Shader : Shader::Default;
+		return m_Shader;
 	}
 
-	void SetShader( const Shader& a_Shader )
+	void SetShader( const Shader* a_Shader )
 	{
-		m_Shader = &a_Shader;
+		m_Shader = a_Shader;
+
+		if ( !m_Shader || !m_Shader->IsCompiled() )
+		{
+			return;
+		}
+
+		for ( auto& Input : *m_Shader )
+		{
+			auto Iter = std::find( m_Properties.begin(), m_Properties.end(), [&]( const MaterialProperty& a_Property ) 
+			{ 
+				a_Property.GetName().HashCode() == Input.GetName().HashCode(); 
+			} );
+
+			if ( Iter != m_Properties.end() )
+			{
+				m_Enabled.emplace_back( &*Iter, &Input );
+			}
+		}
+	}
+
+	bool ApplyPropertiesToShader()
+	{
+		if ( !m_Shader || !m_Shader->IsCompiled() )
+		{
+			return false;
+		}
+
+		for ( auto& Pair : m_Enabled )
+		{
+			auto Type = Pair.first->GetType();
+
+			switch ( Type )
+			{
+				case MaterialProperty::Type::INT:
+				{
+					Pair.second->SetValue( Pair.first->Get< int32_t >(), Pair.first->GetSize() );
+					break;
+				}
+				case MaterialProperty::Type::FLOAT:
+				{
+					Pair.second->SetValue( Pair.first->Get< float >(), Pair.first->GetSize() );
+					break;
+				}
+			}
+		}
 	}
 
 private:
@@ -547,153 +630,26 @@ private:
 	friend class ResourcePackager;
 	friend class RenderPipeline;
 
-	// All of the uniform functions really should be delegated to the Shader object.
-	void Apply() const
-	{
-		//if ( !m_FoundLocations )
-		//{
-		//	if ( !m_Shader->GetProgramHandle() )
-		//	{
-		//		const_cast< Shader* >( const_cast< Material* >( this )->m_Shader )->Compile();
-		//	}
-
-		//	const_cast< Material* >( this )->FindLocations();
-		//	//Rendering::UseProgram( GetShader().GetProgramHandle() );
-		//}
-
-		//for ( auto Begin = m_Attributes.begin(), End = m_Attributes.end(); Begin != End; ++Begin )
-		//{
-		//	if ( Begin->second.m_Location < 0 )
-		//	{
-		//		continue;
-		//	}
-
-		//	auto Type = Begin->second.GetType();
-
-		//	if ( Type == MaterialProperty::Type::STRING )
-		//	{
-		//		continue;
-		//	}
-
-		//	switch ( Type )
-		//	{
-		//		case MaterialProperty::Type::INT:
-		//		{
-		//			switch ( Begin->second.m_Size )
-		//			{
-		//				case 1:
-		//				{
-		//					//Rendering::Uniform1iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
-		//					break;
-		//				}
-		//				case 2:
-		//				{
-		//					//Rendering::Uniform2iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
-		//					break;
-		//				}
-		//				case 3:
-		//				{
-		//					//Rendering::Uniform3iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
-		//					break;
-		//				}
-		//				case 4:
-		//				{
-		//					//Rendering::Uniform4iv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< int32_t >() );
-		//					break;
-		//				}
-		//				default:
-		//					break;
-		//			}
-		//			break;
-		//		}
-		//		case MaterialProperty::Type::FLOAT:
-		//		{
-		//			switch ( Begin->second.m_Size )
-		//			{
-		//				case 1:
-		//				{
-		//					//Rendering::Uniform1fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
-		//					break;
-		//				}
-		//				case 2:
-		//				{
-		//					//Rendering::Uniform2fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
-		//					break;
-		//				}
-		//				case 3:
-		//				{
-		//					//Rendering::Uniform3fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
-		//					break;
-		//				}
-		//				case 4:
-		//				{
-		//					//Rendering::Uniform4fv( Begin->second.m_Location, Begin->second.m_Size, Begin->second.Get< float >() );
-		//					break;
-		//				}
-		//				default:
-		//					break;
-		//			}
-		//			break;
-		//		}
-		//	}
-		//}
-
-		//static int ActiveTextureUnit = 0;
-
-		//for ( auto
-		//	  Begin = const_cast< Material* >( this )->m_Textures.begin(),
-		//	  End = const_cast< Material* >( this )->m_Textures.end();
-		//	  Begin != End; ++Begin )
-		//{
-		//	if ( Begin->second.m_Location < 0 )
-		//	{
-		//		continue;
-		//	}
-
-		//	if ( !Begin->second.m_Handle )
-		//	{
-
-
-		//		//Rendering::GenTextures( 1, &Begin->second.m_Handle );
-		//		//Rendering::ActiveTexture( ActiveTextureUnit );
-		//		//Rendering::BindTexture( TextureTarget::TEXTURE_2D, Begin->second.m_Handle );
-		//		//Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), Begin->second.m_Resource.Assure()->GetWidth(), Begin->second.m_Resource.Assure()->GetHeight(), 0, TextureFormat( 0 ), TextureSetting( 0 ), Begin->second.m_Resource.Assure()->GetData() );
-		//		//Begin->second.m_TextureUnit = ActiveTextureUnit++;
-		//	}
-
-		//	//Rendering::Uniform1i( Begin->second.m_Location, Begin->second.m_TextureUnit );
-		//}
-	}
-
-	// There should be an unapply function too to free all texture handles etc.
-
 	template < typename _Serializer >
 	void Serialize( _Serializer& a_Serializer ) const
 	{
 		a_Serializer << *static_cast< const Resource* >( this );
-		a_Serializer << m_Attributes << m_Textures;
 	}
 
 	template < typename _Deserializer >
 	void Deserialize( _Deserializer& a_Deserializer )
 	{
 		a_Deserializer >> *static_cast< Resource* >( this );
-		a_Deserializer >> m_Attributes >> m_Textures;
 	}
 
 	template < typename _Sizer >
 	void SizeOf( _Sizer& a_Sizer ) const
 	{
 		a_Sizer&* static_cast< const Resource* >( this );
-		a_Sizer& m_Attributes& m_Textures;
 	}
 
-	const Shader*                      m_Shader;
-	std::map< Hash, MaterialProperty > m_Attributes;
-	std::map< Hash, TextureProperty  > m_Textures;
-
-public:
-
-	static Material UnlitFlatColour;
-	static Material LitFlatColour;
+	const Shader*                                m_Shader;
+	std::vector< MaterialProperty >              m_Properties;
+	std::vector< TextureProperty  >              m_Textures;
+	std::vector< std::pair< int32_t, int32_t > > m_Enabled;
 };

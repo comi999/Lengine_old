@@ -1,119 +1,174 @@
 #pragma once
+#include <string>
+#include <vector>
+
 #include "Math.hpp"
-#include "Resource.hpp"
 #include "Hash.hpp"
+#include "RenderingAPI.hpp"
+#include "Resource.hpp"
+#include "Pointer.hpp"
+#include "Name.hpp"
+#include "Delegate.hpp"
 
-typedef uint32_t ShaderProgramHandle;
+class Shader;
 
-enum class ShaderType : uint32_t
+class ShaderInput
 {
-	VERTEX_SHADER,
-	FRAGMENT_SHADER,
-	INVALID = uint32_t( -1 )
+private:
+
+	ShaderInput( const Shader& a_Shader, int32_t a_Index, const Name& a_Name )
+		: m_Shader( &a_Shader )
+		, m_Index( a_Index )
+		, m_Name( a_Name )
+	{ }
+
+public:
+
+	inline const Name& GetName() const { return m_Name; }
+	inline const Shader& GetShader() const { return *m_Shader; }
+	inline int32_t GetIndex() const { return m_Index; }
+
+	template < typename T >
+	bool SetValue( const T* a_Values, size_t a_Count = 1 ) const;
+
+	bool operator==( const ShaderInput& a_ShaderInput ) const;
+	inline bool operator!=( const ShaderInput& a_ShaderInput ) const { return !( *this == a_ShaderInput ); }
+
+private:
+
+	friend class Shader;
+
+	const Shader* m_Shader;
+	int32_t       m_Index;
+	Name          m_Name;
 };
 
-enum class ShaderInfo : uint8_t
+class ShaderIterator
 {
-	COMPILE_STATUS,
-	INFO_LOG_LENGTH,
-	LINK_STATUS
+public:
+
+	using iterator_category = std::forward_iterator_tag;
+	using value_type        = const ShaderInput;
+	using difference_type   = std::ptrdiff_t;
+	using pointer           = value_type*;
+	using reference         = value_type&;
+
+private:
+
+	friend class Shader;
+	friend class ShaderInput;
+
+	ShaderIterator( const ShaderInput& a_ShaderInput );
+
+public:
+
+	ShaderIterator() = default;
+	ShaderIterator( const ShaderIterator& a_ShaderIterator ) = default;
+	ShaderIterator& operator++() { ++m_ShaderInput; }
+	ShaderIterator operator++( int );
+	inline pointer operator->() const { return m_ShaderInput; }
+	inline reference operator*() const { return *m_ShaderInput; }
+	inline bool operator==( const ShaderIterator& a_ShaderIterator ) const { return *m_ShaderInput == *a_ShaderIterator.m_ShaderInput; }
+	inline bool operator!=( const ShaderIterator& a_ShaderIterator ) const { return !( *this == a_ShaderIterator ); }
+
+private:
+
+	const ShaderInput* m_ShaderInput = nullptr;
 };
 
 class Shader : public Resource
 {
 public:
 
-	Shader()
-		: Shader( "Default"_N, "API: ConsoleGL VERTEX: Vertex_Default FRAGMENT: Fragment_Default" )
-	{ }
+	using Iterator = ShaderIterator;
+	using CIterator = ShaderIterator;
 
-	Shader( const Name& a_Name, const std::string& a_Source )
-		: Resource( a_Name )
-		, m_ShaderProgramHandle( 0 )
-	{
-		SetSource( a_Source );
-	}
+	static Shared< Shader > Create( const std::string& a_Source );
 
-	std::string GetAPI()
-	{
-		return m_API;
-	}
+	Shader() = delete;
+	const std::string& GetSource() const { return m_Source; }
+	void SetSource( const std::string& a_Source ) { m_Source = a_Source; }
+	const ShaderInput& GetInput( int32_t a_Index ) const { return m_Inputs[ a_Index ]; }
+	size_t GetInputCount() const { return m_Inputs.size(); }
+	int32_t GetIndex( Hash a_Name ) const;
+	int32_t GetIndex( const char* a_Name ) const { GetIndex( CRC32_RT( a_Name ) ); }
+	ShaderIterator Begin() const { return ShaderIterator( GetInput( 0 ) ); }
+	ShaderIterator End() const { return ShaderIterator( GetInput( GetInputCount() ) ); }
+	bool SetPVM( const Matrix4& a_P, const Matrix4& a_V, const Matrix4& a_M ) const;
+	bool Compile();
+	bool Decompile();
+	virtual RenderingAPI GetAPI() const = 0;
+	virtual bool IsCompiled() const = 0;
+	virtual bool Use() const = 0;
+	virtual bool SetValue( int32_t a_Index, const int32_t*  a_Values, size_t a_Count = 1 ) const = 0;
+	virtual bool SetValue( int32_t a_Index, const uint32_t* a_Values, size_t a_Count = 1 ) const = 0;
+	virtual bool SetValue( int32_t a_Index, const float*    a_Values, size_t a_Count = 1 ) const = 0;
 
-	void SetSource( const std::string& a_Source )
-	{
-		static constexpr auto APITagKey = "API:";
-		auto APITagOffset = a_Source.find( APITagKey );
+protected:
 
-		if ( a_Source.empty() || APITagOffset == std::string::npos )
-		{
-			m_API = "";
-			m_Source = "";
-			return;
-		}
-
-		APITagOffset = a_Source.find_first_not_of( " \n", APITagOffset + strlen( APITagKey ) );
-		auto APITagEnd = a_Source.find_first_of( " \n", APITagOffset );
-		m_API = a_Source.substr( APITagOffset, APITagEnd - APITagOffset );
-		auto SourceOffset = APITagEnd;
-		SourceOffset = a_Source.find_first_not_of( " \n", SourceOffset );
-
-		if ( SourceOffset == std::string::npos )
-		{
-			m_Source = "";
-			return;
-		}
-
-		m_Source = a_Source.substr( SourceOffset );
-	}
-
-	const std::string& GetSource() const
-	{
-		return m_Source;
-	}
-
-	ShaderProgramHandle GetHandle() const
-	{
-		return m_ShaderProgramHandle;
-	}
-
-	ShaderProgramHandle& GetHandle()
-	{
-		return m_ShaderProgramHandle;
-	}
+	virtual void OnCreate() const { };
+	virtual bool OnCompile() = 0;
+	virtual bool OnDecompile() = 0;
+	void AddShaderInput( const Name& a_Name ) const;
 
 private:
 
-	friend class ResourcePackager;
-	friend class Serialization;
+	std::string                m_Source;
+	std::vector< ShaderInput > m_Inputs;
 
-	template < typename T >
-	void Serialize( T& a_Serializer ) const
-	{
-		a_Serializer << *static_cast< Resource* >( this );
-		a_Serializer << m_Source;
-	}
+	const ShaderInput* m_P;
+	const ShaderInput* m_V;
+	const ShaderInput* m_M;
+	const ShaderInput* m_PV;
+	const ShaderInput* m_VM;
+	const ShaderInput* m_PVM;
+};
 
-	template < typename T >
-	void Deserialize( T& a_Deserializer )
-	{
-		a_Deserializer >> *static_cast< Resource* >( this );
-		a_Deserializer >> m_Source;
-	}
-
-	ShaderProgramHandle m_ShaderProgramHandle;
-	std::string         m_API;
-	std::string         m_Source;
-
+template <>
+class ResourceLoader< Shader >
+{
 public:
 
-	static Shader Default;
-	static Shader Diffuse;
-	static Shader LitDiffuse;
-	static Shader Specular;
-	static Shader Normal;
-	static Shader Phong;
-	static Shader UnlitFlatColour;
-	static Shader LitFlatColour;
-	static Shader Spotlight;
-	// More lighting models.
+	using result_type = std::shared_ptr< Shader >;
+
+	result_type operator()( Hash a_Name ) const
+	{
+		std::string Source;
+
+		if ( !Resource::LoadBin( a_Name, Source ) )
+		{
+			return nullptr;
+		}
+
+		return Shader::Create( Source );
+	}
 };
+
+namespace std
+{
+	auto begin( const Shader& a_Shader )
+	{
+		return a_Shader.Begin();
+	}
+	
+	inline auto cbegin( const Shader& a_Shader )
+	{
+		return begin( a_Shader );
+	}
+
+	auto end( const Shader& a_Shader )
+	{
+		return a_Shader.End();
+	}
+
+	inline auto cend( const Shader& a_Shader )
+	{
+		return end( a_Shader );
+	}
+};
+
+template < typename T >
+bool ShaderInput::SetValue( const T* a_Values, size_t a_Count ) const
+{
+	return m_Shader->SetValue( m_Index, a_Values, a_Count );
+}

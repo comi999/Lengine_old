@@ -5,7 +5,7 @@
 uint32_t            ActiveModelTransformLocation = 0;
 uint32_t            ActivePVMTransformLocation   = 0;
 ShaderProgramHandle ActiveShaderProgram          = 0;
-const Mesh*         ActiveMesh                   = nullptr;
+
 
 void Rendering::Init()
 {
@@ -173,7 +173,7 @@ void Rendering::ApplyMesh( const Mesh& a_Mesh )
 
 	ConsoleGL::BindVertexArray( 0 );
 	ConsoleGL::BindVertexArray( ActiveArrayHandle );
-	ActiveMesh = &a_Mesh;
+	Rendering::ActiveMesh = &a_Mesh;
 }
 
 void Rendering::ApplyMaterial( const Material& a_Material )
@@ -219,48 +219,6 @@ void Rendering::ApplyMaterial( const Material& a_Material )
 		Rendering::ApplyUniform( Begin->second.GetName().Data(), 1, &CurrentTextureUnit );
 		++CurrentTextureUnit;
 	}
-
-
-	//	static int ActiveTextureUnit = 0;
-
-	//	for ( auto
-	//		  Begin = const_cast< Material* >( this )->m_Textures.begin(),
-	//		  End = const_cast< Material* >( this )->m_Textures.end();
-	//		  Begin != End; ++Begin )
-	//	{
-	//		if ( Begin->second.m_Location < 0 )
-	//		{
-	//			continue;
-	//		}
-
-	//		if ( !Begin->second.m_Handle )
-	//		{
-
-
-	//			Rendering::GenTextures( 1, &Begin->second.m_Handle );
-	//			Rendering::ActiveTexture( ActiveTextureUnit );
-	//			Rendering::BindTexture( TextureTarget::TEXTURE_2D, Begin->second.m_Handle );
-	//			Rendering::TexImage2D( TextureTarget::TEXTURE_2D, 0, TextureFormat( 0 ), Begin->second.m_Resource.Assure()->GetWidth(), Begin->second.m_Resource.Assure()->GetHeight(), 0, TextureFormat( 0 ), TextureSetting( 0 ), Begin->second.m_Resource.Assure()->GetData() );
-	//			Begin->second.m_TextureUnit = ActiveTextureUnit++;
-	//		}
-
-	//		Rendering::Uniform1i( Begin->second.m_Location, Begin->second.m_TextureUnit );
-	//	}
-
-	// There should be an unapply function too to free all texture handles etc.
-
-	/*void FindLocations()
-	{
-		for ( auto Begin = m_Attributes.begin(), End = m_Attributes.end(); Begin != End; ++Begin )
-		{
-			Begin->second.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), Begin->second.GetName().Data() );
-		}
-
-		for ( auto Begin = m_Textures.begin(), End = m_Textures.end(); Begin != End; ++Begin )
-		{
-			Begin->second.m_Location = Rendering::GetUniformLocation( m_Shader->GetProgramHandle(), Begin->second.GetName().Data() );
-		}
-	}*/
 }
 
 void Rendering::ApplyShader( const Shader& a_Shader )
@@ -336,6 +294,5 @@ void Rendering::ApplyUniform( const char* a_Name, uint32_t a_Count, const Matrix
 
 void Rendering::Draw()
 {
-	//ConsoleGL::UseProgram( ActiveShaderProgram );
-	ConsoleGL::DrawElements( ConsoleGL::RenderMode::TRIANGLE, ActiveMesh->GetIndexCount(), ConsoleGL::DataType::UNSIGNED_INT, ActiveMesh->GetIndices() );
+	ConsoleGL::DrawElements( ConsoleGL::RenderMode::TRIANGLE, Rendering::ActiveMesh->GetIndexCount(), ConsoleGL::DataType::UNSIGNED_INT, Rendering::ActiveMesh->GetIndices() );
 }
